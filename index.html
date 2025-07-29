@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ONPIN Identity Wallet - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .language-selector {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23334d5c'%3E%3Cpath d='M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 010 16z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+            background-size: 1.5em;
+        }
+        .form-input {
+            transition: border-color 0.3s ease;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #16a34a;
+        }
+        .form-input.error {
+            border-color: #dc2626;
+        }
+        .error-message {
+            color: #dc2626;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+        .btn {
+            transition: all 0.3s ease;
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-green-50 to-blue-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-green-800 text-white p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold">ONPIN Identity Wallet</h1>
+            <div class="flex items-center space-x-4">
+                <select id="languageSelect" class="bg-white text-gray-800 rounded px-3 py-1 pr-8 language-selector appearance-none">
+                    <option value="en">English</option>
+                    <option value="yo">Yoruba</option>
+                    <option value="ig">Igbo</option>
+                    <option value="ha">Hausa</option>
+                    <option value="fr">Français</option>
+                    <option value="ar">العربية</option>
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto p-4 flex items-center justify-center min-h-[calc(100vh-140px)]">
+        <div class="w-full max-w-md bg-white rounded-lg shadow-md p-6">
+            <h2 id="loginTitle" class="text-2xl font-bold mb-6 text-center">Login to ONPIN Wallet</h2>
+            
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label id="didLabel" class="block text-gray-700 font-medium mb-2">Decentralized ID (DID)</label>
+                    <input 
+                        type="text" 
+                        id="didInput" 
+                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg form-input" 
+                        placeholder="did:onpin:..."
+                        required
+                    >
+                    <div id="didError" class="error-message" style="display: none;"></div>
+                </div>
+
+                <div>
+                    <label id="pinLabel" class="block text-gray-700 font-medium mb-2">PIN</label>
+                    <input 
+                        type="password" 
+                        id="pinInput" 
+                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg form-input" 
+                        placeholder="4-digit PIN"
+                        maxlength="4"
+                        required
+                    >
+                    <div id="pinError" class="error-message" style="display: none;"></div>
+                </div>
+
+                <div id="generalError" class="error-message text-center" style="display: none;"></div>
+
+                <button 
+                    type="submit" 
+                    id="loginBtn" 
+                    class="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 btn font-medium"
+                >
+                    <span id="loginBtnText">Login</span>
+                </button>
+
+                <div class="text-center">
+                    <p class="text-sm text-gray-600">
+                        <span id="noAccountText">Don't have an account?</span>
+                        <a href="signup.html" class="text-green-600 hover:underline ml-1" id="signupLink">Sign up now</a>
+                    </p>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white p-4 text-center">
+        <p>© 2024 ONPIN - National Identity Wallet</p>
+    </footer>
+
+    <script>
+        // Use the same translations object from index.html
+        const translations = {
+            en: {
+                login_title: "Login to ONPIN Wallet",
+                did_label: "Decentralized ID (DID)",
+                pin_label: "PIN",
+                login_button: "Login",
+                no_account: "Don't have an account?",
+                signup_link: "Sign up now",
+                did_required: "DID is required",
+                pin_required: "PIN is required",
+                invalid_credentials: "Invalid DID or PIN",
+                logging_in: "Logging in...",
+                english: "English",
+                yoruba: "Yoruba",
+                hausa: "Hausa",
+                igbo: "Igbo",
+                french: "French",
+                arabic: "Arabic"
+            },
+            yo: {
+                login_title: "Wo ile ONPIN Wallet",
+                did_label: "Idanimọ Aisakoso (DID)",
+                pin_label: "PIN",
+                login_button: "Wo ile",
+                no_account: "Ko ni akọọlẹ?",
+                signup_link: "Forukọsilẹ bayi",
+                did_required: "DID nilo",
+                pin_required: "PIN nilo",
+                invalid_credentials: "DID tabi PIN ti ko tọ",
+                logging_in: "N wo ile...",
+                english: "Gẹẹsi",
+                yoruba: "Yoruba",
+                hausa: "Hausa",
+                igbo: "Igbo",
+                french: "Faranse",
+                arabic: "Arabiki"
+            },
+            ig: {
+                login_title: "Banye na ONPIN Wallet",
+                did_label: "NJirimara Decentralized (DID)",
+                pin_label: "PIN",
+                login_button: "Banye",
+                no_account: "Enweghị akaụntụ?",
+                signup_link: "Debanye aha ugbu a",
+                did_required: "Achọrọ DID",
+                pin_required: "Achọrọ PIN",
+                invalid_credentials: "DID ma ọ bụ PIN na-ezighi ezi",
+                logging_in: "Na-abanye...",
+                english: "Bekee",
+                yoruba: "Yoruba",
+                hausa: "Hausa",
+                igbo: "Igbo",
+                french: "French",
+                arabic: "Arabic"
+            },
+            ha: {
+                login_title: "Shiga ONPIN Wallet",
+                did_label: "Shaida mai Rarrabawa (DID)",
+                pin_label: "PIN",
+                login_button: "Shiga",
+                no_account: "Ba ku da asusu?",
+                signup_link: "Yi rajista yanzu",
+                did_required: "Ana buƙatar DID",
+                pin_required: "Ana buƙatar PIN",
+                invalid_credentials: "DID ko PIN mara inganci",
+                logging_in: "Ana shigawa...",
+                english: "Turanci",
+                yoruba: "Yoruba",
+                hausa: "Hausa",
+                igbo: "Igbo",
+                french: "Faransanci",
+                arabic: "Larabci"
+            },
+            fr: {
+                login_title: "Connectez-vous à ONPIN Wallet",
+                did_label: "ID décentralisé (DID)",
+                pin_label: "PIN",
+                login_button: "Connexion",
+                no_account: "Vous n'avez pas de compte?",
+                signup_link: "Inscrivez-vous maintenant",
+                did_required: "DID requis",
+                pin_required: "PIN requis",
+                invalid_credentials: "DID ou PIN invalide",
+                logging_in: "Connexion en cours...",
+                english: "Anglais",
+                yoruba: "Yoruba",
+                hausa: "Hausa",
+                igbo: "Igbo",
+                french: "Français",
+                arabic: "Arabe"
+            },
+            ar: {
+                login_title: "تسجيل الدخول إلى محفظة ONPIN",
+                did_label: "معرف اللامركزي (DID)",
+                pin_label: "PIN",
+                login_button: "تسجيل الدخول",
+                no_account: "ليس لديك حساب؟",
+                signup_link: "سجل الآن",
+                did_required: "مطلوب DID",
+                pin_required: "مطلوب PIN",
+                invalid_credentials: "DID أو PIN غير صالح",
+                logging_in: "جاري تسجيل الدخول...",
+                english: "الإنجليزية",
+                yoruba: "اليوربا",
+                hausa: "الهوسا",
+                igbo: "الإيجبو",
+                french: "الفرنسية",
+                arabic: "العربية"
+            }
+        };
+
+        let currentLanguage = 'en';
+
+        // Translation function
+        const t = (key) => {
+            return translations[currentLanguage][key] || translations.en[key] || key;
+        };
+
+        // Update UI text based on current language
+        const updateUIText = () => {
+            document.getElementById('loginTitle').textContent = t('login_title');
+            document.getElementById('didLabel').textContent = t('did_label');
+            document.getElementById('pinLabel').textContent = t('pin_label');
+            document.getElementById('loginBtnText').textContent = t('login_button');
+            document.getElementById('noAccountText').textContent = t('no_account');
+            document.getElementById('signupLink').textContent = t('signup_link');
+        };
+
+        // Clear error messages
+        const clearErrors = () => {
+            const errorElements = document.querySelectorAll('.error-message');
+            errorElements.forEach(element => {
+                element.style.display = 'none';
+                element.textContent = '';
+            });
+            
+            const inputElements = document.querySelectorAll('.form-input');
+            inputElements.forEach(element => {
+                element.classList.remove('error');
+            });
+        };
+
+        // Show error message
+        const showError = (fieldId, message) => {
+            const errorElement = document.getElementById(`${fieldId}Error`);
+            const inputElement = document.getElementById(`${fieldId}Input`);
+            
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.style.display = 'block';
+            }
+            
+            if (inputElement) {
+                inputElement.classList.add('error');
+            }
+        };
+
+        // Handle login form submission
+        const handleLogin = async (e) => {
+            e.preventDefault();
+            clearErrors();
+            
+            const did = document.getElementById('didInput').value.trim();
+            const pin = document.getElementById('pinInput').value.trim();
+            const loginBtn = document.getElementById('loginBtn');
+            const loginBtnText = document.getElementById('loginBtnText');
+            
+            let isValid = true;
+            
+            // Validate inputs
+            if (!did) {
+                showError('did', t('did_required'));
+                isValid = false;
+            }
+            
+            if (!pin) {
+                showError('pin', t('pin_required'));
+                isValid = false;
+            }
+            
+            if (!isValid) return;
+            
+            // Show loading state
+            loginBtn.disabled = true;
+            loginBtnText.textContent = t('logging_in');
+            
+            try {
+                // Get user database from localStorage
+                const userDatabase = JSON.parse(localStorage.getItem('onpinUsers') || '{}');
+                const user = userDatabase[did];
+                
+                if (!user) {
+                    showError('general', t('invalid_credentials'));
+                    return;
+                }
+                
+                if (user.pin !== pin) {
+                    showError('general', t('invalid_credentials'));
+                    return;
+                }
+                
+                // Store current user session
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                
+                // Redirect to dashboard with DID parameter
+                window.location.href = `dashboard.html?did=${encodeURIComponent(did)}`;
+                
+            } catch (error) {
+                showError('general', 'Login failed. Please try again.');
+            } finally {
+                // Reset button state
+                loginBtn.disabled = false;
+                loginBtnText.textContent = t('login_button');
+            }
+        };
+
+        // Initialize event listeners
+        const initializeEventListeners = () => {
+            // Language selector
+            document.getElementById('languageSelect').addEventListener('change', (e) => {
+                currentLanguage = e.target.value;
+                updateUIText();
+            });
+            
+            // Login form
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+        };
+
+        // Initialize the application
+        const init = () => {
+            updateUIText();
+            initializeEventListeners();
+        };
+
+        // Start the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
