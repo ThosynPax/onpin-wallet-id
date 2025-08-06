@@ -194,6 +194,17 @@
       border-radius: 50%;
       transform: translateX(-50%);
     }
+    /* Add these to your existing styles */
+    @keyframes alarm-pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    .alarm-active {
+      animation: alarm-pulse 0.5s infinite;
+      box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.5);
+    }
   </style>
 </head>
 <body class="bg-gray-100">
@@ -319,6 +330,7 @@
         failed: "Failed",
         make_transfer: "Make Transfer",
         to: "To",
+        stop_alarm: "Stop Alarm",
         enter_amount: "Enter Amount",
         send: "Send",
         cancel: "Cancel",
@@ -503,9 +515,30 @@
         biometric_scan_finger: "Scanning fingerprint...",
         biometric_scan_voice: "Recording voice...",
         scan_complete: "Scan complete",
-        enrollment_successful: "Enrollment successful"
+        enrollment_successful: "Enrollment successful",
+        disaster_alerts: "Disaster Alerts",
+        emergency_contacts: "Emergency Contacts",
+        nearest_hospitals: "Nearest Hospitals",
+        shelter_locations: "Shelter Locations",
+        disaster_preparedness: "Disaster Preparedness",
+        flood_warning: "Flood Warning",
+        earthquake_alert: "Earthquake Alert",
+        extreme_weather: "Extreme Weather",
+        high_priority: "High Priority",
+        medium_priority: "Medium Priority",
+        low_priority: "Low Priority",
+        active_alerts: "Active",
+        all_clear: "All Clear",
+        test_alert: "Test",
+        mark_resolved: "Mark as Resolved",
+        share_alert: "Share Alert",
+        alert_preferences: "Alert Preferences",
+        receive_alerts: "Receive Alerts",
+        alert_types: "Alert Types",
+        notification_methods: "Notification Methods",
+        push_notification: "Push Notification",
+        voice_call: "Voice Call",
       },
-      // Add other language translations here (yo, ig, fr, ar) with the same structure
       ig: {
   login_title: "Banye na ONPIN Wallet",
   signup_title: "Mepụta ONPIN Wallet",
@@ -535,6 +568,7 @@
   recent_activity: "Ọrụ na nso nso a",
   account_verified: "Akaụntụ enyochala",
   biometric_enrollment: "Ndebanye aha biometric",
+  stop_alarm: "Kwụsị mkpu",
   consent_granted_to: "Enyere nkwenye nye",
   payment_services: "Ọrụ ịkwụ ụgwọ",
   send_money: "Zipu ego",
@@ -647,7 +681,30 @@
   pin_required: "Achọrọ PIN",
   pin_must_be_4_digits: "PIN ga-abụrịrị nọmba 4",
   invalid_pin: "PIN na-ezighi ezi",
-  invalid_did: "DID na-ezighi ezi"
+  invalid_did: "DID na-ezighi ezi",
+  // Add to Igbo translations (around line 400)
+disaster_alerts: "Ịdọ aka ná ntị Ọdachi",
+emergency_contacts: "Kọntaktị Mberede",
+nearest_hospitals: "Ụlọ Ọgwụ Kacha nso",
+shelter_locations: "Ebe Nchekwa",
+disaster_preparedness: "Nkwadebe Ọdachi",
+flood_warning: "Ịdọ aka ná ntị Iju Mmiri",
+earthquake_alert: "Ịdọ aka ná ntị Ala Ọma Jijiji",
+extreme_weather: "Ọnọdụ Ihu Igwe siri ike",
+high_priority: "Ihe dị elu",
+medium_priority: "Ọkara dị elu",
+low_priority: "Ihe dị ala",
+active_alerts: "Amụma Na-arụ Ọrụ",
+all_clear: "Ihe niile dị ọcha",
+test_alert: "Nnwale Ịdọ aka ná ntị",
+mark_resolved: "Kaa akara dị ka edozi",
+share_alert: "Kekọrịta ịdọ aka ná ntị",
+alert_preferences: "Mmasị ịdọ aka ná ntị",
+receive_alerts: "Nata amụma",
+alert_types: "Ụdị ịdọ aka ná ntị",
+notification_methods: "Ụzọ ngosi",
+push_notification: "Nkwupụta Push",
+voice_call: "Oku olu",
 },
       yo: {
         login_title: "Wo ile ONPIN Wallet",
@@ -1079,7 +1136,328 @@ ar: {
   pin_must_be_4_digits: "يجب أن يتكون PIN من 4 أرقام",
   invalid_pin: "PIN غير صالح",
   invalid_did: "DID غير صالح"
-}
+},
+ha: {
+    login_title: "Shiga cikin Wallet ONPIN",
+    signup_title: "Ƙirƙiri Wallet ONPIN",
+    receive_money: "Karɓa",
+    email_label: "Imel",
+    password_label: "Kalmar wucewa",
+    confirm_password_label: "Tabbatar da Kalmar Wucewa",
+    login_button: "Shiga",
+    signup_button: "Yi Rajista",
+    or_login_with: "Ko kuma shiga ta",
+    no_account: "Baka da asusu?",
+    have_account: "Kuna da asusu?",
+    signup_link: "Yi rijista yanzu",
+    login_link: "Shiga yanzu",
+    verifying_biometrics: "Ana tabbatar da bayanan biometric...",
+    welcome_message: "Barka da dawowa {{name}}",
+    logout_button: "Fita",
+    wallet_balance: "Ma'aunin Wallet",
+    overview_tab: "Bayanin gaba ɗaya",
+    payments_tab: "Biyan kuɗi",
+    consent_tab: "Izini",
+    settings_tab: "Saituna",
+    quick_actions: "Ayyuka masu sauri",
+    transfer: "Canja wuri",
+    payments: "Biyan kuɗi",
+    consent: "Izini",
+    disaster_relief: "Taimakon bala'i",
+    recent_activity: "Ayyukan kwanan nan",
+    account_verified: "An tabbatar da asusu",
+    biometric_enrollment: "Rajista na biometric",
+    consent_granted_to: "An ba da izini ga",
+    payment_services: "Ayyukan biyan kuɗi",
+    send_money: "Aika kuɗi",
+    request_money: "Nemi kuɗi",
+    pay_bills: "Biya kuɗaɗen aiki",
+    airtime_data: "Waya/Data",
+    recent_transactions: "Ma'amaloli na kwanan nan",
+    credit: "Bashi",
+    debit: "Cire kuɗi",
+    disaster_relief_payment: "Biyan taimakon bala'i",
+    consent_management: "Gudanar da izini",
+    pending_requests: "Buƙatun da ke jiran aiki",
+    active_consents: "Izini masu aiki",
+    no_pending_requests: "Babu buƙatun da ke jiran aiki",
+    no_active_consents: "Babu izini masu aiki",
+    grant: "Ba da izini",
+    deny: "ƙi",
+    revoke: "Soke",
+    government_services: "Ayyukan gwamnati",
+    emergency_payments: "Biyan gaggawa",
+    biometric_settings: "Saitunan biometric",
+    face_id: "ID na fuska",
+    fingerprint: "Sawun yatsa",
+    voice_recognition: "Gane murya",
+    security: "Tsaro",
+    change_password: "Canja kalmar wucewa",
+    privacy: "Keɓantawa",
+    data_sharing_preferences: "Zaɓin raba bayanai",
+    help: "Taimako",
+    contact_support: "Tuntuɓi tallafi",
+    voice_command_received: "An karɓi umarnin murya: {{command}}",
+    voice_command_unknown: "Yi hakuri, ban fahimci wannan umarni ba",
+    disaster_payment_triggered: "An kunna biyan taimakon bala'i don wurin ku",
+    disaster_payment_confirmation: "An aiwatar da biyan taimakon bala'i ga 'yan ƙasa a yankin ku",
+    consent_granted: "An ba da izini ga {{requester}}",
+    consent_revoked: "An soke izini daga {{requester}}",
+    name_label: "Cikakken suna",
+    nin_label: "Lambar shaidar ƙasa (NIN)",
+    bvn_label: "Lambar tantance banki (BVN)",
+    phone_label: "Lambar waya",
+    step_1: "NIN/BVN",
+    step_2: "Bayanai",
+    step_3: "Kalmar wucewa",
+    step_4: "Bayanan biometric",
+    biometric_title: "Rajista na biometric",
+    biometric_description: "Kiyaye walat ɗinku tare da tabbatar da ainihi ta hanyoyi da yawa",
+    complete_registration: "Kammala rijista",
+    back_button: "Baya",
+    next_button: "Gaba",
+    nin_required: "Ana buƙatar NIN",
+    bvn_required: "Ana buƙatar BVN",
+    name_required: "Ana buƙatar suna",
+    email_required: "Ana buƙatar imel",
+    phone_required: "Ana buƙatar lambar waya",
+    password_required: "Ana buƙatar kalmar wucewa",
+    password_mismatch: "Kalmomin wucewa ba su daidaita ba",
+    registration_complete: "An kammala rijista! Wallet ɗin ku na ONPIN yana shirye",
+    kyc_verification: "Tabbatar da KYC",
+    identity_verification: "Tabbatar da ainihi",
+    view_biometrics: "Dubi bayanan biometric",
+    biometric_data: "Bayanan biometric",
+    bank_connections: "Haɗin banki",
+    connect_bank: "Haɗa banki",
+    connected_banks: "Bankunan da aka haɗa",
+    no_connected_banks: "Babu bankunan da aka haɗa",
+    verify_identity: "Tabbatar da ainihi",
+    identity_status: "Matsayin ainihi",
+    verified: "An tabbatar",
+    unverified: "Ba a tabbatar ba",
+    verify_now: "Tabbatar yanzu",
+    verification_success: "An tabbatar da ainihin ku cikin nasara",
+    bank_verification: "Tabbatar da banki",
+    recent_transfers: "Canje-canjen kwanan nan",
+    no_recent_transfers: "Babu canje-canje na kwanan nan",
+    recipient: "Mai karɓa",
+    amount: "Adadin",
+    date: "Kwanan wata",
+    status: "Matsayi",
+    pending: "Ana jiran aiki",
+    completed: "An kammala",
+    failed: "Ya gaza",
+    make_transfer: "Yi canja wuri",
+    to: "Zuwa",
+    stop_alarm: "Daina ƙararrawa",
+    enter_amount: "Shigar da adadin",
+    send: "Aika",
+    cancel: "Soke",
+    transfer_success: "Canjin ya yi nasara",
+    transfer_failed: "Canjin ya gaza",
+    insufficient_funds: "ƙarancin kuɗi",
+    enter_recipient: "Shigar da ID ɗin walat mai karɓa",
+    enter_valid_amount: "Da fatan za a shigar da adadi mai inganci",
+    transaction_details: "Cikakkun bayanan ma'amala",
+    transaction_id: "ID ɗin ma'amala",
+    reference: "Tunani",
+    purpose: "Manufa",
+    view_details: "Duba cikakkun bayanai",
+    close: "Rufe",
+    language: "Harshe",
+    english: "Turanci",
+    yoruba: "Yarbanci",
+    hausa: "Hausa",
+    igbo: "Igbo",
+    french: "Faransanci",
+    arabic: "Larabci",
+    did_label: "ID na Decentralized (DID)",
+    pin_label: "PIN",
+    login_with_pin: "Shiga tare da PIN",
+    generate_did: "Ƙirƙiri DID",
+    did_generated: "An ƙirƙiri DID ɗin ku: {{did}}",
+    pin_required: "Ana buƙatar PIN",
+    pin_must_be_4_digits: "PIN dole ne ya zama lambobi 4",
+    invalid_pin: "PIN mara inganci",
+    invalid_did: "DID mara inganci",
+    fund_wallet: "Kuɗaɗe Wallet",
+    select_bank: "Zaɓi banki",
+    fund_amount: "Adadin kuɗin da za a ba da kuɗi",
+    fund_now: "Kuɗaɗe yanzu",
+    funding_success: "An cika walat cikin nasara",
+    scan_face: "Duba fuskar ku",
+    scan_fingerprint: "Duba sawun yatsa",
+    speak_now: "Yi magana yanzu don ganin murya",
+    biometric_success: "An tabbatar da bayanan biometric cikin nasara",
+    biometric_failed: "Tabbatar da bayanan biometric ya gaza",
+    not_enrolled: "Ba a yi rajista ba",
+    enroll_now: "Yi rijista yanzu",
+    optional: "Na zaɓi",
+    add_bank: "Ƙara Asusun Banki",
+    bank_name: "Sunan banki",
+    account_number: "Lambar asusu",
+    account_name: "Sunan asusu",
+    add_now: "Ƙara yanzu",
+    bank_added: "An ƙara asusun banki cikin nasara",
+    verify_bank: "Tabbatar da banki",
+    verifying: "Ana tabbatarwa...",
+    bank_verified: "An tabbatar da asusun banki",
+    consent_tab: "Izini",
+    lifecycle_tab: "Zaman rayuwa",
+    grant_consent: "Ba da izini",
+    revoke_consent: "Soke izini",
+    active_consents: "Izini masu aiki",
+    no_active_consents: "Babu izini masu aiki",
+    identity_status: "Matsayin ainihi",
+    issue_at_birth: "Bayarwa a lokacin haihuwa",
+    revoke_at_death: "Soke a mutuwa",
+    linked_services: "Ayyukan da aka haɗa",
+    ussd_access: "Samun damar USSD",
+    sms_access: "Samun damar SMS",
+    dial_code: "Lambar buga",
+    send_to: "Aika zuwa",
+    view_commands: "Duba umarni",
+    simulate_ussd: "Kwaikwayi USSD",
+    simulate_sms: "Kwaikwayi SMS",
+    identity_status_active: "Mai aiki",
+    identity_status_suspended: "An dakatar",
+    identity_status_revoked: "An soke",
+    next_verification: "Tabbatarwa na gaba",
+    credit_score: "Makin bashi",
+    credit_rating: "Kimar bashi",
+    excellent: "Mai kyau sosai",
+    good: "Mai kyau",
+    fair: "Matsakaici",
+    poor: "Mara kyau",
+    credit_history: "Tarihin bashi",
+    loan_eligibility: "Cancantar rance",
+    eligible: "Canjawa",
+    not_eligible: "Ba cancanta ba",
+    credit_factors: "Abubuwan bashi",
+    payment_history: "Tarihin biyan kuɗi",
+    credit_utilization: "Amfani da bashi",
+    credit_length: "Tsawon lokacin bashi",
+    credit_mix: "Gaurayawan bashi",
+    new_credit: "Sabon bashi",
+    improve_score: "Inganta maki",
+    credit_report: "Rahoton bashi",
+    download_report: "Zazzage rahoto",
+    share_with_lender: "Raba tare mai ba da rance",
+    api_access: "Samun damar API",
+    generate_api_key: "Ƙirƙiri maɓallin API",
+    api_documentation: "Takaddun API",
+    bill_payment: "Biyan kuɗaɗen aiki",
+    electricity: "Wutar lantarki",
+    water: "Ruwa",
+    internet: "Intanet",
+    cable_tv: "Talabijin na kebul",
+    phone_bill: "Kuɗin waya",
+    select_biller: "Zaɓi mai biyan kuɗi",
+    customer_id: "ID ɗin abokin ciniki",
+    pay_now: "Biya yanzu",
+    payment_successful: "Biyan ya yi nasara",
+    airtime_topup: "Ƙara waya",
+    data_bundle: "Kunshin data",
+    select_network: "Zaɓi hanyar sadarwa",
+    phone_number: "Lambar waya",
+    select_amount: "Zaɓi adadin",
+    buy_now: "Saya yanzu",
+    topup_successful: "Ƙarar ta yi nasara",
+    loan_application: "Neman rance",
+    personal_loan: "Rancen sirri",
+    business_loan: "Rancen kasuwanci",
+    emergency_loan: "Rancen gaggawa",
+    loan_amount: "Adadin rance",
+    loan_purpose: "Manufar rance",
+    monthly_income: "Kuɗin shiga na wata-wata",
+    apply_loan: "Nemi rance",
+    loan_applied: "An gabatar da neman rance",
+    repay_loan: "Biya rance",
+    loan_balance: "Ma'aunin rance",
+    next_payment: "Biya na gaba",
+    make_payment: "Yi biya",
+    payment_made: "An yi biya cikin nasara",
+    investment_options: "Zaɓuɓɓukan saka hannun jari",
+    treasury_bills: "Kudaden baitulmali",
+    mutual_funds: "Kudaden haɗin gwiwa",
+    fixed_deposit: "Ajiyar kuɗi mai ƙayyadaddun lokaci",
+    stocks: "Hannun jari",
+    invest_amount: "Adadin saka hannun jari",
+    expected_return: "Da'awar dawowa",
+    maturity_date: "Ranar cikewa",
+    invest_now: "Saka hannun jari yanzu",
+    investment_successful: "Saka hannun jari ya yi nasara",
+    withdraw_investment: "Janye saka hannun jari",
+    current_value: "Ƙimar yanzu",
+    withdraw_amount: "Adadin janyewa",
+    withdraw_now: "Janye yanzu",
+    withdrawal_successful: "Janyewar ta yi nasara",
+    emotional_wellbeing: "Jin daɗin tunani",
+    mood_tracker: "Mai bin yanayin tunani",
+    stress_level: "Matsanin damuwa",
+    happiness_index: "Ma'aunin farin ciki",
+    anxiety_level: "Matsanin damuwa",
+    record_mood: "Rubuta yanayin tunani",
+    mood_recorded: "An rubuta yanayin tunani cikin nasara",
+    insurance_policies: "Manufofin inshora",
+    health_insurance: "Inshorar lafiya",
+    life_insurance: "Inshorar rayuwa",
+    auto_insurance: "Inshorar mota",
+    property_insurance: "Inshorar dukiya",
+    policy_details: "Cikakkun bayanan manufa",
+    premium_amount: "Adadin premium",
+    coverage_amount: "Adadin ɗaukar nauyi",
+    pay_premium: "Biya premium",
+    premium_paid: "An biya premium cikin nasara",
+    file_claim: "Shigar da da'awar",
+    claim_amount: "Adadin da'awar",
+    claim_reason: "Dalilin da'awar",
+    submit_claim: "Gabatar da da'awar",
+    claim_submitted: "An gabatar da da'awar cikin nasara",
+    remittance_services: "Ayyukan aika kuɗi",
+    send_money_abroad: "Aika",
+    receive_money: "Karɓa",
+    exchange_rate: "Farashin musaya",
+    recipient_country: "Ƙasar mai karɓa",
+    recipient_details: "Cikakkun bayanan mai karɓa",
+    transfer_fee: "Kuɗin canja wuri",
+    send_remittance: "Aika kuɗi",
+    remittance_sent: "An aika kuɗin cikin nasara",
+    birth_certificate: "Takardar shaidar haihuwa",
+    death_certificate: "Takardar shaidar mutuwa",
+    marriage_certificate: "Takardar shaidar aure",
+    divorce_certificate: "Takardar shaidar saki",
+    request_certificate: "Nemi takardar shaida",
+    certificate_requested: "An nemi takardar shaida cikin nasara",
+    biometric_scan_face: "Ana duba fuska...",
+    biometric_scan_finger: "Ana duba sawun yatsa...",
+    biometric_scan_voice: "Ana rikodin murya...",
+    scan_complete: "An kammala duba",
+    enrollment_successful: "An yi rajista cikin nasara",
+    disaster_alerts: "Faɗakarwar bala'i",
+    emergency_contacts: "Lambobin gaggawa",
+    nearest_hospitals: "Asibitoci mafi kusa",
+    shelter_locations: "Wuraren matsuguni",
+    disaster_preparedness: "Shirye-shiryen bala'i",
+    flood_warning: "Faɗakarwar ambaliya",
+    earthquake_alert: "Faɗakarwar girgizar ƙasa",
+    extreme_weather: "Yanayi mai tsanani",
+    high_priority: "Babban fifiko",
+    medium_priority: "Matsakaicin fifiko",
+    low_priority: "Ƙaramin fifiko",
+    active_alerts: "Mai aiki",
+    all_clear: "Duk a sarari",
+    test_alert: "Gwajin faɗakarwa",
+    mark_resolved: "Yiwa alama an warware",
+    share_alert: "Raba faɗakarwa",
+    alert_preferences: "Zaɓin faɗakarwa",
+    receive_alerts: "Karɓi faɗakarwa",
+    alert_types: "Nau'ikan faɗakarwa",
+    notification_methods: "Hanyoyin sanarwa",
+    push_notification: "Sanarwar turawa",
+    voice_call: "Kiran murya",
+},
     };
 
     // Function to get URL parameter
@@ -1206,6 +1584,20 @@ ar: {
       const [ussdModalOpen, setUssdModalOpen] = React.useState(false);
       const [smsModalOpen, setSmsModalOpen] = React.useState(false);
       const [transactionDetail, setTransactionDetail] = React.useState(null);
+
+      const [welfareModal, setWelfareModal] = React.useState(false);
+      const [welfareDetails, setWelfareDetails] = React.useState({
+        program: '',
+        amount: ''
+      });
+
+      const welfarePrograms = [
+        { id: 'poverty_alleviation', name: 'Poverty Alleviation Fund', amount: 50000 },
+        { id: 'education_grant', name: 'Education Support Grant', amount: 75000 },
+        { id: 'healthcare_support', name: 'Healthcare Support', amount: 30000 },
+        { id: 'agricultural_subsidy', name: 'Agricultural Subsidy', amount: 100000 },
+        { id: 'disaster_relief', name: 'Disaster Relief Fund', amount: 50000 }
+      ];
       
       // Add these two lines for receive remittance functionality
       const [receiveRemittanceModal, setReceiveRemittanceModal] = React.useState(false);
@@ -1248,6 +1640,56 @@ ar: {
       const [biometricEnrolled, setBiometricEnrolled] = React.useState({
         face: false, fingerprint: false, voice: false
       });
+
+      // Add to your existing state variables
+const [disasterAlerts, setDisasterAlerts] = React.useState([
+  {
+    id: 'alert-1',
+    type: 'flood',
+    title: 'Flood Warning',
+    severity: 'high',
+    issued: new Date().toISOString(),
+    areas: ['Lagos Island', 'Victoria Island', 'Lekki'],
+    description: 'Heavy rainfall expected to cause flooding in low-lying areas',
+    instructions: 'Evacuate to higher ground if in flood-prone areas. Avoid walking or driving through flood waters.',
+    active: true
+  },
+  {
+    id: 'alert-2',
+    type: 'earthquake',
+    title: 'Earthquake Alert',
+    severity: 'medium',
+    issued: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
+    areas: ['Central Lagos', 'Mainland'],
+    description: 'Minor earthquake detected in your region',
+    instructions: 'Stay indoors. Take cover under sturdy furniture. Stay away from windows.',
+    active: true
+  }
+]);
+
+const [alertPreferences, setAlertPreferences] = React.useState({
+  receiveAlerts: true,
+  alertTypes: {
+    flood: true,
+    earthquake: true,
+    extremeWeather: true,
+    fire: true
+  },
+  notificationMethods: {
+    push: true,
+    sms: true,
+    email: false,
+    voice: true
+  }
+});
+
+  const [audio] = React.useState(() => {
+    // Create audio element programmatically
+    const audio = new Audio();
+    audio.src = "https://assets.mixkit.co/active_storage/sfx/905/905-preview.mp3";
+    audio.preload = "auto";
+    return audio;
+  });
       
       // USSD/SMS states
       const [ussdCode, setUssdCode] = React.useState('');
@@ -1991,6 +2433,7 @@ ar: {
                   <option value="fr">{t('french')}</option>
                   <option value="ar">{t('arabic')}</option>
                   <option value="ig">{t('igbo')}</option>
+                  <option value="ha">{t('hausa')}</option>
                 </select>
               </div>
             </div>
@@ -2044,9 +2487,6 @@ ar: {
                       >
                         {t('fund_wallet')}
                       </button>
-                      <div className="bg-green-100 p-3 rounded-full">
-                        <span className="text-green-600 text-2xl font-bold">₦</span>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -2065,7 +2505,8 @@ ar: {
                     { key: 'loans', label: 'Loans' },
                     { key: 'remittance', label: 'Remittance' },
                     { key: 'investments', label: 'Investments' },
-                    { key: 'insurance', label: 'Insurance' }
+                    { key: 'insurance', label: 'Insurance' },
+                    { key: 'disaster', label: 'Disaster Alerts' }
                   ].map(tab => (
                     <button
                       key={tab.key}
@@ -2388,84 +2829,204 @@ ar: {
                   )}
                 </div>
               )}
+{/* Payments Tab */}
+{activeTab === 'payments' && (
+  <div className="space-y-6">
+    <div className="bg-white rounded-lg shadow-md p-6">
+      <h3 className="text-lg font-semibold mb-4">{t('payment_services')}</h3>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* Send Money */}
+        <div className="p-4 border rounded-lg">
+          <h4 className="font-medium mb-2">{t('send_money')}</h4>
+          <p className="text-sm text-gray-600 mb-4">Transfer money to other ONPIN wallets</p>
+          <button
+            onClick={() => setTransferModalOpen(true)}
+            className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+          >
+            {t('transfer')}
+          </button>
+        </div>
 
-              {/* Payments Tab */}
-              {activeTab === 'payments' && (
-                <div className="space-y-6">
-                  <div className="bg-white rounded-lg shadow-md p-6">
-                    <h3 className="text-lg font-semibold mb-4">{t('payment_services')}</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      {/* Send Money */}
-                      <div className="p-4 border rounded-lg">
-                        <h4 className="font-medium mb-2">{t('send_money')}</h4>
-                        <p className="text-sm text-gray-600 mb-4">Transfer money to other ONPIN wallets</p>
-                        <button
-                          onClick={() => setTransferModalOpen(true)}
-                          className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-                        >
-                          {t('transfer')}
-                        </button>
-                      </div>
+        {/* Pay Bills */}
+        <div className="p-4 border rounded-lg">
+          <h4 className="font-medium mb-2">{t('pay_bills')}</h4>
+          <p className="text-sm text-gray-600 mb-4">Pay electricity, water, cable TV bills</p>
+          <button
+            onClick={() => setBillPaymentModal(true)}
+            className="w-full px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition"
+          >
+            {t('bill_payment')}
+          </button>
+        </div>
 
-                      {/* Pay Bills */}
-                      <div className="p-4 border rounded-lg">
-                        <h4 className="font-medium mb-2">{t('pay_bills')}</h4>
-                        <p className="text-sm text-gray-600 mb-4">Pay electricity, water, cable TV bills</p>
-                        <button
-                          onClick={() => setBillPaymentModal(true)}
-                          className="w-full px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition"
-                        >
-                          {t('bill_payment')}
-                        </button>
-                      </div>
+        {/* Airtime/Data */}
+        <div className="p-4 border rounded-lg">
+          <h4 className="font-medium mb-2">{t('airtime_data')}</h4>
+          <p className="text-sm text-gray-600 mb-4">Buy airtime and data bundles</p>
+          <button
+            onClick={() => setAirtimeModal(true)}
+            className="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+          >
+            {t('buy_now')}
+          </button>
+        </div>
 
-                      {/* Airtime/Data */}
-                      <div className="p-4 border rounded-lg">
-                        <h4 className="font-medium mb-2">{t('airtime_data')}</h4>
-                        <p className="text-sm text-gray-600 mb-4">Buy airtime and data bundles</p>
-                        <button
-                          onClick={() => setAirtimeModal(true)}
-                          className="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
-                        >
-                          {t('buy_now')}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+        {/* Welfare Disbursements */}
+        <div className="p-4 border rounded-lg">
+          <h4 className="font-medium mb-2">Welfare Disbursements</h4>
+          <p className="text-sm text-gray-600 mb-4">Request government welfare funds</p>
+          <button
+            onClick={() => setWelfareModal(true)}
+            className="w-full px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition"
+          >
+            Request Funds
+          </button>
+        </div>
+      </div>
+    </div>
 
-                  {/* Recent Transactions */}
-                  <div className="bg-white rounded-lg shadow-md p-6">
-                    <h3 className="text-lg font-semibold mb-4">{t('recent_transactions')}</h3>
-                    <div className="space-y-3">
-                      {user.transactions.map(txn => (
-                        <div
-                          key={txn.id}
-                          className="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer"
-                          onClick={() => setTransactionDetail(txn)}
-                        >
-                          <div>
-                            <p className="font-medium">{txn.description}</p>
-                            <p className="text-sm text-gray-500">{txn.date} • {txn.recipient}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className={`font-semibold ${
-                              txn.type === 'credit' ? 'text-green-600' : 'text-red-600'
-                            }`}>
-                              {txn.type === 'credit' ? '+' : '-'}₦{txn.amount.toLocaleString()}
-                            </p>
-                            <span className={`text-xs px-2 py-1 rounded ${
-                              txn.status === 'completed' ? 'bg-green-100 text-green-800' :
-                              txn.status === 'failed' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
-                            }`}>
-                              {t(txn.status)}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+    {/* Recent Transactions */}
+    <div className="bg-white rounded-lg shadow-md p-6">
+      <h3 className="text-lg font-semibold mb-4">{t('recent_transactions')}</h3>
+      <div className="space-y-3">
+        {user.transactions.map(txn => (
+          <div
+            key={txn.id}
+            className="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer"
+            onClick={() => setTransactionDetail(txn)}
+          >
+            <div>
+              <p className="font-medium">{txn.description}</p>
+              <p className="text-sm text-gray-500">{txn.date} • {txn.recipient || txn.sender || 'Government'}</p>
+            </div>
+            <div className="text-right">
+              <p className={`font-semibold ${
+                txn.type === 'credit' ? 'text-green-600' : 'text-red-600'
+              }`}>
+                {txn.type === 'credit' ? '+' : '-'}₦{txn.amount.toLocaleString()}
+              </p>
+              <span className={`text-xs px-2 py-1 rounded ${
+                txn.status === 'completed' ? 'bg-green-100 text-green-800' :
+                txn.status === 'failed' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
+              }`}>
+                {t(txn.status)}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+)}
+
+{/* Welfare Disbursement Modal */}
+{welfareModal && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+      <h3 className="text-xl font-bold mb-4">Government Welfare Disbursement</h3>
+      <div className="space-y-4">
+        <div>
+          <label className="block text-gray-700 mb-1">Select Program</label>
+          <select
+            value={welfareDetails.program}
+            onChange={(e) => setWelfareDetails({...welfareDetails, program: e.target.value})}
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+          >
+            <option value="">Select Welfare Program</option>
+            <option value="poverty_alleviation">Poverty Alleviation Fund</option>
+            <option value="education_grant">Education Support Grant</option>
+            <option value="healthcare_support">Healthcare Support</option>
+            <option value="agricultural_subsidy">Agricultural Subsidy</option>
+            <option value="disaster_relief">Disaster Relief Fund</option>
+          </select>
+        </div>
+        
+        {welfareDetails.program && (
+          <>
+            <div>
+              <label className="block text-gray-700 mb-1">Eligibility Status</label>
+              <div className="p-3 bg-green-50 rounded-md">
+                <div className="flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-sm text-green-800">Verified Eligible</span>
                 </div>
-              )}
+                <p className="text-xs text-green-600 mt-1">Based on your NIN and BVN records</p>
+              </div>
+            </div>
+            
+            <div>
+              <label className="block text-gray-700 mb-1">Amount Available</label>
+              <div className="p-3 bg-blue-50 rounded-md">
+                <p className="font-medium text-blue-800">
+                  ₦{welfarePrograms.find(p => p.id === welfareDetails.program)?.amount.toLocaleString() || '0'}
+                </p>
+                <p className="text-xs text-blue-600 mt-1">Maximum disbursement amount for this program</p>
+              </div>
+            </div>
+            
+            <div>
+              <label className="block text-gray-700 mb-1">Request Amount (₦)</label>
+              <input
+                type="number"
+                value={welfareDetails.amount}
+                onChange={(e) => setWelfareDetails({...welfareDetails, amount: e.target.value})}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                placeholder={`Enter amount up to ₦${welfarePrograms.find(p => p.id === welfareDetails.program)?.amount.toLocaleString()}`}
+                max={welfarePrograms.find(p => p.id === welfareDetails.program)?.amount}
+              />
+            </div>
+          </>
+        )}
+      </div>
+      <div className="flex justify-end space-x-3 mt-6">
+        <button
+          onClick={() => {
+            setWelfareModal(false);
+            setWelfareDetails({ program: '', amount: '' });
+          }}
+          className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition duration-300"
+        >
+          {t('cancel')}
+        </button>
+        <button
+          onClick={() => {
+            if (!welfareDetails.program) {
+              alert('Please select a welfare program');
+              return;
+            }
+            
+            const program = welfarePrograms.find(p => p.id === welfareDetails.program);
+            const amount = parseFloat(welfareDetails.amount) || program.amount;
+            
+            if (amount > program.amount) {
+              alert(`Amount cannot exceed ₦${program.amount.toLocaleString()} for this program`);
+              return;
+            }
+            
+            // Add transaction to wallet
+            addTransaction({
+              type: "credit",
+              amount: amount,
+              description: `Welfare Disbursement: ${program.name}`,
+              recipient: user.name,
+              status: "completed"
+            });
+            
+            setWelfareModal(false);
+            setWelfareDetails({ program: '', amount: '' });
+            alert(`₦${amount.toLocaleString()} welfare disbursement received successfully!`);
+          }}
+          className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition duration-300"
+          disabled={!welfareDetails.program}
+        >
+          Request Disbursement
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
 {/* Identity Tab */}
 {activeTab === 'identity' && (
@@ -2502,10 +3063,6 @@ ar: {
             <div className="flex justify-between">
               <span>NIN:</span>
               <span className="font-mono font-medium">{user.nin || 'Not provided'}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>BVN:</span>
-              <span className="font-mono font-medium">{user.bvn || 'Not provided'}</span>
             </div>
           </div>
         </div>
@@ -3530,6 +4087,296 @@ ar: {
                   </div>
                 </div>
               )}
+
+              {/* Disaster Alert Tab */}
+{activeTab === 'disaster' && (
+  <div className="space-y-6">
+    <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-xl font-semibold text-gray-800">{t('disaster_alerts')}</h3>
+        <div className="flex items-center space-x-2">
+        <span className={`px-2 py-1 text-xs rounded-full ${
+          disasterAlerts.some(a => a.active) 
+            ? 'bg-red-100 text-red-800 alarm-active' 
+            : 'bg-green-100 text-green-800'
+        }`}>
+          {disasterAlerts.some(a => a.active) ? t('active_alerts') : t('all_clear')}
+        </span>
+<button 
+  onClick={() => {
+    // Play alarm sound
+    audio.play().catch(e => console.log("Audio play failed:", e));
+    
+    // Simulate new alert
+    const newAlert = {
+      id: `alert-${Date.now()}`,
+      type: ['flood', 'earthquake', 'extremeWeather', 'fire'][Math.floor(Math.random() * 4)],
+      title: ['Severe Storm Warning', 'Tsunami Alert', 'Wildfire Warning', 'Tornado Watch'][Math.floor(Math.random() * 4)],
+      severity: ['low', 'medium', 'high'][Math.floor(Math.random() * 3)],
+      issued: new Date().toISOString(),
+      areas: ['Your Area', 'Nearby Regions'],
+      description: 'This is a test alert to demonstrate the system',
+      instructions: 'This is only a test. No action required.',
+      active: true
+    };
+    setDisasterAlerts([newAlert, ...disasterAlerts]);
+    
+    // Optional: Vibrate device if supported
+    if ("vibrate" in navigator) {
+      navigator.vibrate([200, 100, 200]);
+    }
+  }}
+  className="px-3 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition"
+>
+  {t('test_alert')}
+</button>
+
+<div className="flex items-center space-x-2">
+  {/* Existing indicator and test button */}
+  {disasterAlerts.some(a => a.active) && (
+    <button 
+      onClick={() => {
+        audio.pause();
+        audio.currentTime = 0;
+        if ("vibrate" in navigator) {
+          navigator.vibrate(0); // Stop vibration
+        }
+      }}
+      className="px-3 py-1 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition"
+    >
+      Stop
+    </button>
+  )}
+</div>
+        </div>
+      </div>
+      
+      {/* Current Alerts */}
+      <div className="mb-8">
+        <h4 className="font-medium mb-4 text-gray-700">Active Alerts in Your Area</h4>
+        {disasterAlerts.filter(a => a.active).length > 0 ? (
+          <div className="space-y-4">
+            {disasterAlerts.filter(a => a.active).map(alert => (
+              <div 
+                key={alert.id} 
+                className={`p-4 rounded-lg border ${
+                  alert.severity === 'high' ? 'bg-red-50 border-red-200' :
+                  alert.severity === 'medium' ? 'bg-yellow-50 border-yellow-200' :
+                  'bg-blue-50 border-blue-200'
+                }`}
+              >
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <h5 className={`font-medium ${
+                      alert.severity === 'high' ? 'text-red-800' :
+                      alert.severity === 'medium' ? 'text-yellow-800' :
+                      'text-blue-800'
+                    }`}>
+                      {alert.title}
+                    </h5>
+                    <p className="text-sm text-gray-600">{alert.description}</p>
+                  </div>
+                  <span className={`text-xs px-2 py-1 rounded-full ${
+                    alert.severity === 'high' ? 'bg-red-100 text-red-800' :
+                    alert.severity === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-blue-100 text-blue-800'
+                  }`}>
+                    {alert.severity === 'high' ? 'High Priority' :
+                     alert.severity === 'medium' ? 'Medium Priority' : 'Low Priority'}
+                  </span>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700 mb-3">
+                  <div>
+                    <p><span className="font-medium">Issued:</span> {new Date(alert.issued).toLocaleString()}</p>
+                    <p><span className="font-medium">Affected Areas:</span> {alert.areas.join(', ')}</p>
+                  </div>
+                  <div className="bg-white p-2 rounded border">
+                    <p className="font-medium text-gray-800">Recommended Actions:</p>
+                    <p>{alert.instructions}</p>
+                  </div>
+                </div>
+                
+                <div className="flex justify-between items-center">
+                  <button 
+                    onClick={() => {
+                      // Mark as read
+                      setDisasterAlerts(disasterAlerts.map(a => 
+                        a.id === alert.id ? {...a, active: false} : a
+                      ));
+                    }}
+                    className="text-sm text-blue-600 hover:text-blue-800"
+                  >
+                    Mark as Resolved
+                  </button>
+                  <button 
+                    onClick={() => {
+                      // Share alert
+                      const shareText = `${alert.title}\n\n${alert.description}\n\nAffected Areas: ${alert.areas.join(', ')}\n\nInstructions: ${alert.instructions}`;
+                      if (navigator.share) {
+                        navigator.share({
+                          title: alert.title,
+                          text: shareText
+                        });
+                      } else {
+                        alert('Share this alert:\n\n' + shareText);
+                      }
+                    }}
+                    className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded hover:bg-gray-200 transition"
+                  >
+                    Share Alert
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="p-8 text-center bg-gray-50 rounded-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-green-500 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-gray-600">No active alerts in your area</p>
+          </div>
+        )}
+      </div>
+
+      {/* Alert Settings */}
+      <div className="p-4 border rounded-lg bg-gray-50">
+        <h4 className="font-medium mb-4 text-gray-700">Alert Preferences</h4>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <label className="text-gray-700">Receive Emergency Alerts</label>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input 
+                type="checkbox" 
+                className="sr-only peer" 
+                checked={alertPreferences.receiveAlerts}
+                onChange={() => setAlertPreferences({
+                  ...alertPreferences,
+                  receiveAlerts: !alertPreferences.receiveAlerts
+                })}
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            </label>
+          </div>
+          
+          <div>
+            <label className="block text-gray-700 mb-2">Alert Types</label>
+            <div className="grid grid-cols-2 gap-3">
+              {Object.entries(alertPreferences.alertTypes).map(([type, enabled]) => (
+                <label key={type} className="flex items-center space-x-2">
+                  <input 
+                    type="checkbox" 
+                    className="form-checkbox h-5 w-5 text-blue-600 rounded"
+                    checked={enabled}
+                    onChange={() => setAlertPreferences({
+                      ...alertPreferences,
+                      alertTypes: {
+                        ...alertPreferences.alertTypes,
+                        [type]: !enabled
+                      }
+                    })}
+                  />
+                  <span className="text-gray-700 capitalize">
+                    {type === 'extremeWeather' ? 'Extreme Weather' : type}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-gray-700 mb-2">Notification Methods</label>
+            <div className="grid grid-cols-2 gap-3">
+              {Object.entries(alertPreferences.notificationMethods).map(([method, enabled]) => (
+                <label key={method} className="flex items-center space-x-2">
+                  <input 
+                    type="checkbox" 
+                    className="form-checkbox h-5 w-5 text-blue-600 rounded"
+                    checked={enabled}
+                    onChange={() => setAlertPreferences({
+                      ...alertPreferences,
+                      notificationMethods: {
+                        ...alertPreferences.notificationMethods,
+                        [method]: !enabled
+                      }
+                    })}
+                  />
+                  <span className="text-gray-700 capitalize">
+                    {method === 'push' ? 'Push Notification' : 
+                     method === 'sms' ? 'SMS' : 
+                     method === 'voice' ? 'Voice Call' : 'Email'}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
+        
+        <button 
+          onClick={() => alert('Preferences saved!')}
+          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+        >
+          Save Preferences
+        </button>
+      </div>
+
+      {/* Emergency Resources */}
+      <div className="mt-8">
+        <h4 className="font-medium mb-4 text-gray-700">Emergency Resources</h4>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <button 
+            onClick={() => alert('Emergency contacts:\n\nPolice: 112\nAmbulance: 119\nFire: 110')}
+            className="p-4 bg-white rounded-lg border hover:bg-blue-50 transition flex flex-col items-center"
+          >
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
+            </div>
+            <span className="text-sm text-center">{t('emergency_contacts')}</span>
+          </button>
+          
+          <button 
+            onClick={() => alert('Nearest hospitals:\n\nGeneral Hospital Lagos\nSt. Nicholas Hospital\nReddington Hospital')}
+            className="p-4 bg-white rounded-lg border hover:bg-blue-50 transition flex flex-col items-center"
+          >
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+            </div>
+            <span className="text-sm text-center">{t('nearest_hospitals')}</span>
+          </button>
+          
+          <button 
+            onClick={() => alert('Shelter locations:\n\nNational Stadium Lagos\nLagos City Hall\nCommunity Center Yaba')}
+            className="p-4 bg-white rounded-lg border hover:bg-blue-50 transition flex flex-col items-center"
+          >
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+            </div>
+            <span className="text-sm text-center">{t('shelter_locations')}</span>
+          </button>
+          
+          <button 
+            onClick={() => alert('Disaster preparedness information will be shown here')}
+            className="p-4 bg-white rounded-lg border hover:bg-blue-50 transition flex flex-col items-center"
+          >
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <span className="text-sm text-center">{t('disaster_preparedness')}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
             </div>
           </main>
 
