@@ -2467,73 +2467,191 @@ ar: {
                 </div>
               )}
 
-              {/* Identity Tab */}
-              {activeTab === 'identity' && (
-                <div className="space-y-6">
-                  <div className="bg-white rounded-lg shadow-md p-6">
-                    <h3 className="text-lg font-semibold mb-4">{t('identity_verification')}</h3>
-                    
-                    {/* Identity Status */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                      <div className="p-4 border rounded-lg">
-                        <h4 className="font-medium mb-2">{t('identity_status')}</h4>
-                        <div className="flex items-center space-x-2 mb-2">
-                          <span className={`px-3 py-1 text-sm rounded-full ${
-                            user.identityStatus === 'active' ? 'bg-green-100 text-green-800' :
-                            user.identityStatus === 'suspended' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-red-100 text-red-800'
-                          }`}>
-                            {t(`identity_status_${user.identityStatus}`)}
-                          </span>
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          <p>Issue Date: {user.identityIssueDate}</p>
-                          <p>Last Verified: {user.lastVerified}</p>
-                          <p>Next Verification: {user.nextVerification}</p>
-                        </div>
-                      </div>
+{/* Identity Tab */}
+{activeTab === 'identity' && (
+  <div className="space-y-6">
+    <div className="bg-white rounded-lg shadow-md p-6">
+      <h3 className="text-lg font-semibold mb-4">{t('identity_verification')}</h3>
+      
+      {/* Identity Status */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div className="p-4 border rounded-lg">
+          <h4 className="font-medium mb-2">{t('identity_status')}</h4>
+          <div className="flex items-center space-x-2 mb-2">
+            <span className={`px-3 py-1 text-sm rounded-full ${
+              user.identityStatus === 'active' ? 'bg-green-100 text-green-800' :
+              user.identityStatus === 'suspended' ? 'bg-yellow-100 text-yellow-800' :
+              'bg-red-100 text-red-800'
+            }`}>
+              {t(`identity_status_${user.identityStatus}`)}
+            </span>
+          </div>
+          <div className="text-sm text-gray-600 space-y-2">
+            <div className="flex justify-between">
+              <span>Issue Date:</span>
+              <span className="font-medium">{user.identityIssueDate}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Last Verified:</span>
+              <span className="font-medium">{user.lastVerified}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Next Verification:</span>
+              <span className="font-medium">{user.nextVerification}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>NIN:</span>
+              <span className="font-mono font-medium">{user.nin || 'Not provided'}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>BVN:</span>
+              <span className="font-mono font-medium">{user.bvn || 'Not provided'}</span>
+            </div>
+          </div>
+        </div>
 
-                      <div className="p-4 border rounded-lg">
-                        <h4 className="font-medium mb-2">{t('biometric_enrollment')}</h4>
-                        <div className="space-y-2">
-                          {[
-                            { key: 'face', label: t('face_id'), icon: '👤' },
-                            { key: 'fingerprint', label: t('fingerprint'), icon: '👆' },
-                            { key: 'voice', label: t('voice_recognition'), icon: '🎤' }
-                          ].map(biometric => (
-                            <div key={biometric.key} className="flex items-center justify-between">
-                              <div className="flex items-center space-x-2">
-                                <span>{biometric.icon}</span>
-                                <span className="text-sm">{biometric.label}</span>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <span className={`text-xs px-2 py-1 rounded ${
-                                  biometricEnrolled[biometric.key] || user.biometricData?.[biometric.key]?.enrolled
-                                    ? 'bg-green-100 text-green-800' 
-                                    : 'bg-gray-100 text-gray-800'
-                                }`}>
-                                  {biometricEnrolled[biometric.key] || user.biometricData?.[biometric.key]?.enrolled 
-                                    ? t('verified') 
-                                    : t('not_enrolled')}
-                                </span>
-                                {!(biometricEnrolled[biometric.key] || user.biometricData?.[biometric.key]?.enrolled) && (
-                                  <button
-                                    onClick={() => handleBiometricScan(biometric.key)}
-                                    className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-                                    disabled={biometricScanning === biometric.key}
-                                  >
-                                    {biometricScanning === biometric.key ? t('verifying') : t('enroll_now')}
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+        {/* Owner Details Card */}
+        <div className="p-4 border rounded-lg">
+          <h4 className="font-medium mb-4">Owner Details</h4>
+          <div className="flex items-start space-x-4 mb-4">
+            <div className="w-20 h-20 bg-gray-200 rounded-full overflow-hidden">
+              {user.profilePhoto ? (
+                <img src={user.profilePhoto} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
                 </div>
               )}
+            </div>
+            <div className="flex-1">
+              <h5 className="font-medium text-lg">{user.name}</h5>
+              <p className="text-sm text-gray-600">{user.occupation || 'Occupation not specified'}</p>
+              <p className="text-sm text-gray-600">{user.phone}</p>
+              <p className="text-sm text-gray-600">{user.email}</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <div>
+              <span className="text-gray-600">Date of Birth:</span>
+              <p className="font-medium">{user.dob || 'Not provided'}</p>
+            </div>
+            <div>
+              <span className="text-gray-600">Gender:</span>
+              <p className="font-medium">{user.gender || 'Not specified'}</p>
+            </div>
+            <div>
+              <span className="text-gray-600">State of Origin:</span>
+              <p className="font-medium">{user.stateOfOrigin || 'Not provided'}</p>
+            </div>
+            <div>
+              <span className="text-gray-600">LGA:</span>
+              <p className="font-medium">{user.lga || 'Not provided'}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Biometric Enrollment */}
+      <div className="p-4 border rounded-lg mb-6">
+        <h4 className="font-medium mb-4">{t('biometric_enrollment')}</h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[
+            { key: 'face', label: t('face_id'), icon: '👤', description: 'Facial recognition for secure authentication' },
+            { key: 'fingerprint', label: t('fingerprint'), icon: '👆', description: 'Fingerprint scanning for quick access' },
+            { key: 'iris', label: 'Iris Scan', icon: '👁️', description: 'Iris pattern recognition for high-security verification' },
+            { key: 'voice', label: t('voice_recognition'), icon: '🎤', description: 'Voice pattern matching for hands-free access' }
+          ].map(biometric => (
+            <div key={biometric.key} className="p-3 border rounded-lg hover:bg-gray-50 transition">
+              <div className="flex items-start space-x-3">
+                <span className="text-2xl">{biometric.icon}</span>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <h5 className="font-medium">{biometric.label}</h5>
+                    <span className={`text-xs px-2 py-1 rounded ${
+                      biometricEnrolled[biometric.key] || user.biometricData?.[biometric.key]?.enrolled
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {biometricEnrolled[biometric.key] || user.biometricData?.[biometric.key]?.enrolled 
+                        ? t('verified') 
+                        : t('not_enrolled')}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">{biometric.description}</p>
+                  {!(biometricEnrolled[biometric.key] || user.biometricData?.[biometric.key]?.enrolled) && (
+                    <button
+                      onClick={() => handleBiometricScan(biometric.key)}
+                      className="mt-2 w-full py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition"
+                      disabled={biometricScanning === biometric.key}
+                    >
+                      {biometricScanning === biometric.key ? t('verifying') : t('enroll_now')}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Identity Documents */}
+      <div className="p-4 border rounded-lg">
+        <h4 className="font-medium mb-4">Identity Documents</h4>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="border rounded-lg p-3 text-center">
+            <div className="h-32 bg-gray-100 rounded flex items-center justify-center mb-2">
+              <span className="text-gray-400">NIN Front</span>
+            </div>
+            <p className="text-sm font-medium">National ID Card</p>
+            <p className="text-xs text-gray-500">Uploaded: {user.ninUploadDate || 'Not uploaded'}</p>
+          </div>
+          <div className="border rounded-lg p-3 text-center">
+            <div className="h-32 bg-gray-100 rounded flex items-center justify-center mb-2">
+              <span className="text-gray-400">Passport Photo</span>
+            </div>
+            <p className="text-sm font-medium">Passport</p>
+            <p className="text-xs text-gray-500">Expires: {user.passportExpiry || 'Not provided'}</p>
+          </div>
+          <div className="border rounded-lg p-3 text-center">
+            <div className="h-32 bg-gray-100 rounded flex items-center justify-center mb-2">
+              <span className="text-gray-400">Driver's License</span>
+            </div>
+            <p className="text-sm font-medium">Driver's License</p>
+            <p className="text-xs text-gray-500">Expires: {user.licenseExpiry || 'Not provided'}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Verification History */}
+      <div className="p-4 border rounded-lg mt-6">
+        <h4 className="font-medium mb-4">Verification History</h4>
+        <div className="space-y-3">
+          {[
+            { id: 1, date: '2023-11-15', type: 'Biometric', status: 'success', method: 'Face ID' },
+            { id: 2, date: '2023-08-22', type: 'Document', status: 'success', method: 'NIN Verification' },
+            { id: 3, date: '2023-05-10', type: 'Address', status: 'pending', method: 'Utility Bill' }
+          ].map(verification => (
+            <div key={verification.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div>
+                <p className="font-medium">{verification.type} Verification</p>
+                <p className="text-sm text-gray-600">{verification.method} • {verification.date}</p>
+              </div>
+              <span className={`text-xs px-2 py-1 rounded ${
+                verification.status === 'success' ? 'bg-green-100 text-green-800' :
+                verification.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                'bg-red-100 text-red-800'
+              }`}>
+                {verification.status}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+)}
 
               {/* Consent Tab */}
               {activeTab === 'consent' && (
