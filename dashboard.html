@@ -1,3 +1,122 @@
+  <!-- Mic Icon for Accessibility -->
+  <button id="accessMicBtn" aria-label="Activate screen reader" class="fixed top-4 right-4 bg-green-600 text-white rounded-full p-3 shadow-lg focus:outline-none" tabindex="0">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18v2m0-2a6 6 0 006-6V9a6 6 0 10-12 0v3a6 6 0 006 6zm0 0v2m-6-6h12" />
+    </svg>
+  </button>
+  <script>
+    // Accessibility: Screen Reader Functionality
+    const speak = (text) => {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'en-US';
+        window.speechSynthesis.speak(utter);
+      }
+    };
+
+    // Make mic icon functional for reading out screen content
+    document.addEventListener('DOMContentLoaded', function() {
+      var micBtn = document.getElementById('accessMicBtn');
+      if (micBtn) {
+        micBtn.addEventListener('click', function() {
+          let content = '';
+          const title = document.querySelector('h1, h2, h3');
+          if (title) content += title.textContent + '. ';
+          const labels = document.querySelectorAll('label, h3, p');
+          labels.forEach(label => {
+            if (label.offsetParent !== null) content += label.textContent + '. ';
+          });
+          const errors = document.querySelectorAll('.error-message');
+          errors.forEach(err => {
+            if (err.textContent) content += 'Error: ' + err.textContent + '. ';
+          });
+          speak(content);
+        });
+      }
+      if (micBtn) {
+        micBtn.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            micBtn.click();
+          }
+        });
+      }
+    });
+
+    // Voice Biometrics Proof of Concept
+    let voiceChunks = [];
+    let mediaRecorder = null;
+    let voiceBlob = null;
+    document.addEventListener('DOMContentLoaded', function() {
+      const voiceSection = document.getElementById('voiceBiometricsSection');
+      const startBtn = document.getElementById('startVoiceRecordBtn');
+      const stopBtn = document.getElementById('stopVoiceRecordBtn');
+      const playBtn = document.getElementById('playVoiceSampleBtn');
+      const statusDiv = document.getElementById('voiceStatus');
+
+      if (voiceSection) {
+        voiceSection.classList.remove('hidden');
+      }
+
+      if (startBtn && stopBtn && playBtn) {
+        startBtn.addEventListener('click', async () => {
+          voiceChunks = [];
+          statusDiv.textContent = 'Recording...';
+          startBtn.disabled = true;
+          stopBtn.disabled = false;
+          playBtn.disabled = true;
+          if (mediaRecorder) mediaRecorder.stop();
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.ondataavailable = (e) => {
+              if (e.data.size > 0) voiceChunks.push(e.data);
+            };
+            mediaRecorder.onstop = () => {
+              voiceBlob = new Blob(voiceChunks, { type: 'audio/webm' });
+              statusDiv.textContent = 'Recording complete.';
+              playBtn.disabled = false;
+            };
+            mediaRecorder.start();
+          } catch (err) {
+            statusDiv.textContent = 'Microphone access denied.';
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+          }
+        });
+        stopBtn.addEventListener('click', () => {
+          if (mediaRecorder && mediaRecorder.state === 'recording') {
+            mediaRecorder.stop();
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+          }
+        });
+        playBtn.addEventListener('click', () => {
+          if (voiceBlob) {
+            const audio = new Audio(URL.createObjectURL(voiceBlob));
+            audio.play();
+            statusDiv.textContent = 'Playing voice sample...';
+            audio.onended = () => {
+              statusDiv.textContent = 'Playback finished.';
+            };
+          }
+        });
+      }
+    });
+
+    // Accessibility: Add ARIA labels and keyboard navigation to main form elements
+    document.addEventListener('DOMContentLoaded', function() {
+      const inputs = document.querySelectorAll('input, select, textarea, button');
+      inputs.forEach(input => {
+        if (!input.hasAttribute('aria-label') && input.id) {
+          const label = document.querySelector(`label[for='${input.id}']`);
+          if (label) input.setAttribute('aria-label', label.textContent);
+        }
+      });
+      const mainForm = document.querySelector('form');
+      if (mainForm) mainForm.setAttribute('role', 'form');
+    });
+    </script>
   <!DOCTYPE html>
   <html lang="en">
   <head>
@@ -1567,6 +1686,15 @@
         const [creditScore, setCreditScore] = React.useState(null);
         const [creditReport, setCreditReport] = React.useState(null);
         const [apiKey, setApiKey] = React.useState(null);
+
+        const [insuranceView, setInsuranceView] = React.useState('products');
+        const [productCategory, setProductCategory] = React.useState('health');
+        const [microCategory, setMicroCategory] = React.useState('insurance');
+        const [currentClaimPolicy, setCurrentClaimPolicy] = React.useState(null);
+        const [claimAmount, setClaimAmount] = React.useState('');
+        const [claimDescription, setClaimDescription] = React.useState('');
+
+
         
         // Modal states
         const [transferModalOpen, setTransferModalOpen] = React.useState(false);
@@ -1641,56 +1769,169 @@
           face: false, fingerprint: false, voice: false
         });
 
-        // Add to your existing state variables
-  const [disasterAlerts, setDisasterAlerts] = React.useState([
-    {
-      id: 'alert-1',
-      type: 'flood',
-      title: 'Flood Warning',
-      severity: 'high',
-      issued: new Date().toISOString(),
-      areas: ['Lagos Island', 'Victoria Island', 'Lekki'],
-      description: 'Heavy rainfall expected to cause flooding in low-lying areas',
-      instructions: 'Evacuate to higher ground if in flood-prone areas. Avoid walking or driving through flood waters.',
-      active: true
-    },
-    {
-      id: 'alert-2',
-      type: 'earthquake',
-      title: 'Earthquake Alert',
-      severity: 'medium',
-      issued: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
-      areas: ['Central Lagos', 'Mainland'],
-      description: 'Minor earthquake detected in your region',
-      instructions: 'Stay indoors. Take cover under sturdy furniture. Stay away from windows.',
-      active: true
-    }
-  ]);
-
-  const [alertPreferences, setAlertPreferences] = React.useState({
-    receiveAlerts: true,
-    alertTypes: {
-      flood: true,
-      earthquake: true,
-      extremeWeather: true,
-      fire: true
-    },
-    notificationMethods: {
-      push: true,
-      sms: true,
-      email: false,
-      voice: true
-    }
-  });
-
-    const [audio] = React.useState(() => {
-      // Create audio element programmatically
-      const audio = new Audio();
-      audio.src = "https://assets.mixkit.co/active_storage/sfx/905/905-preview.mp3";
-      audio.preload = "auto";
-      return audio;
-    });
+        // In your React state initialization (inside the DashboardApp component), add these:
         
+        // Get insurance products by category
+        const getProductsByCategory = () => {
+          if (productCategory === 'health') return [
+            { id: 'health-1', name: 'Basic Health Plan', description: 'Essential coverage', premium: '₦1,500/month', coverage: '₦500,000', term: '1 year' },
+            { id: 'health-2', name: 'Family Health Plan', description: 'For your whole family', premium: '₦4,500/month', coverage: '₦1,500,000', term: '1 year' }
+          ];
+          if (productCategory === 'life') return [
+            { id: 'life-1', name: 'Term Life Insurance', description: 'Financial protection', premium: '₦2,000/month', coverage: '₦5,000,000', term: '10 years' }
+          ];
+          if (productCategory === 'property') return [
+            { id: 'property-1', name: 'Home Insurance', description: 'Protect your home', premium: '₦3,500/month', coverage: '₦10,000,000', term: '1 year' }
+          ];
+          return [];
+        };
+
+        // Get micro products by category
+        const getMicroProductsByCategory = () => {
+          if (microCategory === 'insurance') return [
+            { id: 'micro-ins-1', name: 'Daily Health', description: 'Pay-per-day coverage', payment: '₦50/day', coverage: '₦10,000 per incident', flexibility: 'Cancel anytime' }
+          ];
+          if (microCategory === 'pensions') return [
+            { id: 'micro-pen-1', name: 'Daily Pension', description: 'Save for retirement', payment: '₦200/day', coverage: 'Flexible withdrawals', flexibility: 'Adjust anytime' }
+          ];
+          if (microCategory === 'investment') return [
+            { id: 'micro-inv-1', name: 'Micro-Investment', description: 'Grow your money', payment: '₦500/week', coverage: 'Market returns', flexibility: 'Redeem anytime' }
+          ];
+          return [];
+        };
+
+        // Handle product purchase
+        const handlePurchase = (product) => {
+          const newPolicy = {
+            id: `pol-${Date.now()}`,
+            type: productCategory,
+            provider: 'InsureNG',
+            status: 'active',
+            premium: parseInt(product.premium.replace(/[^0-9]/g, '')),
+            coverage: parseInt(product.coverage.replace(/[^0-9]/g, '')),
+            nextPayment: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()
+          };
+          setUser(prev => ({
+            ...prev,
+            insurancePolicies: [...prev.insurancePolicies, newPolicy],
+            walletBalance: prev.walletBalance - newPolicy.premium
+          }));
+        };
+
+        // Handle micro product purchase
+        const handleMicroPurchase = (product) => {
+          const newProduct = {
+            id: `micro-${Date.now()}`,
+            type: `micro-${microCategory}`,
+            provider: 'MicroInsureNG',
+            status: 'active',
+            paymentAmount: parseInt(product.payment.replace(/[^0-9]/g, '')),
+            paymentFrequency: product.payment.includes('/day') ? 'day' : 'month',
+            currentValue: 0,
+            nextPayment: 'Flexible'
+          };
+          setUser(prev => ({
+            ...prev,
+            microProducts: [...prev.microProducts, newProduct],
+            walletBalance: prev.walletBalance - newProduct.paymentAmount
+          }));
+        };
+
+        // Handle premium payment
+        const handlePremiumPayment = (policy) => {
+          setUser(prev => ({
+            ...prev,
+            walletBalance: prev.walletBalance - policy.premium,
+            insurancePolicies: prev.insurancePolicies.map(p => 
+              p.id === policy.id ? {
+                ...p,
+                nextPayment: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()
+              } : p
+            )
+          }));
+        };
+
+        // Handle file upload for claims
+        const handleFileUpload = (e) => {
+          console.log('Files selected:', e.target.files);
+        };
+
+        // Submit a claim
+        const submitClaim = () => {
+          if (!currentClaimPolicy || !claimAmount || !claimDescription) return;
+          
+          const newClaim = {
+            id: `clm-${Date.now()}`,
+            policyId: currentClaimPolicy.id,
+            policyType: currentClaimPolicy.type,
+            amount: parseInt(claimAmount),
+            date: new Date().toLocaleDateString(),
+            description: claimDescription,
+            status: 'pending'
+          };
+          
+          setUser(prev => ({
+            ...prev,
+            insuranceClaims: [...prev.insuranceClaims, newClaim]
+          }));
+          
+          setCurrentClaimPolicy(null);
+          setClaimAmount('');
+          setClaimDescription('');
+        };
+
+        
+
+        // Add to your existing state variables
+        const [disasterAlerts, setDisasterAlerts] = React.useState([
+          {
+            id: 'alert-1',
+            type: 'flood',
+            title: 'Flood Warning',
+            severity: 'high',
+            issued: new Date().toISOString(),
+            areas: ['Lagos Island', 'Victoria Island', 'Lekki'],
+            description: 'Heavy rainfall expected to cause flooding in low-lying areas',
+            instructions: 'Evacuate to higher ground if in flood-prone areas. Avoid walking or driving through flood waters.',
+            active: true
+          },
+          {
+            id: 'alert-2',
+            type: 'earthquake',
+            title: 'Earthquake Alert',
+            severity: 'medium',
+            issued: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
+            areas: ['Central Lagos', 'Mainland'],
+            description: 'Minor earthquake detected in your region',
+            instructions: 'Stay indoors. Take cover under sturdy furniture. Stay away from windows.',
+            active: true
+          }
+        ]);
+
+        const [alertPreferences, setAlertPreferences] = React.useState({
+          receiveAlerts: true,
+          alertTypes: {
+            flood: true,
+            earthquake: true,
+            extremeWeather: true,
+            fire: true
+          },
+          notificationMethods: {
+            push: true,
+            sms: true,
+            email: false,
+            voice: true
+          }
+        });
+
+        const [audio] = React.useState(() => {
+          // Create audio element programmatically
+          const audio = new Audio();
+          audio.src = "https://assets.mixkit.co/active_storage/sfx/905/905-preview.mp3";
+          audio.preload = "auto";
+          return audio;
+        });
+            
         // USSD/SMS states
         const [ussdCode, setUssdCode] = React.useState('');
         const [ussdResponse, setUssdResponse] = React.useState('');
@@ -1737,76 +1978,85 @@
             return;
           }
 
-          // Initialize user with default data if missing
-          user = {
-            identityStatus: 'active',
-            identityIssueDate: "2023-01-15",
-            lastVerified: "2023-06-20",
-            nextVerification: "2024-01-15",
-            activeConsents: [
-              {
-                id: 'consent-1',
-                organization: 'NIMC',
-                date: '2023-05-10',
-                expiry: '2024-05-10',
-                scope: 'Basic identity verification'
-              }
-            ],
-            loans: [
-              {
-                id: 'loan_1',
-                type: 'personal',
-                amount: 500000,
-                interestRate: 15,
-                dueDate: '2023-12-31',
-                status: 'active',
-                balance: 450000,
-                paidAmount: 50000,
-                totalAmount: 575000
-              }
-            ],
-            investments: [
-              {
-                id: 'inv_1',
-                type: 'treasury',
-                amount: 200000,
-                returnRate: 13.5,
-                maturityDate: '2024-01-15',
-                status: 'active',
-                currentValue: 227000
-              }
-            ],
-            insurancePolicies: [
-              {
-                id: 'ins_1',
-                type: 'health',
-                provider: 'AIICO Insurance',
-                premium: 50000,
-                coverage: 2000000,
-                status: 'active',
-                nextPayment: '2024-02-15'
-              }
-            ],
-            emotionalHistory: [
-              { date: '2023-07-01', mood: 75, stress: 25, happiness: 80, anxiety: 15 },
-              { date: '2023-07-02', mood: 60, stress: 40, happiness: 65, anxiety: 30 }
-            ],
-            connectedBanks: [
-              {
-                id: 'bank_1',
-                name: 'Access Bank',
-                accountNumber: '0123456789',
-                accountName: user.name,
-                verified: true
-              }
-            ],
-            ...user
-          };
+  // Initialize user with default data if missing
+  user = {
+    ...user, // Spread existing user data first
+    // Then set defaults only for missing properties
+    identityStatus: user.identityStatus || 'active',
+    identityIssueDate: user.identityIssueDate || "2023-01-15",
+    lastVerified: user.lastVerified || "2023-06-20",
+    nextVerification: user.nextVerification || "2024-01-15",
+    activeConsents: user.activeConsents || [
+      {
+        id: 'consent-1',
+        organization: 'NIMC',
+        date: '2023-05-10',
+        expiry: '2024-05-10',
+        scope: 'Basic identity verification'
+      }
+    ],
+    loans: user.loans || [
+      {
+        id: 'loan_1',
+        type: 'personal',
+        amount: 500000,
+        interestRate: 15,
+        dueDate: '2023-12-31',
+        status: 'active',
+        balance: 450000,
+        paidAmount: 50000,
+        totalAmount: 575000
+      }
+    ],
+    investments: user.investments || [
+      {
+        id: 'inv_1',
+        type: 'treasury',
+        amount: 200000,
+        returnRate: 13.5,
+        maturityDate: '2024-01-15',
+        status: 'active',
+        currentValue: 227000
+      }
+    ],
+    insurancePolicies: user.insurancePolicies || [
+      {
+        id: 'ins_1',
+        type: 'health',
+        provider: 'AIICO Insurance',
+        premium: 50000,
+        coverage: 2000000,
+        status: 'active',
+        nextPayment: '2024-02-15'
+      }
+    ],
+    insuranceClaims: user.insuranceClaims || [],
+    microProducts: user.microProducts || [],
+    emotionalHistory: user.emotionalHistory || [
+      { date: '2023-07-01', mood: 75, stress: 25, happiness: 80, anxiety: 15 },
+      { date: '2023-07-02', mood: 60, stress: 40, happiness: 65, anxiety: 30 }
+    ],
+    connectedBanks: user.connectedBanks || [
+      {
+        id: 'bank_1',
+        name: 'Access Bank',
+        accountNumber: '0123456789',
+        accountName: user.name || 'User Name',
+        verified: true
+      }
+    ],
+    biometricData: user.biometricData || {
+      face: { enrolled: false },
+      fingerprint: { enrolled: false },
+      voice: { enrolled: false }
+    },
+    createdAt: user.createdAt || new Date().toISOString()
+  };
 
-          const score = CreditScoringSystem.calculateCreditScore(user);
-          setCreditScore(score);
-          setUser(user);
-        }, []);
+  const score = CreditScoringSystem.calculateCreditScore(user);
+  setCreditScore(score);
+  setUser(user);
+}, []);
 
         const t = (key, params) => {
           let text = translations[language][key] || translations.en[key] || key;
@@ -2412,8 +2662,8 @@
             <header className="bg-green-800 text-white p-4 shadow-md">
               <div className="container mx-auto flex justify-between items-center">
                 <h1 className="text-2xl font-bold">
-                  <img src="logo.png" />
-                  </h1>
+                  <img src="logo.png" alt={t('wallet_balance')} />
+                </h1>
                 <div className="flex items-center space-x-4">
                   <button
                     onClick={() => setVoiceCommandActive(!voiceCommandActive)}
@@ -2452,15 +2702,15 @@
                         </svg>
                       </div>
                       <div>
-                        <h2 className="text-xl font-bold">Welcome! {user.name}</h2>
-                        <p className="text-gray-600">{user.location || 'Nigeria'}</p>
+                        <h2 className="text-xl font-bold">{t('welcome_message').replace('{{name}}', user.name)}</h2>
+                        <p className="text-gray-600">{user.location ? user.location : t('country_default')}</p>
                         <div className="flex flex-wrap gap-2 mt-2">
-                          <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">NIN: {user.nin}</span>
-                          <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">DID: {user.did}</span>
+                          <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">{t('nin_label')}: {user.nin}</span>
+                          <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">{t('did_label')}: {user.did}</span>
                           <span className={`text-xs px-2 py-1 rounded ${
                             user.identityStatus === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                           }`}>
-                            Status: {t(`identity_status_${user.identityStatus}`)}
+                            {t('status')}: {t(`identity_status_${user.identityStatus}`)}
                           </span>
                         </div>
                       </div>
@@ -2502,11 +2752,11 @@
                       { key: 'identity', label: t('identity_status') },
                       { key: 'consent', label: t('consent_tab') },
                       { key: 'lifecycle', label: t('lifecycle_tab') },
-                      { key: 'loans', label: 'Loans' },
-                      { key: 'remittance', label: 'Remittance' },
-                      { key: 'investments', label: 'Investments' },
-                      { key: 'insurance', label: 'Insurance' },
-                      { key: 'disaster', label: 'Disaster Alerts' }
+                      { key: 'loans', label: t('loan_application') },
+                      { key: 'remittance', label: t('remittance_services') },
+                      { key: 'investments', label: t('investment_options') },
+                      { key: 'insurance', label: t('insurance_policies') },
+                      { key: 'disaster', label: t('disaster_alerts') }
                     ].map(tab => (
                       <button
                         key={tab.key}
@@ -2611,11 +2861,11 @@
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="p-4 border rounded-lg">
                           <h4 className="font-medium mb-2">{t('ussd_access')}</h4>
-                          <p className="text-sm text-gray-600 mb-4">Access your wallet via USSD codes</p>
+                          <p className="text-sm text-gray-600 mb-4">{t('ussd_access_description')}</p>
                           <div className="space-y-2">
-                            <p className="text-sm"><strong>*389#</strong> - Main Menu</p>
-                            <p className="text-sm"><strong>*389*1#</strong> - Check Balance</p>
-                            <p className="text-sm"><strong>*389*2#</strong> - Transfer Money</p>
+                            <p className="text-sm"><strong>*389#</strong> - {t('main_menu')}</p>
+                            <p className="text-sm"><strong>*389*1#</strong> - {t('check_balance')}</p>
+                            <p className="text-sm"><strong>*389*2#</strong> - {t('transfer_money')}</p>
                           </div>
                           <button
                             onClick={() => setUssdModalOpen(true)}
@@ -2627,11 +2877,11 @@
 
                         <div className="p-4 border rounded-lg">
                           <h4 className="font-medium mb-2">{t('sms_access')}</h4>
-                          <p className="text-sm text-gray-600 mb-4">Send SMS commands to manage your wallet</p>
+                          <p className="text-sm text-gray-600 mb-4">{t('sms_access_description')}</p>
                           <div className="space-y-2">
-                            <p className="text-sm"><strong>BAL</strong> to 389 - Check Balance</p>
-                            <p className="text-sm"><strong>SEND amount phone</strong> - Transfer</p>
-                            <p className="text-sm"><strong>BILL type amount</strong> - Pay Bills</p>
+                            <p className="text-sm"><strong>BAL</strong> to 389 - {t('check_balance')}</p>
+                            <p className="text-sm"><strong>SEND amount phone</strong> - {t('transfer_money')}</p>
+                            <p className="text-sm"><strong>BILL type amount</strong> - {t('pay_bills')}</p>
                           </div>
                           <button
                             onClick={() => setSmsModalOpen(true)}
@@ -3210,84 +3460,233 @@
     </div>
   )}
 
-                {/* Consent Tab */}
-                {activeTab === 'consent' && (
-                  <div className="bg-white rounded-lg shadow-md p-6">
-                    <h3 className="text-lg font-semibold mb-4">{t('consent_management')}</h3>
-                    
-                    <div className="space-y-6">
-                      {/* Active Consents */}
-                      <div>
-                        <h4 className="font-medium mb-4">{t('active_consents')}</h4>
-                        <div className="space-y-3">
-                          {user.activeConsents?.map(consent => (
-                            <div key={consent.id} className="flex items-center justify-between p-4 border rounded-lg">
-                              <div>
-                                <p className="font-medium">{consent.organization}</p>
-                                <p className="text-sm text-gray-600">{consent.scope}</p>
-                                <p className="text-xs text-gray-500">Granted: {consent.date} • Expires: {consent.expiry}</p>
-                              </div>
-                              <button
-                                onClick={() => {
-                                  const updatedConsents = user.activeConsents.filter(c => c.id !== consent.id);
-                                  updateUser({ activeConsents: updatedConsents });
-                                  alert(`Consent revoked from ${consent.organization}`);
-                                }}
-                                className="px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 transition"
-                              >
-                                {t('revoke')}
-                              </button>
-                            </div>
-                          ))}
-                          {(!user.activeConsents || user.activeConsents.length === 0) && (
-                            <p className="text-gray-500 text-center py-8">{t('no_active_consents')}</p>
-                          )}
-                        </div>
-                      </div>
 
-                      {/* Consent Requests */}
+{/* Consent Tab */}
+{activeTab === 'consent' && (
+  <div className="bg-white rounded-lg shadow-md p-6">
+    <h3 className="text-lg font-semibold mb-4">{t('consent_management')}</h3>
+    
+    <div className="space-y-6">
+      {/* Active Consents */}
+      <div>
+        <div className="flex justify-between items-center mb-4">
+          <h4 className="font-medium">{t('active_consents')}</h4>
+          <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
+            {user.activeConsents?.length || 0} Active
+          </span>
+        </div>
+        
+        <div className="space-y-3">
+          {user.activeConsents?.map(consent => (
+            <div key={consent.id} className="p-4 border rounded-lg hover:shadow-sm transition">
+              <div className="flex justify-between items-start">
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <h5 className="font-medium">{consent.organization}</h5>
+                    <span className={`text-xs px-2 py-1 rounded ${
+                      consent.status === 'active' ? 'bg-green-100 text-green-800' :
+                      consent.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {consent.status}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Granted: {consent.date} • Expires: {consent.expiry}
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    const updatedConsents = user.activeConsents.filter(c => c.id !== consent.id);
+                    updateUser({ activeConsents: updatedConsents });
+                    alert(`Consent revoked from ${consent.organization}`);
+                  }}
+                  className="px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 transition text-sm"
+                >
+                  {t('revoke')}
+                </button>
+              </div>
+              
+              <div className="mt-3">
+                <h6 className="text-sm font-medium text-gray-700 mb-1">Data Shared:</h6>
+                <div className="flex flex-wrap gap-2">
+                  {consent.dataTypes?.map(dataType => (
+                    <span key={dataType} className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
+                      {dataType}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="mt-3">
+                <h6 className="text-sm font-medium text-gray-700 mb-1">Purpose:</h6>
+                <p className="text-sm text-gray-600">{consent.purpose || 'General verification'}</p>
+              </div>
+            </div>
+          ))}
+          
+          {(!user.activeConsents || user.activeConsents.length === 0) && (
+            <div className="text-center py-8 border rounded-lg bg-gray-50">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              <p className="text-gray-500 mt-2">{t('no_active_consents')}</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Consent Requests */}
+      <div>
+        <h4 className="font-medium mb-4">{t('pending_requests')}</h4>
+        <div className="space-y-4">
+          {/* Sample consent requests */}
+          {[
+            {
+              id: 'req-1',
+              organization: 'First Bank Nigeria',
+              purpose: 'Loan application processing',
+              requestedData: ['identity_verification', 'credit_score', 'transaction_history'],
+              date: 'Today'
+            },
+            {
+              id: 'req-2',
+              organization: 'HealthPlus Insurance',
+              purpose: 'Policy underwriting',
+              requestedData: ['identity_verification', 'health_records'],
+              date: '2 days ago'
+            }
+          ].map(request => (
+            <div key={request.id} className="border rounded-lg overflow-hidden">
+              <div className="p-4 bg-blue-50">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h5 className="font-medium">{request.organization}</h5>
+                    <p className="text-sm text-gray-600">{request.purpose}</p>
+                    <p className="text-xs text-gray-500 mt-1">Requested: {request.date}</p>
+                  </div>
+                  <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+                    Pending
+                  </span>
+                </div>
+              </div>
+              
+              <div className="p-4 border-t">
+                <h6 className="text-sm font-medium text-gray-700 mb-2">Requesting Access To:</h6>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {[
+                    { id: 'identity', label: 'Identity Verification', description: 'Name, NIN, Date of Birth' },
+                    { id: 'credit', label: 'Credit Information', description: 'Credit score & history' },
+                    { id: 'transactions', label: 'Transaction History', description: '6 months of transactions' },
+                    { id: 'health', label: 'Health Records', description: 'Medical history & insurance' }
+                  ].filter(item => request.requestedData.includes(item.id.replace('-', '_')))
+                  .map(data => (
+                    <div key={data.id} className="flex items-start space-x-3">
+                      <input 
+                        type="checkbox" 
+                        id={`${request.id}-${data.id}`}
+                        className="mt-1 h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
+                        defaultChecked
+                      />
                       <div>
-                        <h4 className="font-medium mb-4">{t('pending_requests')}</h4>
-                        <div className="space-y-3">
-                          {/* Sample consent request */}
-                          <div className="flex items-center justify-between p-4 border rounded-lg bg-blue-50">
-                            <div>
-                              <p className="font-medium">First Bank Nigeria</p>
-                              <p className="text-sm text-gray-600">Requesting access to credit score and transaction history</p>
-                              <p className="text-xs text-gray-500">Requested: Today</p>
-                            </div>
-                            <div className="flex space-x-2">
-                              <button
-                                onClick={() => {
-                                  const newConsent = {
-                                    id: `consent-${Date.now()}`,
-                                    organization: 'First Bank Nigeria',
-                                    date: new Date().toISOString().split('T')[0],
-                                    expiry: new Date(Date.now() + 365*24*60*60*1000).toISOString().split('T')[0],
-                                    scope: 'Credit score and transaction history'
-                                  };
-                                  updateUser({ 
-                                    activeConsents: [...(user.activeConsents || []), newConsent] 
-                                  });
-                                  alert(t('consent_granted', { requester: 'First Bank Nigeria' }));
-                                }}
-                                className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition"
-                              >
-                                {t('grant')}
-                              </button>
-                              <button
-                                className="px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 transition"
-                              >
-                                {t('deny')}
-                              </button>
-                            </div>
-                          </div>
-                          <p className="text-gray-500 text-center py-4">No other pending requests</p>
-                        </div>
+                        <label htmlFor={`${request.id}-${data.id}`} className="text-sm font-medium text-gray-700">
+                          {data.label}
+                        </label>
+                        <p className="text-xs text-gray-500">{data.description}</p>
                       </div>
                     </div>
-                  </div>
-                )}
+                  ))}
+                </div>
+                
+                <div className="flex justify-end space-x-3 mt-4">
+                  <button
+                    onClick={() => {
+                      // Deny action
+                      alert(`Denied consent request from ${request.organization}`);
+                    }}
+                    className="px-3 py-1 bg-gray-100 text-gray-800 rounded hover:bg-gray-200 transition text-sm"
+                  >
+                    {t('deny')}
+                  </button>
+                  <button
+                    onClick={() => {
+                      const newConsent = {
+                        id: `consent-${Date.now()}`,
+                        organization: request.organization,
+                        date: new Date().toISOString().split('T')[0],
+                        expiry: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 90 days
+                        status: 'active',
+                        purpose: request.purpose,
+                        dataTypes: request.requestedData.map(id => 
+                          id === 'identity_verification' ? 'Identity' :
+                          id === 'credit_score' ? 'Credit Score' :
+                          id === 'transaction_history' ? 'Transactions' :
+                          id === 'health_records' ? 'Health Data' : id
+                        )
+                      };
+                      updateUser({ 
+                        activeConsents: [...(user.activeConsents || []), newConsent] 
+                      });
+                      alert(t('consent_granted', { requester: request.organization }));
+                    }}
+                    className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition text-sm"
+                  >
+                    {t('grant')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+          
+          <div className="text-center py-4">
+            <p className="text-gray-500">No other pending requests</p>
+          </div>
+        </div>
+      </div>
+      
+      {/* New Consent Types Section */}
+      <div className="border-t pt-6">
+        <h4 className="font-medium mb-4">Data Sharing Categories</h4>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[
+            {
+              id: 'identity',
+              title: 'Identity Data',
+              description: 'Name, NIN, Date of Birth, Address',
+              icon: '🆔'
+            },
+            {
+              id: 'financial',
+              title: 'Financial Data',
+              description: 'Account balances, transactions, credit score',
+              icon: '💰'
+            },
+            {
+              id: 'health',
+              title: 'Health Data',
+              description: 'Medical records, insurance claims',
+              icon: '🏥'
+            }
+          ].map(category => (
+            <div key={category.id} className="border rounded-lg p-4 hover:shadow-sm transition">
+              <div className="flex items-center space-x-3 mb-2">
+                <span className="text-2xl">{category.icon}</span>
+                <h5 className="font-medium">{category.title}</h5>
+              </div>
+              <p className="text-sm text-gray-600 mb-3">{category.description}</p>
+              <button
+                onClick={() => alert(`View ${category.title} sharing history`)}
+                className="text-sm text-blue-600 hover:text-blue-800"
+              >
+                View Sharing History →
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+)}
 
                 {/* Lifecycle Tab */}
                 {activeTab === 'lifecycle' && (
@@ -3954,7 +4353,347 @@
                 )}
   {/* Insurance Tab */}
 
+{activeTab === 'insurance' && (
+  <div className="space-y-6">
+    <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold">Insurance</h1>
+        <h2 className="text-3xl">₦{user?.walletBalance?.toLocaleString() || '0'}</h2>
+      </div>
 
+      <div className="flex border-b">
+        <button 
+          onClick={() => setInsuranceView('products')} 
+          className={`px-4 py-2 font-small ${insuranceView === 'products' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500'}`}
+        >
+          Insurance
+        </button>
+        <button 
+          onClick={() => setInsuranceView('policies')} 
+          className={`px-4 py-2 font-small ${insuranceView === 'policies' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500'}`}
+        >
+          Policies
+        </button>
+        <button 
+          onClick={() => setInsuranceView('claims')} 
+          className={`px-4 py-2 font-small ${insuranceView === 'claims' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500'}`}
+        >
+          Claims
+        </button>
+        <button 
+          onClick={() => setInsuranceView('micro')} 
+          className={`px-4 py-2 font-small ${insuranceView === 'micro' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500'}`}
+        >
+          Solutions
+        </button>
+      </div>
+
+      {insuranceView === 'products' && (
+        <div className="mt-6">
+          <h3 className="text-lg font-semibold mb-4">Available Insurance Products</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <button 
+              onClick={() => setProductCategory('health')} 
+              className={`p-4 rounded-lg text-left ${productCategory === 'health' ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50'}`}
+            >
+              <h4 className="font-medium">Health Insurance</h4>
+              <p className="text-sm text-gray-600">Medical coverage</p>
+            </button>
+            <button 
+              onClick={() => setProductCategory('life')} 
+              className={`p-4 rounded-lg text-left ${productCategory === 'life' ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50'}`}
+            >
+              <h4 className="font-medium">Life Insurance</h4>
+              <p className="text-sm text-gray-600">Financial protection</p>
+            </button>
+            <button 
+              onClick={() => setProductCategory('property')} 
+              className={`p-4 rounded-lg text-left ${productCategory === 'property' ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50'}`}
+            >
+              <h4 className="font-medium">Property Insurance</h4>
+              <p className="text-sm text-gray-600">Home protection</p>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {getProductsByCategory().map(product => (
+              <div key={product.id} className="border rounded-lg p-4 hover:shadow-md transition">
+                <div className="flex justify-between items-start mb-2">
+                  <h4 className="font-medium">{product.name}</h4>
+                  <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Popular</span>
+                </div>
+                <p className="text-sm text-gray-600 mb-3">{product.description}</p>
+                <div className="space-y-2 text-sm mb-4">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Premium:</span>
+                    <span className="font-medium">{product.premium}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Coverage:</span>
+                    <span className="font-medium">{product.coverage}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Term:</span>
+                    <span className="font-medium">{product.term}</span>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => handlePurchase(product)} 
+                  className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                >
+                  Get Coverage
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {insuranceView === 'micro' && (
+        <div className="mt-6">
+          <h3 className="text-lg font-semibold mb-4">Micro Protection Solutions</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <button 
+              onClick={() => setMicroCategory('insurance')} 
+              className={`p-4 rounded-lg text-left ${microCategory === 'insurance' ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50'}`}
+            >
+              <h4 className="font-medium">Micro-Insurance</h4>
+              <p className="text-sm text-gray-600">Pay-as-you-go</p>
+            </button>
+            <button 
+              onClick={() => setMicroCategory('pensions')} 
+              className={`p-4 rounded-lg text-left ${microCategory === 'pensions' ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50'}`}
+            >
+              <h4 className="font-medium">Micro-Pensions</h4>
+              <p className="text-sm text-gray-600">Small savings</p>
+            </button>
+            <button 
+              onClick={() => setMicroCategory('investment')} 
+              className={`p-4 rounded-lg text-left ${microCategory === 'investment' ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50'}`}
+            >
+              <h4 className="font-medium">Micro-Investments</h4>
+              <p className="text-sm text-gray-600">Grow your money</p>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {getMicroProductsByCategory().map(product => (
+              <div key={product.id} className="border rounded-lg p-4 hover:shadow-md transition">
+                <div className="flex justify-between items-start mb-2">
+                  <h4 className="font-medium">{product.name}</h4>
+                  <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Flexible</span>
+                </div>
+                <p className="text-sm text-gray-600 mb-3">{product.description}</p>
+                <div className="space-y-2 text-sm mb-4">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Payment:</span>
+                    <span className="font-medium">{product.payment}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Benefit:</span>
+                    <span className="font-medium">{product.coverage}</span>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => handleMicroPurchase(product)} 
+                  className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                >
+                  {microCategory === 'pensions' ? 'Start Saving' : microCategory === 'investment' ? 'Start Investing' : 'Get Covered'}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {insuranceView === 'policies' && (
+        <div className="mt-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold">My Coverage</h3>
+            <div className="flex space-x-2">
+              <button 
+                onClick={() => setInsuranceView('products')} 
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+              >
+                Get New Policy
+              </button>
+              <button 
+                onClick={() => setInsuranceView('micro')} 
+                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+              >
+                Micro Solutions
+              </button>
+            </div>
+          </div>
+
+          {user.insurancePolicies.length > 0 ? (
+            <div className="space-y-4">
+              {user.insurancePolicies.map(policy => (
+                <div key={policy.id} className="border rounded-lg p-4">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h4 className="font-medium capitalize">{policy.type}</h4>
+                      <p className="text-sm text-gray-600">{policy.provider}</p>
+                    </div>
+                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Active</span>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-3">
+                    <div>
+                      <p className="text-gray-600">Premium</p>
+                      <p className="font-medium">₦{policy.premium.toLocaleString()}/year</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Coverage</p>
+                      <p className="font-medium">₦{policy.coverage.toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Next Payment</p>
+                      <p className="font-medium">{policy.nextPayment}</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    <button 
+                      onClick={() => handlePremiumPayment(policy)} 
+                      className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition"
+                    >
+                      Pay Premium
+                    </button>
+                    <button 
+                      onClick={() => setCurrentClaimPolicy(policy)} 
+                      className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                    >
+                      File Claim
+                    </button>
+                    <button 
+                      onClick={() => handlePolicyDetails(policy)} 
+                      className="px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition"
+                    >
+                      Details
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-500 mb-4">No active policies</p>
+              <button 
+                onClick={() => setInsuranceView('products')} 
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+              >
+                Browse Products
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {insuranceView === 'claims' && (
+        <div className="mt-6">
+          <h3 className="text-lg font-semibold mb-4">My Claims</h3>
+          
+          {currentClaimPolicy && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <div className="flex justify-between items-center mb-2">
+                <h4 className="font-medium">New Claim for {currentClaimPolicy.type}</h4>
+                <button 
+                  onClick={() => setCurrentClaimPolicy(null)} 
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  ×
+                </button>
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Claim Amount (₦)</label>
+                  <input 
+                    type="number" 
+                    value={claimAmount} 
+                    onChange={(e) => setClaimAmount(e.target.value)} 
+                    className="w-full p-2 border rounded" 
+                    placeholder="Enter amount" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                  <textarea 
+                    value={claimDescription} 
+                    onChange={(e) => setClaimDescription(e.target.value)} 
+                    className="w-full p-2 border rounded" 
+                    rows="3" 
+                    placeholder="Describe your claim"
+                  ></textarea>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Upload Documents</label>
+                  <input 
+                    type="file" 
+                    onChange={handleFileUpload} 
+                    className="w-full p-2 border rounded" 
+                    multiple 
+                  />
+                </div>
+                <button 
+                  onClick={submitClaim} 
+                  className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                >
+                  Submit Claim
+                </button>
+              </div>
+            </div>
+          )}
+          
+          {user.insuranceClaims.length > 0 ? (
+            <div className="space-y-4">
+              {user.insuranceClaims.map(claim => (
+                <div key={claim.id} className="border rounded-lg p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <h4 className="font-medium">{claim.policyType} Claim</h4>
+                      <p className="text-sm text-gray-600">#{claim.id}</p>
+                    </div>
+                    <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Pending</span>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm mb-3">
+                    <div>
+                      <p className="text-gray-600">Amount</p>
+                      <p className="font-medium">₦{claim.amount.toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Submitted</p>
+                      <p className="font-medium">{claim.date}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-500 mb-4">No claims submitted</p>
+              {user.insurancePolicies.length > 0 ? (
+                <button 
+                  onClick={() => setInsuranceView('policies')} 
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                >
+                  File a Claim
+                </button>
+              ) : (
+                <button 
+                  onClick={() => setInsuranceView('products')} 
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                >
+                  Get Insurance First
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  </div>
+)}  
   
   {/* Disaster Alert Tab */}
   {activeTab === 'disaster' && (

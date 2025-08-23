@@ -593,14 +593,19 @@
                 </button>
             </div>
         </main>
-
-        <!-- Footer -->
-        <footer class="bg-gray-800 text-white p-4 text-center">
-            <p>© 2024 ONPIN - National Identity Wallet</p>
-        </footer>
     </div>
 
+    <footer class="bg-gray-800 text-white p-4 text-center">
+        <p>© <span id="footerYear"></span> ONPIN - National Identity Wallet</p>
+    </footer>
     <script>
+        // Set footer year automatically
+        document.addEventListener('DOMContentLoaded', function() {
+            var yearSpan = document.getElementById('footerYear');
+            if (yearSpan) {
+                yearSpan.textContent = new Date().getFullYear();
+            }
+        });
         // Complete translations object with all languages
         const translations = {
             en: {

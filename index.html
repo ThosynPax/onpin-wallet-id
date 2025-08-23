@@ -37,7 +37,12 @@
     </style>
 </head>
 <body class="bg-gradient-to-br from-green-50 to-blue-50 min-h-screen">
-    <!-- Header -->
+    <!-- Mic Icon for Accessibility -->
+    <button id="accessMicBtn" aria-label="Activate screen reader" class="fixed top-4 right-4 bg-green-600 text-white rounded-full p-3 shadow-lg focus:outline-none" tabindex="0">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18v2m0-2a6 6 0 006-6V9a6 6 0 10-12 0v3a6 6 0 006 6zm0 0v2m-6-6h12" />
+        </svg>
+    </button>
     <header class="bg-green-800 text-white p-4 shadow-md">
         <div class="container mx-auto flex justify-between items-center">
             <h1 class="text-2xl font-bold">
@@ -60,7 +65,6 @@
     <main class="container mx-auto p-4 flex items-center justify-center min-h-[calc(100vh-140px)]">
         <div class="w-full max-w-md bg-white rounded-lg shadow-md p-6">
             <h2 id="loginTitle" class="text-2xl font-bold mb-6 text-center">Login to ONPIN Wallet</h2>
-            
             <form id="loginForm" class="space-y-4">
                 <div>
                     <label id="didLabel" class="block text-gray-700 font-medium mb-2">Decentralized ID (DID)</label>
@@ -73,22 +77,27 @@
                     >
                     <div id="didError" class="error-message" style="display: none;"></div>
                 </div>
-
                 <div>
                     <label id="pinLabel" class="block text-gray-700 font-medium mb-2">PIN</label>
-                    <input 
-                        type="password" 
-                        id="pinInput" 
-                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg form-input" 
-                        placeholder="4-digit PIN"
-                        maxlength="4"
-                        required
-                    >
+                    <div class="relative">
+                        <input 
+                            type="password" 
+                            id="pinInput" 
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg form-input pr-12" 
+                            placeholder="4-digit PIN"
+                            maxlength="4"
+                            required
+                        >
+                        <button type="button" id="togglePinVisibility" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 focus:outline-none" tabindex="-1">
+                            <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </button>
+                    </div>
                     <div id="pinError" class="error-message" style="display: none;"></div>
                 </div>
-
                 <div id="generalError" class="error-message text-center" style="display: none;"></div>
-
                 <button 
                     type="submit" 
                     id="loginBtn" 
@@ -96,7 +105,31 @@
                 >
                     <span id="loginBtnText">Login</span>
                 </button>
-
+                <div class="flex items-center justify-center my-4">
+                    <span class="text-gray-500 mx-2">or</span>
+                    <button type="button" id="voiceLoginBtn" class="flex items-center text-gray-800" aria-label="Login with voice" style="background: none; border: none; box-shadow: none;">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18v2m0-2a6 6 0 006-6V9a6 6 0 10-12 0v3a6 6 0 006 6zm0 0v2m-6-6h12" />
+                        </svg>
+                        Voice Login
+                    </button>
+                </div>
+                <div id="voiceLoginPopup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                    <div class="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full text-center relative">
+                        <button id="closeVoicePopup" class="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl">&times;</button>
+                        <div class="flex flex-col items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-green-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18v2m0-2a6 6 0 006-6V9a6 6 0 10-12 0v3a6 6 0 006 6zm0 0v2m-6-6h12" />
+                            </svg>
+                            <h3 class="text-xl font-bold mb-2">Voice Login</h3>
+                            <p class="mb-4">Say your 4-digit PIN to login.<br><span class="text-sm text-gray-500">(Proof of concept: PIN is matched with your registered PIN)</span></p>
+                            <button id="startVoiceLogin" class="bg-green-600 text-white px-4 py-2 rounded-lg mb-2">Start Voice Login</button>
+                            <div id="voiceLoginStatus" class="text-gray-700 mb-2"></div>
+                            <div id="voiceLoginError" class="error-message text-center" style="display: none;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div id="generalError" class="error-message text-center" style="display: none;"></div>
                 <div class="text-center">
                     <p class="text-sm text-gray-600">
                         <span id="noAccountText">Don't have an account?</span>
@@ -109,10 +142,197 @@
 
     <!-- Footer -->
     <footer class="bg-gray-800 text-white p-4 text-center">
-        <p>© 2024 ONPIN - National Identity Wallet</p>
+        <p>© 2025 ONPIN - National Identity Wallet</p>
     </footer>
 
     <script>
+        // Voice Biometrics Login Option
+        document.addEventListener('DOMContentLoaded', function() {
+            const voiceLoginBtn = document.getElementById('voiceLoginBtn');
+            const voiceLoginPopup = document.getElementById('voiceLoginPopup');
+            const closeVoicePopup = document.getElementById('closeVoicePopup');
+            const startVoiceLogin = document.getElementById('startVoiceLogin');
+            const voiceLoginStatus = document.getElementById('voiceLoginStatus');
+            const voiceLoginError = document.getElementById('voiceLoginError');
+
+            if (voiceLoginBtn && voiceLoginPopup) {
+                voiceLoginBtn.addEventListener('click', () => {
+                    voiceLoginPopup.classList.remove('hidden');
+                    voiceLoginStatus.textContent = '';
+                    voiceLoginError.style.display = 'none';
+                });
+            }
+            if (closeVoicePopup) {
+                closeVoicePopup.addEventListener('click', () => {
+                    voiceLoginPopup.classList.add('hidden');
+                });
+            }
+            if (startVoiceLogin) {
+                startVoiceLogin.addEventListener('click', async () => {
+                    voiceLoginStatus.textContent = 'Listening for your PIN...';
+                    voiceLoginError.style.display = 'none';
+                    // Use Web Speech API for proof of concept
+                    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                        voiceLoginStatus.textContent = '';
+                        voiceLoginError.textContent = 'Voice recognition not supported in this browser.';
+                        voiceLoginError.style.display = 'block';
+                        return;
+                    }
+                    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                    const recognition = new SpeechRecognition();
+                    recognition.lang = 'en-US';
+                    recognition.interimResults = false;
+                    recognition.maxAlternatives = 1;
+                    recognition.start();
+                    recognition.onresult = function(event) {
+                        const transcript = event.results[0][0].transcript.replace(/\D/g, '');
+                        voiceLoginStatus.textContent = `You said: ${transcript}`;
+                        if (!transcript.match(/^\d{4}$/)) {
+                            voiceLoginError.textContent = 'Please say your 4-digit PIN clearly.';
+                            voiceLoginError.style.display = 'block';
+                            return;
+                        }
+                        // Find user by PIN
+                        const userDatabase = JSON.parse(localStorage.getItem('onpinUsers') || '{}');
+                        let foundUser = null;
+                        Object.keys(userDatabase).forEach(did => {
+                            if (userDatabase[did].pin === transcript) {
+                                foundUser = userDatabase[did];
+                                foundUser.did = did;
+                            }
+                        });
+                        if (!foundUser) {
+                            voiceLoginError.textContent = 'Invalid PIN.';
+                            voiceLoginError.style.display = 'block';
+                            return;
+                        }
+                        // Store current user session
+                        localStorage.setItem('currentUser', JSON.stringify(foundUser));
+                        window.location.href = `dashboard.html?did=${encodeURIComponent(foundUser.did)}`;
+                    };
+                    recognition.onerror = function(event) {
+                        voiceLoginStatus.textContent = '';
+                        voiceLoginError.textContent = 'Voice recognition error. Please try again.';
+                        voiceLoginError.style.display = 'block';
+                    };
+                });
+            }
+        });
+        // Accessibility: Screen Reader Functionality
+        const speak = (text) => {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utter = new SpeechSynthesisUtterance(text);
+                utter.lang = currentLanguage || 'en-US';
+                window.speechSynthesis.speak(utter);
+            }
+        };
+
+        // Make mic icon functional for reading out important screen content only
+        document.addEventListener('DOMContentLoaded', function() {
+            var micBtn = document.getElementById('accessMicBtn');
+            if (micBtn) {
+                micBtn.addEventListener('click', function() {
+                    let content = '';
+                    // Only read main login section
+                    const loginTitle = document.getElementById('loginTitle');
+                    if (loginTitle) content += loginTitle.textContent + '. ';
+                    const didLabel = document.getElementById('didLabel');
+                    if (didLabel) content += didLabel.textContent + '. ';
+                    const pinLabel = document.getElementById('pinLabel');
+                    if (pinLabel) content += pinLabel.textContent + '. ';
+                    const voiceLoginBtn = document.getElementById('voiceLoginBtn');
+                    if (voiceLoginBtn) content += 'Voice Login option available. ';
+                    // Read error messages if any
+                    const errors = document.querySelectorAll('.error-message');
+                    errors.forEach(err => {
+                        if (err.textContent) content += 'Error: ' + err.textContent + '. ';
+                    });
+                    speak(content);
+                });
+            }
+            if (micBtn) {
+                micBtn.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        micBtn.click();
+                    }
+                });
+            }
+        });
+
+        // Voice Biometrics Proof of Concept
+        let voiceChunks = [];
+        let mediaRecorder = null;
+        let voiceBlob = null;
+        document.addEventListener('DOMContentLoaded', function() {
+            const voiceSection = document.getElementById('voiceBiometricsSection');
+            const startBtn = document.getElementById('startVoiceRecordBtn');
+            const stopBtn = document.getElementById('stopVoiceRecordBtn');
+            const playBtn = document.getElementById('playVoiceSampleBtn');
+            const statusDiv = document.getElementById('voiceStatus');
+
+            if (voiceSection) {
+                voiceSection.classList.remove('hidden');
+            }
+
+            if (startBtn && stopBtn && playBtn) {
+                startBtn.addEventListener('click', async () => {
+                    voiceChunks = [];
+                    statusDiv.textContent = 'Recording...';
+                    startBtn.disabled = true;
+                    stopBtn.disabled = false;
+                    playBtn.disabled = true;
+                    if (mediaRecorder) mediaRecorder.stop();
+                    try {
+                        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                        mediaRecorder = new MediaRecorder(stream);
+                        mediaRecorder.ondataavailable = (e) => {
+                            if (e.data.size > 0) voiceChunks.push(e.data);
+                        };
+                        mediaRecorder.onstop = () => {
+                            voiceBlob = new Blob(voiceChunks, { type: 'audio/webm' });
+                            statusDiv.textContent = 'Recording complete.';
+                            playBtn.disabled = false;
+                        };
+                        mediaRecorder.start();
+                    } catch (err) {
+                        statusDiv.textContent = 'Microphone access denied.';
+                        startBtn.disabled = false;
+                        stopBtn.disabled = true;
+                    }
+                });
+                stopBtn.addEventListener('click', () => {
+                    if (mediaRecorder && mediaRecorder.state === 'recording') {
+                        mediaRecorder.stop();
+                        startBtn.disabled = false;
+                        stopBtn.disabled = true;
+                    }
+                });
+                playBtn.addEventListener('click', () => {
+                    if (voiceBlob) {
+                        const audio = new Audio(URL.createObjectURL(voiceBlob));
+                        audio.play();
+                        statusDiv.textContent = 'Playing voice sample...';
+                        audio.onended = () => {
+                            statusDiv.textContent = 'Playback finished.';
+                        };
+                    }
+                });
+            }
+        });
+
+        // Accessibility: Add ARIA labels and keyboard navigation to main form elements
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = document.querySelectorAll('input, select, textarea, button');
+            inputs.forEach(input => {
+                if (!input.hasAttribute('aria-label') && input.id) {
+                    const label = document.querySelector(`label[for='${input.id}']`);
+                    if (label) input.setAttribute('aria-label', label.textContent);
+                }
+            });
+            const mainForm = document.querySelector('form');
+            if (mainForm) mainForm.setAttribute('role', 'form');
+        });
         // Use the same translations object from index.html
         const translations = {
             en: {
@@ -330,6 +550,21 @@
             }
         };
 
+        // Toggle PIN visibility
+        const initializePinVisibilityToggle = () => {
+            const pinInput = document.getElementById('pinInput');
+            const toggleBtn = document.getElementById('togglePinVisibility');
+            const eyeIcon = document.getElementById('eyeIcon');
+            let visible = false;
+            toggleBtn.addEventListener('click', () => {
+                visible = !visible;
+                pinInput.type = visible ? 'text' : 'password';
+                eyeIcon.innerHTML = visible
+                    ? `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.956 9.956 0 012.042-3.362m3.087-2.968A9.956 9.956 0 0112 5c4.477 0 8.268 2.943 9.542 7a9.96 9.96 0 01-4.205 5.442M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3l18 18" />`
+                    : `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />`;
+            });
+        };
+
         // Initialize event listeners
         const initializeEventListeners = () => {
             // Language selector
@@ -337,7 +572,8 @@
                 currentLanguage = e.target.value;
                 updateUIText();
             });
-            
+            // PIN visibility toggle
+            initializePinVisibilityToggle();
             // Login form
             document.getElementById('loginForm').addEventListener('submit', handleLogin);
         };
