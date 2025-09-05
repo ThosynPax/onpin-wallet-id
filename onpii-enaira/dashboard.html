@@ -1,0 +1,4339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ONPIN Identity Wallet - Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .biometric-icon {
+      transition: all 0.3s ease;
+    }
+    .biometric-icon:hover {
+      transform: scale(1.1);
+    }
+    .progress-bar {
+      transition: width 0.5s ease;
+    }
+    .voice-command-active {
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+    }
+    .language-selector {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23334d5c'%3E%3Cpath d='M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 010 16z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.5rem center;
+      background-size: 1.5em;
+    }
+    .biometric-scan {
+      animation: scan 2s infinite;
+    }
+    @keyframes scan {
+      0% { transform: translateY(0); opacity: 0; }
+      50% { opacity: 1; }
+      100% { transform: translateY(100%); opacity: 0; }
+    }
+    /* In your <style> section */
+.container {
+  width: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .container {
+    max-width: 640px;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 768px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1024px;
+  }
+}
+header {
+  padding: 1rem;
+}
+
+@media (min-width: 768px) {
+  header {
+    padding: 1.5rem;
+  }
+}
+/* Flex direction changes on mobile */
+.profile-container {
+  flex-direction: column;
+}
+
+@media (min-width: 768px) {
+  .profile-container {
+    flex-direction: row;
+  }
+}
+.quick-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .quick-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+}
+.tab-container {
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tab-item {
+  display: inline-block;
+  padding: 0.75rem 1rem;
+}
+
+@media (min-width: 768px) {
+  .tab-container {
+    overflow-x: visible;
+    white-space: normal;
+  }
+  
+  .tab-item {
+    display: block;
+  }
+}
+.transaction-item {
+  flex-direction: column;
+  padding: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .transaction-item {
+    flex-direction: row;
+    padding: 1rem;
+  }
+}
+.modal-container {
+  width: 95%;
+  margin: 1rem auto;
+  padding: 1rem;
+}
+
+@media (min-width: 640px) {
+  .modal-container {
+    width: 100%;
+    max-width: 28rem;
+    padding: 1.5rem;
+  }
+}
+input, select {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 1rem;
+}
+
+@media (min-width: 640px) {
+  input, select {
+    padding: 0.75rem;
+    font-size: 1.125rem;
+  }
+}
+.btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+@media (min-width: 640px) {
+  .btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+  }
+}
+.text-xs { font-size: 0.75rem; }
+.text-sm { font-size: 0.875rem; }
+.text-base { font-size: 1rem; }
+.text-lg { font-size: 1.125rem; }
+.text-xl { font-size: 1.25rem; }
+.text-2xl { font-size: 1.5rem; }
+
+@media (min-width: 768px) {
+  .text-xl { font-size: 1.5rem; }
+  .text-2xl { font-size: 1.75rem; }
+}
+.biometric-scan-container {
+  width: 100%;
+  max-width: 18rem;
+  margin: 0 auto;
+}
+  </style>
+</head>
+<body class="bg-gray-100">
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script type="text/babel">
+    // Translations
+    const translations = {
+      en: {
+        login_title: "Login to ONPIN Wallet",
+        signup_title: "Create ONPIN Wallet",
+        email_label: "Email",
+        password_label: "Password",
+        confirm_password_label: "Confirm Password",
+        login_button: "Login",
+        signup_button: "Sign Up",
+        or_login_with: "Or login with",
+        no_account: "Don't have an account?",
+        have_account: "Already have an account?",
+        signup_link: "Sign up now",
+        login_link: "Login now",
+        verifying_biometrics: "Verifying biometrics...",
+        welcome_message: "Welcome back {{name}}",
+        logout_button: "Logout",
+        wallet_balance: "E-naira Wallet Balance",
+        overview_tab: "Overview",
+        payments_tab: "Payments",
+        consent_tab: "Consent",
+        settings_tab: "Settings",
+        quick_actions: "Quick Actions",
+        transfer: "Transfer",
+        payments: "Payments",
+        consent: "Consent",
+        disaster_relief: "Disaster Relief",
+        recent_activity: "Recent Activity",
+        account_verified: "Account Verified",
+        biometric_enrollment: "Biometric Enrollment",
+        consent_granted_to: "Consent granted to",
+        payment_services: "Payment Services",
+        send_money: "Send Money",
+        request_money: "Request Money",
+        pay_bills: "Pay Bills",
+        airtime_data: "Airtime/Data",
+        recent_transactions: "Recent Transactions",
+        credit: "Credit",
+        debit: "Debit",
+        disaster_relief_payment: "Disaster Relief Payment",
+        consent_management: "Consent Management",
+        pending_requests: "Pending Requests",
+        active_consents: "Active Consents",
+        no_pending_requests: "No pending requests",
+        no_active_consents: "No active consents",
+        grant: "Grant",
+        deny: "Deny",
+        revoke: "Revoke",
+        government_services: "Government Services",
+        emergency_payments: "Emergency Payments",
+        biometric_settings: "Biometric Settings",
+        face_id: "Face ID",
+        fingerprint: "Fingerprint",
+        voice_recognition: "Voice Recognition",
+        security: "Security",
+        change_password: "Change Password",
+        privacy: "Privacy",
+        data_sharing_preferences: "Data Sharing Preferences",
+        help: "Help",
+        contact_support: "Contact Support",
+        voice_command_received: "Voice command received: {{command}}",
+        voice_command_unknown: "Sorry, I didn't understand that command",
+        disaster_payment_triggered: "Disaster relief payments triggered for your location",
+        disaster_payment_confirmation: "Disaster relief payments have been processed for citizens in your area",
+        consent_granted: "Consent granted to {{requester}}",
+        consent_revoked: "Consent revoked from {{requester}}",
+        name_label: "Full Name",
+        nin_label: "National Identification Number (NIN)",
+        bvn_label: "Bank Verification Number (BVN)",
+        phone_label: "Phone Number",
+        step_1: "NIN/BVN",
+        step_2: "Details",
+        step_3: "Password",
+        step_4: "Biometrics",
+        biometric_title: "Biometric Enrollment",
+        biometric_description: "Secure your wallet with multi-factor biometric authentication",
+        complete_registration: "Complete Registration",
+        back_button: "Back",
+        next_button: "Next",
+        nin_required: "NIN is required",
+        bvn_required: "BVN is required",
+        name_required: "Name is required",
+        email_required: "Email is required",
+        phone_required: "Phone is required",
+        password_required: "Password is required",
+        password_mismatch: "Passwords do not match",
+        registration_complete: "Registration complete! Your ONPIN wallet is ready",
+        kyc_verification: "KYC Verification",
+        identity_verification: "Identity Verification",
+        view_biometrics: "View Biometrics",
+        biometric_data: "Biometric Data",
+        bank_connections: "Bank Connections",
+        connect_bank: "Connect Bank",
+        connected_banks: "Connected Banks",
+        no_connected_banks: "No banks connected",
+        verify_identity: "Verify Identity",
+        identity_status: "Identity Status",
+        verified: "Verified",
+        unverified: "Unverified",
+        verify_now: "Verify Now",
+        verification_success: "Identity verification successful",
+        bank_verification: "Bank Verification",
+        recent_transfers: "Recent Transfers",
+        no_recent_transfers: "No recent transfers",
+        recipient: "Recipient",
+        amount: "Amount",
+        date: "Date",
+        status: "Status",
+        pending: "Pending",
+        completed: "Completed",
+        failed: "Failed",
+        make_transfer: "Make Transfer",
+        to: "To",
+        enter_amount: "Enter Amount",
+        send: "Send",
+        cancel: "Cancel",
+        transfer_success: "Transfer successful",
+        transfer_failed: "Transfer failed",
+        insufficient_funds: "Insufficient funds",
+        enter_recipient: "Enter recipient wallet ID",
+        enter_valid_amount: "Please enter a valid amount",
+        transaction_details: "Transaction Details",
+        transaction_id: "Transaction ID",
+        reference: "Reference",
+        purpose: "Purpose",
+        view_details: "View Details",
+        close: "Close",
+        language: "Language",
+        english: "English",
+        yoruba: "Yoruba",
+        hausa: "Hausa",
+        igbo: "Igbo",
+        french: "French",
+        arabic: "Arabic",
+        did_label: "Decentralized ID (DID)",
+        pin_label: "PIN",
+        login_with_pin: "Login with PIN",
+        generate_did: "Generate DID",
+        did_generated: "Your DID has been generated: {{did}}",
+        pin_required: "PIN is required",
+        pin_must_be_4_digits: "PIN must be 4 digits",
+        invalid_pin: "Invalid PIN",
+        invalid_did: "Invalid DID",
+        fund_wallet: "Fund Wallet",
+        select_bank: "Select Bank",
+        fund_amount: "Amount to Fund",
+        fund_now: "Fund Now",
+        funding_success: "Wallet funded successfully",
+        scan_face: "Scan your face",
+        scan_fingerprint: "Scan your fingerprint",
+        speak_now: "Speak now for voice recognition",
+        biometric_success: "Biometric verification successful",
+        biometric_failed: "Biometric verification failed",
+        not_enrolled: "Not enrolled",
+        enroll_now: "Enroll Now",
+        optional: "Optional",
+        add_bank: "Add Bank Account",
+        bank_name: "Bank Name",
+        account_number: "Account Number",
+        account_name: "Account Name",
+        add_now: "Add Now",
+        bank_added: "Bank account added successfully",
+        verify_bank: "Verify Bank",
+        verifying: "Verifying...",
+        bank_verified: "Bank account verified",
+        consent_tab: "Consent",
+        lifecycle_tab: "Lifecycle",
+        grant_consent: "Grant Consent",
+        revoke_consent: "Revoke Consent",
+        active_consents: "Active Consents",
+        no_active_consents: "No active consents",
+        identity_status: "Identity Status",
+        issue_at_birth: "Issue at Birth",
+        revoke_at_death: "Revoke at Death",
+        linked_services: "Linked Services",
+        ussd_access: "USSD Access",
+        sms_access: "SMS Access",
+        dial_code: "Dial code",
+        send_to: "Send to",
+        view_commands: "View Commands",
+        simulate_ussd: "Simulate USSD",
+        simulate_sms: "Simulate SMS",
+        identity_status_active: "Active",
+        identity_status_suspended: "Suspended",
+        identity_status_revoked: "Revoked",
+        next_verification: "Next Verification",
+      },
+      ig: {
+  login_title: "Banye na ONPIN Wallet",
+  signup_title: "Mepụta ONPIN Wallet",
+  email_label: "Email",
+  password_label: "Paswọọdụ",
+  confirm_password_label: "Kwenye paswọọdụ",
+  login_button: "Banye",
+  signup_button: "Debanye aha",
+  or_login_with: "Ma ọ bụ banye site na",
+  no_account: "Enweghị akaụntụ?",
+  have_account: "Enweelarị akaụntụ?",
+  signup_link: "Debanye aha ugbu a",
+  login_link: "Banye ugbu a",
+  verifying_biometrics: "Na-enyocha biometrics...",
+  welcome_message: "Nnọọ {{name}}",
+  logout_button: "Wepụ",
+  wallet_balance: "Balance Wallet",
+  overview_tab: "Nchịkọta",
+  payments_tab: "Ịkwụ ụgwọ",
+  consent_tab: "Nkwenye",
+  settings_tab: "Ntọala",
+  quick_actions: "Ọrụ ngwa ngwa",
+  transfer: "Nyefee",
+  payments: "Ịkwụ ụgwọ",
+  consent: "Nkwenye",
+  disaster_relief: "Enyemaka Ọdachi",
+  recent_activity: "Ọrụ na nso nso a",
+  account_verified: "Akaụntụ enyochala",
+  biometric_enrollment: "Ndebanye aha biometric",
+  consent_granted_to: "Enyere nkwenye nye",
+  payment_services: "Ọrụ ịkwụ ụgwọ",
+  send_money: "Zipu ego",
+  request_money: "Rịọ ego",
+  pay_bills: "Kwụọ ụgwọ",
+  airtime_data: "Oge ikuku/Data",
+  recent_transactions: "Azụmahịa ndị na-adịbeghị anya",
+  credit: "Kredit",
+  debit: "Debit",
+  disaster_relief_payment: "Ịkwụ ụgwọ enyemaka ọdachi",
+  consent_management: "Njikwa nkwenye",
+  pending_requests: "Arịrịọ na-echere",
+  active_consents: "Nkwenye na-arụ ọrụ",
+  no_pending_requests: "Enweghị arịrịọ na-echere",
+  no_active_consents: "Enweghị nkwenye na-arụ ọrụ",
+  grant: "Nye",
+  deny: "Jụ",
+  revoke: "Kagbuo",
+  government_services: "Ọrụ gọọmentị",
+  emergency_payments: "Ịkwụ ụgwọ mberede",
+  biometric_settings: "Ntọala biometric",
+  face_id: "Face ID",
+  fingerprint: "Akara mkpịsị aka",
+  voice_recognition: "Nnabata olu",
+  security: "Nchekwa",
+  change_password: "Gbanwee paswọọdụ",
+  privacy: "Nzuzo",
+  data_sharing_preferences: "Mmasị ịkekọrịta data",
+  help: "Enyemaka",
+  contact_support: "Kpọtụrụ nkwado",
+  voice_command_received: "Natara iwu olu: {{command}}",
+  voice_command_unknown: "Ndo, aghọtaghị m iwu ahụ",
+  disaster_payment_triggered: "Akpalitela ịkwụ ụgwọ enyemaka ọdachi maka ọnọdụ gị",
+  disaster_payment_confirmation: "Emeela ịkwụ ụgwọ enyemaka ọdachi maka ụmụ amaala nọ na mpaghara gị",
+  consent_granted: "Enyere nkwenye nye {{requester}}",
+  consent_revoked: "Ewepụla nkwenye n'aka {{requester}}",
+  name_label: "Aha zuru ezu",
+  nin_label: "Nọmba NJirimara Mba (NIN)",
+  bvn_label: "Nọmba Nkwenye Bank (BVN)",
+  phone_label: "Nọmba ekwentị",
+  step_1: "NIN/BVN",
+  step_2: "Nkọwa",
+  step_3: "Paswọọdụ",
+  step_4: "Biometrics",
+  biometric_title: "Ndebanye aha biometric",
+  biometric_description: "Chekwaa obere akpa gị site na njirimara biometric ọtụtụ ihe",
+  complete_registration: "Mechie ndebanye aha",
+  back_button: "Azụ",
+  next_button: "Ọzọ",
+  nin_required: "Achọrọ NIN",
+  bvn_required: "Achọrọ BVN",
+  name_required: "Achọrọ aha",
+  email_required: "Achọrọ email",
+  phone_required: "Achọrọ nọmba ekwentị",
+  password_required: "Achọrọ paswọọdụ",
+  password_mismatch: "Okwuntughe adabaghị",
+  registration_complete: "Emechara ndebanye aha! ONPIN obere akpa gị dị njikere",
+  kyc_verification: "Nyocha KYC",
+  identity_verification: "Nyocha njirimara",
+  view_biometrics: "Lelee biometrics",
+  biometric_data: "Data biometric",
+  bank_connections: "Njikọ ụlọ akụ",
+  connect_bank: "Jikọọ ụlọ akụ",
+  connected_banks: "Ụlọ akụ ejikọrọ",
+  no_connected_banks: "Enweghị ụlọ akụ ejikọrọ",
+  verify_identity: "Nyochaa njirimara",
+  identity_status: "Ọkwa njirimara",
+  verified: "Enyochala",
+  unverified: "Achọpụtabeghị",
+  verify_now: "Nyochaa ugbu a",
+  verification_success: "Nyocha njirimara gara nke ọma",
+  bank_verification: "Nyocha ụlọ akụ",
+  recent_transfers: "Nyefe na nso nso a",
+  no_recent_transfers: "Enweghị mbufe na nso nso a",
+  recipient: "Onye nnata",
+  amount: "Ọnụ ego",
+  date: "Ụbọchị",
+  status: "Ọnọdụ",
+  pending: "Na-echere",
+  completed: "Emechara",
+  failed: "Dara",
+  make_transfer: "Mee mbufe",
+  to: "Gaa na",
+  enter_amount: "Tinye ego",
+  send: "Ziga",
+  cancel: "Kagbuo",
+  transfer_success: "Mbufe gara nke ọma",
+  transfer_failed: "Mbufe dara",
+  insufficient_funds: "Ego ezughị oke",
+  enter_recipient: "Tinye ID obere akpa onye nnata",
+  enter_valid_amount: "Biko tinye ego ziri ezi",
+  transaction_details: "Nkọwa azụmahịa",
+  transaction_id: "ID azụmahịa",
+  reference: "Ntụaka",
+  purpose: "Ebumnuche",
+  view_details: "Lelee nkọwa",
+  close: "Mechie",
+  language: "Asụsụ",
+  english: "Bekee",
+  yoruba: "Yoruba",
+  hausa: "Hausa",
+  igbo: "Igbo",
+  french: "French",
+  arabic: "Arabic",
+  did_label: "NJirimara Decentralized (DID)",
+  pin_label: "PIN",
+  login_with_pin: "Banye na PIN",
+  generate_did: "Mepụta DID",
+  did_generated: "Emepụtara DID gị: {{did}}",
+  pin_required: "Achọrọ PIN",
+  pin_must_be_4_digits: "PIN ga-abụrịrị nọmba 4",
+  invalid_pin: "PIN na-ezighi ezi",
+  invalid_did: "DID na-ezighi ezi"
+},
+      yo: {
+        login_title: "Wo ile ONPIN Wallet",
+        login_with_pin: "Wo ile pẹlu PIN",
+        signup_title: "Ṣẹda ONPIN Wallet",
+        email_label: "Imeeli",
+        password_label: "Ọrọ igbaniwọle",
+        confirm_password_label: "Jẹrisi ọrọ igbaniwọle",
+        login_button: "Wo ile",
+        signup_button: "Forukọsilẹ",
+        or_login_with: "Tabi wo ile pẹlu",
+        no_account: "Ko ni akọọlẹ?",
+        have_account: "Ni akọọlẹ tẹlẹ?",
+        signup_link: "Forukọsilẹ bayi",
+        login_link: "Wo ile bayi",
+        verifying_biometrics: "Ṣiṣayẹwo awọn biometrics...",
+        welcome_message: "Kaabọ {{name}}",
+        logout_button: "Jaade",
+        wallet_balance: "Iwọn iṣura",
+        overview_tab: "Akopọ",
+        payments_tab: "Isanwo",
+        consent_tab: "Igbasilẹ",
+        settings_tab: "Etọ",
+        quick_actions: "Awọn iṣẹ lẹsẹkẹsẹ",
+        transfer: "Gbe lọ",
+        payments: "Isanwo",
+        consent: "Igbasilẹ",
+        disaster_relief: "Iranlowo Ijamba",
+        recent_activity: "Awọn iṣẹlẹ tuntun",
+        account_verified: "Akọọlẹ ti jẹrisi",
+        biometric_enrollment: "Iforukọsilẹ biometric",
+        consent_granted_to: "Ti fun ni igbasilẹ si",
+        payment_services: "Awọn iṣẹ isanwo",
+        send_money: "Ranṣẹ owo",
+        request_money: "Beere owo",
+        pay_bills: "San awọn bilẹ",
+        airtime_data: "Airtime/Data",
+        recent_transactions: "Awọn iṣowo tuntun",
+        credit: "Kirediti",
+        debit: "Debiti",
+        disaster_relief_payment: "Isanwo Iranlowo Ijamba",
+        consent_management: "Iṣakoso Igbasilẹ",
+        pending_requests: "Awọn ibeere ti nṣura",
+        active_consents: "Awọn igbasilẹ ti nṣiṣẹ",
+        no_pending_requests: "Ko si awọn ibeere ti nṣura",
+        no_active_consents: "Ko si awọn igbasilẹ ti nṣiṣẹ",
+        grant: "Fun ni",
+        deny: "Kọ",
+        revoke: "Yọ kuro",
+        government_services: "Awọn iṣẹ ijọba",
+        emergency_payments: "Awọn isanwo iyara",
+        biometric_settings: "Awọn etọ biometric",
+        face_id: "Face ID",
+        fingerprint: "Ika ọwọ",
+        voice_recognition: "Ifọrọwanilẹnu ohun",
+        security: "Aabo",
+        change_password: "Yi ọrọ igbaniwọle pada",
+        privacy: "Ikọkọ",
+        data_sharing_preferences: "Awọn yiyan pinpin data",
+        help: "Iranlọwọ",
+        contact_support: "Kan si atilẹyin",
+        voice_command_received: "Aṣẹ ohun ti gba: {{command}}",
+        voice_command_unknown: "Ma binu, Emi ko gbọ aṣẹ naa",
+        disaster_payment_triggered: "Awọn isanwo iranlowo ijamba ti ṣe fun ipo rẹ",
+        disaster_payment_confirmation: "Awọn isanwo iranlowo ijamba ti ṣe fun awọn ara ilu ni agbegbe rẹ",
+        consent_granted: "Ti fun ni igbasilẹ si {{requester}}",
+        consent_revoked: "Ti yọ igbasilẹ kuro ni {{requester}}",
+        name_label: "Orukọ kikun",
+        nin_label: "Nọmba Idanimọ Orilẹ-ede (NIN)",
+        bvn_label: "Nọmba Idanimọ Banki (BVN)",
+        phone_label: "Nọmba foonu",
+        step_1: "NIN/BVN",
+        step_2: "Awọn alaye",
+        step_3: "Ọrọ igbaniwọle",
+        step_4: "Awọn biometric",
+        biometric_title: "Iforukọsilẹ Biometric",
+        biometric_description: "Dani ẹru rẹ pẹlu ifọrọwanilẹnu biometric oriṣiriṣi",
+        complete_registration: "Parẹ iforukọsilẹ",
+        back_button: "Pada",
+        next_button: "Iwọle",
+        nin_required: "NIN nilo",
+        bvn_required: "BVN nilo",
+        name_required: "Orukọ nilo",
+        email_required: "Imeeli nilo",
+        phone_required: "Nọmba foonu nilo",
+        password_required: "Ọrọ igbaniwọle nilo",
+        password_mismatch: "Awọn ọrọ igbaniwọle ko baamu",
+        registration_complete: "Iforukọsilẹ pari! ONPIN ẹru rẹ ti ṣetan",
+        kyc_verification: "Iṣẹlẹ KYC",
+        identity_verification: "Iṣẹlẹ Idanimọ",
+        view_biometrics: "Wo Awọn Biometrics",
+        biometric_data: "Data Biometric",
+        bank_connections: "Awọn asopọ Banki",
+        connect_bank: "So banki pọ",
+        connected_banks: "Awọn banki ti a sopọ",
+        no_connected_banks: "Ko si awọn banki ti a sopọ",
+        verify_identity: "Ṣe ayẹwo idanimọ",
+        identity_status: "Ipo Idanimọ",
+        verified: "Ti jẹrisi",
+        unverified: "Ko jẹrisi",
+        verify_now: "Ṣe ayẹwo bayi",
+        verification_success: "Iṣẹlẹ idanimọ ti ṣe aṣeyọri",
+        bank_verification: "Iṣẹlẹ Banki",
+        recent_transfers: "Awọn gbigbe tuntun",
+        no_recent_transfers: "Ko si awọn gbigbe tuntun",
+        recipient: "Olugba",
+        amount: "Iye",
+        date: "Ọjọ",
+        status: "Ipo",
+        pending: "Nṣura",
+        completed: "Ti pari",
+        failed: "Ti ṣẹgun",
+        make_transfer: "Ṣe gbigbe",
+        to: "Si",
+        enter_amount: "Tẹ iye",
+        send: "Ranṣẹ",
+        cancel: "Fagilee",
+        transfer_success: "Gbigbe ti ṣe aṣeyọri",
+        transfer_failed: "Gbigbe ti ṣẹgun",
+        insufficient_funds: "Ko si owo to",
+        enter_recipient: "Tẹ idẹ ẹru olugba",
+        enter_valid_amount: "Jọwọ tẹ iye ti o wulo",
+        transaction_details: "Awọn alaye iṣowo",
+        transaction_id: "ID Iṣowo",
+        reference: "Itọkasi",
+        purpose: "Idi",
+        view_details: "Wo awọn alaye",
+        close: "Pa",
+        language: "Ede",
+        english: "Gẹẹsi",
+        yoruba: "Yoruba",
+        hausa: "Hausa",
+        igbo: "Igbo",
+        french: "Faranse",
+        arabic: "Arabiki",
+        did_label: "Idanimọ Aisakoso (DID)",
+        pin_label: "PIN",
+        generate_did: "Ṣẹda DID",
+        did_generated: "DID rẹ ti ṣẹda: {{did}}",
+        pin_required: "PIN nilo",
+        pin_must_be_4_digits: "PIN gbọdọ jẹ nọmba 4",
+        invalid_pin: "PIN ti ko tọ",
+        invalid_did: "DID ti ko tọ"
+      },
+
+fr: {
+  login_title: "Connectez-vous à ONPIN Wallet",
+  signup_title: "Créer un portefeuille ONPIN",
+  email_label: "Email",
+  password_label: "Mot de passe",
+  confirm_password_label: "Confirmer le mot de passe",
+  login_button: "Connexion",
+  signup_button: "S'inscrire",
+  or_login_with: "Ou connectez-vous avec",
+  no_account: "Vous n'avez pas de compte?",
+  have_account: "Vous avez déjà un compte?",
+  signup_link: "Inscrivez-vous maintenant",
+  login_link: "Connectez-vous maintenant",
+  verifying_biometrics: "Vérification des données biométriques...",
+  welcome_message: "Bienvenue {{name}}",
+  logout_button: "Déconnexion",
+  wallet_balance: "Solde du portefeuille",
+  overview_tab: "Aperçu",
+  payments_tab: "Paiements",
+  consent_tab: "Consentement",
+  settings_tab: "Paramètres",
+  quick_actions: "Actions rapides",
+  transfer: "Transfert",
+  payments: "Paiements",
+  consent: "Consentement",
+  disaster_relief: "Secours en cas de catastrophe",
+  recent_activity: "Activité récente",
+  account_verified: "Compte vérifié",
+  biometric_enrollment: "Enregistrement biométrique",
+  consent_granted_to: "Consentement accordé à",
+  payment_services: "Services de paiement",
+  send_money: "Envoyer de l'argent",
+  request_money: "Demander de l'argent",
+  pay_bills: "Payer les factures",
+  airtime_data: "Crédit/Données",
+  recent_transactions: "Transactions récentes",
+  credit: "Crédit",
+  debit: "Débit",
+  disaster_relief_payment: "Paiement de secours en cas de catastrophe",
+  consent_management: "Gestion du consentement",
+  pending_requests: "Demandes en attente",
+  active_consents: "Consentements actifs",
+  no_pending_requests: "Aucune demande en attente",
+  no_active_consents: "Aucun consentement actif",
+  grant: "Accorder",
+  deny: "Refuser",
+  revoke: "Révoquer",
+  government_services: "Services gouvernementaux",
+  emergency_payments: "Paiements d'urgence",
+  biometric_settings: "Paramètres biométriques",
+  face_id: "Face ID",
+  fingerprint: "Empreinte digitale",
+  voice_recognition: "Reconnaissance vocale",
+  security: "Sécurité",
+  change_password: "Changer le mot de passe",
+  privacy: "Confidentialité",
+  data_sharing_preferences: "Préférences de partage de données",
+  help: "Aide",
+  contact_support: "Contacter le support",
+  voice_command_received: "Commande vocale reçue: {{command}}",
+  voice_command_unknown: "Désolé, je n'ai pas compris cette commande",
+  disaster_payment_triggered: "Paiements de secours en cas de catastrophe déclenchés pour votre localisation",
+  disaster_payment_confirmation: "Les paiements de secours en cas de catastrophe ont été traités pour les citoyens de votre région",
+  consent_granted: "Consentement accordé à {{requester}}",
+  consent_revoked: "Consentement révoqué de {{requester}}",
+  name_label: "Nom complet",
+  nin_label: "Numéro d'identification nationale (NIN)",
+  bvn_label: "Numéro de vérification bancaire (BVN)",
+  phone_label: "Numéro de téléphone",
+  step_1: "NIN/BVN",
+  step_2: "Détails",
+  step_3: "Mot de passe",
+  step_4: "Biométrie",
+  biometric_title: "Enregistrement biométrique",
+  biometric_description: "Sécurisez votre portefeuille avec une authentification biométrique multifactorielle",
+  complete_registration: "Terminer l'inscription",
+  back_button: "Retour",
+  next_button: "Suivant",
+  nin_required: "NIN requis",
+  bvn_required: "BVN requis",
+  name_required: "Nom requis",
+  email_required: "Email requis",
+  phone_required: "Téléphone requis",
+  password_required: "Mot de passe requis",
+  password_mismatch: "Les mots de passe ne correspondent pas",
+  registration_complete: "Inscription terminée! Votre portefeuille ONPIN est prêt",
+  kyc_verification: "Vérification KYC",
+  identity_verification: "Vérification d'identité",
+  view_biometrics: "Voir les données biométriques",
+  biometric_data: "Données biométriques",
+  bank_connections: "Connexions bancaires",
+  connect_bank: "Connecter une banque",
+  connected_banks: "Banques connectées",
+  no_connected_banks: "Aucune banque connectée",
+  verify_identity: "Vérifier l'identité",
+  identity_status: "Statut d'identité",
+  verified: "Vérifié",
+  unverified: "Non vérifié",
+  verify_now: "Vérifier maintenant",
+  verification_success: "Vérification d'identité réussie",
+  bank_verification: "Vérification bancaire",
+  recent_transfers: "Transferts récents",
+  no_recent_transfers: "Aucun transfert récent",
+  recipient: "Bénéficiaire",
+  amount: "Montant",
+  date: "Date",
+  status: "Statut",
+  pending: "En attente",
+  completed: "Terminé",
+  failed: "Échoué",
+  make_transfer: "Effectuer un transfert",
+  to: "À",
+  enter_amount: "Entrez le montant",
+  send: "Envoyer",
+  cancel: "Annuler",
+  transfer_success: "Transfert réussi",
+  transfer_failed: "Échec du transfert",
+  insufficient_funds: "Fonds insuffisants",
+  enter_recipient: "Entrez l'ID du portefeuille du bénéficiaire",
+  enter_valid_amount: "Veuillez entrer un montant valide",
+  transaction_details: "Détails de la transaction",
+  transaction_id: "ID de transaction",
+  reference: "Référence",
+  purpose: "Objet",
+  view_details: "Voir les détails",
+  close: "Fermer",
+  language: "Langue",
+  english: "Anglais",
+  yoruba: "Yoruba",
+  hausa: "Hausa",
+  igbo: "Igbo",
+  french: "Français",
+  arabic: "Arabe",
+  did_label: "ID décentralisé (DID)",
+  pin_label: "PIN",
+  login_with_pin: "Connexion avec PIN",
+  generate_did: "Générer DID",
+  did_generated: "Votre DID a été généré: {{did}}",
+  pin_required: "PIN requis",
+  pin_must_be_4_digits: "Le PIN doit être à 4 chiffres",
+  invalid_pin: "PIN invalide",
+  invalid_did: "DID invalide"
+},
+
+ar: {
+  login_title: "تسجيل الدخول إلى محفظة ONPIN",
+  signup_title: "إنشاء محفظة ONPIN",
+  email_label: "البريد الإلكتروني",
+  password_label: "كلمة المرور",
+  confirm_password_label: "تأكيد كلمة المرور",
+  login_button: "تسجيل الدخول",
+  signup_button: "التسجيل",
+  or_login_with: "أو تسجيل الدخول باستخدام",
+  no_account: "ليس لديك حساب؟",
+  have_account: "لديك حساب بالفعل؟",
+  signup_link: "سجل الآن",
+  login_link: "تسجيل الدخول الآن",
+  verifying_biometrics: "التحقق من البصمات الحيوية...",
+  welcome_message: "مرحبًا بعودتك {{name}}",
+  logout_button: "تسجيل الخروج",
+  wallet_balance: "رصيد المحفظة",
+  overview_tab: "نظرة عامة",
+  payments_tab: "المدفوعات",
+  consent_tab: "الموافقة",
+  settings_tab: "الإعدادات",
+  quick_actions: "إجراءات سريعة",
+  transfer: "تحويل",
+  payments: "المدفوعات",
+  consent: "الموافقة",
+  disaster_relief: "الإغاثة في حالات الكوارث",
+  recent_activity: "النشاط الأخير",
+  account_verified: "تم التحقق من الحساب",
+  biometric_enrollment: "تسجيل البصمات الحيوية",
+  consent_granted_to: "تم منح الموافقة لـ",
+  payment_services: "خدمات الدفع",
+  send_money: "إرسال الأموال",
+  request_money: "طلب الأموال",
+  pay_bills: "دفع الفواتير",
+  airtime_data: "رصيد/بيانات",
+  recent_transactions: "المعاملات الأخيرة",
+  credit: "ائتمان",
+  debit: "مدين",
+  disaster_relief_payment: "دفع الإغاثة في حالات الكوارث",
+  consent_management: "إدارة الموافقة",
+  pending_requests: "الطلبات المعلقة",
+  active_consents: "الموافقات النشطة",
+  no_pending_requests: "لا توجد طلبات معلقة",
+  no_active_consents: "لا توجد موافقات نشطة",
+  grant: "منح",
+  deny: "رفض",
+  revoke: "إلغاء",
+  government_services: "الخدمات الحكومية",
+  emergency_payments: "المدفوعات الطارئة",
+  biometric_settings: "إعدادات البصمات الحيوية",
+  face_id: "Face ID",
+  fingerprint: "بصمة الإصبع",
+  voice_recognition: "التعرف الصوتي",
+  security: "الأمان",
+  change_password: "تغيير كلمة المرور",
+  privacy: "الخصوصية",
+  data_sharing_preferences: "تفضيلات مشاركة البيانات",
+  help: "مساعدة",
+  contact_support: "اتصل بالدعم",
+  voice_command_received: "تم استلام الأمر الصوتي: {{command}}",
+  voice_command_unknown: "عذرًا، لم أفهم هذا الأمر",
+  disaster_payment_triggered: "تم تشغيل مدفوعات الإغاثة في حالات الكوارث لموقعك",
+  disaster_payment_confirmation: "تمت معالجة مدفوعات الإغاثة في حالات الكوارث للمواطنين في منطقتك",
+  consent_granted: "تم منح الموافقة لـ {{requester}}",
+  consent_revoked: "تم سحب الموافقة من {{requester}}",
+  name_label: "الاسم الكامل",
+  nin_label: "رقم التعريف الوطني (NIN)",
+  bvn_label: "رقم التحقق المصرفي (BVN)",
+  phone_label: "رقم الهاتف",
+  step_1: "NIN/BVN",
+  step_2: "التفاصيل",
+  step_3: "كلمة المرور",
+  step_4: "البصمات الحيوية",
+  biometric_title: "تسجيل البصمات الحيوية",
+  biometric_description: "أمّن محفظتك باستخدام المصادقة متعددة العوامل البيومترية",
+  complete_registration: "إكمال التسجيل",
+  back_button: "رجوع",
+  next_button: "التالي",
+  nin_required: "مطلوب NIN",
+  bvn_required: "مطلوب BVN",
+  name_required: "مطلوب الاسم",
+  email_required: "البريد الإلكتروني مطلوب",
+  phone_required: "رقم الهاتف مطلوب",
+  password_required: "كلمة المرور مطلوبة",
+  password_mismatch: "كلمات المرور غير متطابقة",
+  registration_complete: "اكتمل التسجيل! محفظة ONPIN الخاصة بك جاهزة",
+  kyc_verification: "التحقق من الهوية KYC",
+  identity_verification: "التحقق من الهوية",
+  view_biometrics: "عرض البصمات الحيوية",
+  biometric_data: "بيانات البصمات الحيوية",
+  bank_connections: "اتصالات البنك",
+  connect_bank: "ربط البنك",
+  connected_banks: "البنوك المتصلة",
+  no_connected_banks: "لا توجد بنوك متصلة",
+  verify_identity: "التحقق من الهوية",
+  identity_status: "حالة الهوية",
+  verified: "تم التحقق",
+  unverified: "غير محقق",
+  verify_now: "تحقق الآن",
+  verification_success: "نجاح التحقق من الهوية",
+  bank_verification: "التحقق من البنك",
+  recent_transfers: "التحويلات الأخيرة",
+  no_recent_transfers: "لا توجد تحويلات حديثة",
+  recipient: "المستلم",
+  amount: "المبلغ",
+  date: "التاريخ",
+  status: "الحالة",
+  pending: "قيد الانتظار",
+  completed: "مكتمل",
+  failed: "فشل",
+  make_transfer: "إجراء تحويل",
+  to: "إلى",
+  enter_amount: "أدخل المبلغ",
+  send: "إرسال",
+  cancel: "إلغاء",
+  transfer_success: "نجاح التحويل",
+  transfer_failed: "فشل التحويل",
+  insufficient_funds: "أموال غير كافية",
+  enter_recipient: "أدخل معرف محفظة المستلم",
+  enter_valid_amount: "الرجاء إدخال مبلغ صالح",
+  transaction_details: "تفاصيل المعاملة",
+  transaction_id: "معرف المعاملة",
+  reference: "المرجع",
+  purpose: "الغرض",
+  view_details: "عرض التفاصيل",
+  close: "إغلاق",
+  language: "اللغة",
+  english: "الإنجليزية",
+  yoruba: "اليوربا",
+  hausa: "الهوسا",
+  igbo: "الإيجبو",
+  french: "الفرنسية",
+  arabic: "العربية",
+  did_label: "معرف اللامركزي (DID)",
+  pin_label: "PIN",
+  login_with_pin: "تسجيل الدخول باستخدام PIN",
+  generate_did: "إنشاء DID",
+  did_generated: "تم إنشاء DID الخاص بك: {{did}}",
+  pin_required: "مطلوب PIN",
+  pin_must_be_4_digits: "يجب أن يتكون PIN من 4 أرقام",
+  invalid_pin: "PIN غير صالح",
+  invalid_did: "DID غير صالح"
+}
+    };
+
+    // Function to get URL parameter
+    const getUrlParameter = (name) => {
+      name = name.replace(/[[]/, '\\[').replace(/[\]]/, '\\]');
+      const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+      const results = regex.exec(window.location.search);
+      return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    };
+
+    // Main App Component for Dashboard
+    function DashboardApp() {
+      const [user, setUser] = React.useState(null);
+      const [voiceCommandActive, setVoiceCommandActive] = React.useState(false);
+      const [language, setLanguage] = React.useState('en');
+      const [transferModalOpen, setTransferModalOpen] = React.useState(false);
+      const [fundWalletModal, setFundWalletModal] = React.useState(false);
+      const [addBankModal, setAddBankModal] = React.useState(false);
+      const [transferDetails, setTransferDetails] = React.useState({
+        recipient: '',
+        amount: '',
+        purpose: ''
+      });
+      const [fundDetails, setFundDetails] = React.useState({
+        bank: '',
+        amount: ''
+      });
+      const [bankDetails, setBankDetails] = React.useState({
+        name: '',
+        accountNumber: '',
+        accountName: ''
+      });
+      const [transactionDetail, setTransactionDetail] = React.useState(null);
+      const [bankVerificationModal, setBankVerificationModal] = React.useState(false);
+      const [biometricModal, setBiometricModal] = React.useState(false);
+      const [biometricScanning, setBiometricScanning] = React.useState(null);
+      const [activeTab, setActiveTab] = React.useState('overview');
+      const [ussdModalOpen, setUssdModalOpen] = React.useState(false);
+      const [smsModalOpen, setSmsModalOpen] = React.useState(false);
+      const [currentUssdCode, setCurrentUssdCode] = React.useState('');
+      const [ussdResponse, setUssdResponse] = React.useState('');
+      const [smsCommand, setSmsCommand] = React.useState('');
+      const [ussdHistory, setUssdHistory] = React.useState([]);
+      const [currentMenu, setCurrentMenu] = React.useState(null);
+      const [inputValue, setInputValue] = React.useState('');
+
+      // Loan state
+      const [loanModal, setLoanModal] = React.useState({open: false, type: ''});
+      const [repaymentModal, setRepaymentModal] = React.useState({open: false, loanId: ''});
+
+      // BNPL state
+      const [bnplPaymentModal, setBnplPaymentModal] = React.useState({open: false, planId: ''});
+      const bnplPartners = [
+        {name: "Jumia", logo: "jumia-logo.png", terms: "4 installments, 0% interest"},
+        {name: "Konga", logo: "konga-logo.png", terms: "3 installments, 0% interest"},
+        {name: "Slot", logo: "slot-logo.png", terms: "6 installments, 5% interest"},
+        {name: "Computer Village", logo: "comp-village-logo.png", terms: "Flexible plans"},
+        {name: "Park 'n' Shop", logo: "parknshop-logo.png", terms: "3-12 months"},
+        {name: "Justrite", logo: "justrite-logo.png", terms: "Interest-free options"}
+      ];
+
+      // Investment state
+      const [investmentModal, setInvestmentModal] = React.useState({open: false, type: ''});
+      const [withdrawModal, setWithdrawModal] = React.useState({open: false, investmentId: ''});
+      
+      // Sample banks for funding
+      const banks = [
+        { name: "Access Bank", code: "044" },
+        { name: "Zenith Bank", code: "057" },
+        { name: "GTBank", code: "058" },
+        { name: "First Bank", code: "011" },
+        { name: "UBA", code: "033" }
+      ];
+      
+React.useEffect(() => {
+  // Get DID from URL
+  const did = getUrlParameter('did');
+  if (!did) {
+    window.location.href = 'index.html';
+    return;
+  }
+  
+  // Load user from database
+  const userDatabase = JSON.parse(localStorage.getItem('onpinUsers')) || {};
+  let user = userDatabase[did];
+  
+  if (!user) {
+    window.location.href = 'index.html';
+    return;
+  }
+  
+
+// Merge with default values if properties don't exist
+user = {
+  // Default values
+  identityStatus: 'active',
+  identityIssueDate: "2023-01-15",
+  lastVerified: "2023-06-20",
+  nextVerification: "2024-01-15",
+  activeConsents: [
+    {
+      id: 'consent-1',
+      organization: 'NIMC',
+      date: '2023-05-10',
+      expiry: '2024-05-10',
+      scope: 'Basic identity verification'
+    }
+  ],
+  loans: [],
+  loanHistory: [],
+  bnplPlans: [],
+  bnplHistory: [],
+  investments: [],
+  investmentHistory: [],
+  // Spread existing user properties (overrides defaults if they exist)
+  ...user
+};
+
+// Set sample data only if the arrays are empty
+if (user.loans.length === 0) {
+  user.loans = [
+    {
+      id: 'loan_1',
+      type: 'personal',
+      amount: 500000,
+      interestRate: 15,
+      dueDate: '2023-12-31',
+      status: 'active',
+      balance: 450000,
+      paidAmount: 50000,
+      totalAmount: 575000
+    }
+  ];
+}
+
+if (user.bnplPlans.length === 0) {
+  user.bnplPlans = [
+    {
+      id: 'bnpl_1',
+      merchant: 'Jumia',
+      description: 'Smartphone purchase',
+      amount: 150000,
+      installments: 4,
+      installmentAmount: 37500,
+      nextPaymentDate: '2023-08-15',
+      remaining: 112500,
+      status: 'active'
+    }
+  ];
+}
+
+if (user.investments.length === 0) {
+  user.investments = [
+    {
+      id: 'inv_1',
+      type: 'treasury',
+      amount: 200000,
+      returnRate: 13.5,
+      maturityDate: '2024-01-15',
+      status: 'active',
+      currentValue: 227000
+    }
+  ];
+}
+
+setUser(user);
+}, []);
+      
+      const t = (key, params) => {
+        let text = translations[language][key] || translations.en[key] || key;
+        if (params) {
+          Object.keys(params).forEach(param => {
+            text = text.replace(`{{${param}}}`, params[param]);
+          });
+        }
+        return text;
+      };
+      
+      const startVoiceCommand = () => {
+        setVoiceCommandActive(true);
+        
+        // Simulate voice command after 3 seconds
+        setTimeout(() => {
+          setVoiceCommandActive(false);
+          const command = "dashboard";
+          if (user) {
+            setActiveTab('overview');
+          }
+        }, 3000);
+      };
+      
+      const handleLogout = () => {
+        window.location.href = 'index.html';
+      };
+      
+      const triggerDisasterPayment = () => {
+        if (!user) return;
+        
+        // Add disaster payment to transactions
+        const newTransaction = {
+          id: `txn_${Date.now()}`,
+          type: "credit",
+          amount: 10000,
+          date: new Date().toISOString().split('T')[0],
+          description: "Emergency Flood Relief",
+          status: "completed",
+          recipient: "Borno State Govt"
+        };
+        
+        setUser(prev => ({
+          ...prev,
+          balance: prev.balance + newTransaction.amount,
+          transactions: [newTransaction, ...prev.transactions]
+        }));
+        
+        alert(t('disaster_payment_triggered'));
+      };
+      
+      const handleTransfer = () => {
+        if (!transferDetails.recipient || !transferDetails.amount) {
+          alert(t('enter_recipient'));
+          return;
+        }
+        
+        const amount = parseFloat(transferDetails.amount);
+        if (isNaN(amount) || amount <= 0) {
+          alert(t('enter_valid_amount'));
+          return;
+        }
+        
+        if (amount > user.balance) {
+          alert(t('insufficient_funds'));
+          return;
+        }
+        
+        // Add new transaction
+        const newTransaction = {
+          id: `txn_${Date.now()}`,
+          type: "debit",
+          amount: amount,
+          date: new Date().toISOString().split('T')[0],
+          description: transferDetails.purpose || "Transfer",
+          status: "completed",
+          recipient: transferDetails.recipient
+        };
+        
+        setUser(prev => {
+          const updatedUser = {
+            ...prev,
+            balance: prev.balance - amount,
+            transactions: [newTransaction, ...prev.transactions]
+          };
+          
+          // Update localStorage
+          const userDatabase = JSON.parse(localStorage.getItem('onpinUsers')) || {};
+          userDatabase[prev.did] = updatedUser;
+          localStorage.setItem('onpinUsers', JSON.stringify(userDatabase));
+          
+          return updatedUser;
+        });
+        
+        setTransferModalOpen(false);
+        setTransferDetails({ recipient: '', amount: '', purpose: '' });
+        alert(t('transfer_success'));
+      };
+
+// USSD Handler Function
+const handleUssdRequest = (code) => {
+  setCurrentUssdCode(code);
+  setUssdResponse(`Connecting to ${code}...`);
+  setUssdModalOpen(true);
+  setUssdHistory([]);
+  
+  setTimeout(() => {
+    if (code === '*123*1#') {
+      setUssdResponse(`ONPIN Wallet USSD Menu:
+1. Check Balance
+2. Send Money
+3. Pay Bills
+4. Manage Consent
+5. Lifecycle Services
+6. Help`);
+      setCurrentMenu('main');
+    } else {
+      setUssdResponse('Invalid USSD code. Please dial *123*1# for ONPIN Wallet');
+    }
+  }, 1000);
+};
+
+// USSD Input Handler
+const handleUssdInput = (value) => {
+  setUssdHistory([...ussdHistory, `> ${value}`]);
+  setInputValue('');
+  
+  switch(currentMenu) {
+    case 'main':
+      handleMainMenu(value);
+      break;
+    case 'send_money':
+      handleSendMoney(value);
+      break;
+    case 'pay_bills':
+      handlePayBills(value);
+      break;
+    case 'manage_consent':
+      handleManageConsent(value);
+      break;
+    case 'lifecycle':
+      handleLifecycle(value);
+      break;
+    default:
+      setUssdResponse('Invalid selection. Please try again.');
+  }
+};
+
+// Menu Handlers
+const handleMainMenu = (option) => {
+  switch(option) {
+    case '1': // Check Balance
+      recordTransaction('USSD Balance Check', 'info', 0);
+      setUssdResponse(`Your balance: ₦${user.balance.toLocaleString()}\n\n0. Back`);
+      break;
+    case '2': // Send Money
+      setUssdResponse(`Enter amount followed by recipient number:\nExample: 5000 08123456789\n\n0. Back`);
+      setCurrentMenu('send_money');
+      break;
+    case '3': // Pay Bills
+      setUssdResponse(`Select biller:\n1. Electricity\n2. Water\n3. TV Subscription\n4. Back`);
+      setCurrentMenu('pay_bills');
+      break;
+    case '4': // Manage Consent
+      setUssdResponse(`Consent Management:\n1. View Active Consents\n2. Grant New Consent\n3. Revoke Consent\n4. Back`);
+      setCurrentMenu('manage_consent');
+      break;
+    case '5': // Lifecycle Services
+      setUssdResponse(`Lifecycle Services:\n1. Birth Registration\n2. Death Reporting\n3. Identity Status\n4. Back`);
+      setCurrentMenu('lifecycle');
+      break;
+    case '6': // Help
+      setUssdResponse(`ONPIN Wallet USSD Help:\nDial *123*1# to access menu\nFor support call 0700ONPIN\n\n0. Back`);
+      break;
+    case '0': // Back
+      setUssdResponse(`ONPIN Wallet USSD Menu:\n1. Check Balance\n2. Send Money\n3. Pay Bills\n4. Manage Consent\n5. Lifecycle Services\n6. Help`);
+      setCurrentMenu('main');
+      break;
+    default:
+      setUssdResponse('Invalid selection. Please try again.');
+  }
+};
+
+const handleSendMoney = (input) => {
+  if (input === '0') {
+    setUssdResponse(`ONPIN Wallet USSD Menu:\n1. Check Balance\n2. Send Money\n3. Pay Bills\n4. Manage Consent\n5. Lifecycle Services\n6. Help`);
+    setCurrentMenu('main');
+    return;
+  }
+
+  const parts = input.split(' ');
+  if (parts.length >= 2) {
+    const amount = parseFloat(parts[0]);
+    const recipient = parts[1];
+    
+    if (!isNaN(amount)) {  // Fixed: Added missing closing parenthesis
+      if (amount > user.balance) {
+        setUssdResponse(`Insufficient balance. Your balance is ₦${user.balance.toLocaleString()}\n\n0. Back`);
+      } else {
+        setUssdResponse(`Confirm send ₦${amount} to ${recipient}?\n1. Yes\n2. No`);
+        setCurrentTransaction({ amount, recipient });
+      }
+    }
+  } else {
+    setUssdResponse('Invalid format. Use: <amount> <recipient>\nExample: 5000 08123456789\n\n0. Back');
+  }
+};
+
+const handlePayBills = (option) => {
+  switch(option) {
+    case '1': // Electricity
+      setUssdResponse(`Electricity Bill Payment:\nEnter meter number:\n\n0. Back`);
+      setCurrentMenu('electricity_bill');
+      break;
+    case '2': // Water
+      setUssdResponse(`Water Bill Payment:\nEnter account number:\n\n0. Back`);
+      setCurrentMenu('water_bill');
+      break;
+    case '3': // TV Subscription
+      setUssdResponse(`TV Subscription:\n1. DSTV\n2. GOTV\n3. Startimes\n4. Back`);
+      setCurrentMenu('tv_subscription');
+      break;
+    case '4': // Back
+      setUssdResponse(`ONPIN Wallet USSD Menu:\n1. Check Balance\n2. Send Money\n3. Pay Bills\n4. Manage Consent\n5. Lifecycle Services\n6. Help`);
+      setCurrentMenu('main');
+      break;
+    case '0': // Back
+      setUssdResponse(`Select biller:\n1. Electricity\n2. Water\n3. TV Subscription\n4. Back`);
+      break;
+    default:
+      setUssdResponse('Invalid selection. Please try again.');
+  }
+};
+
+// Add similar handlers for manage_consent and lifecycle menus
+
+// Transaction Recorder
+const recordTransaction = (description, type, amount, recipient = '') => {
+  const transaction = {
+    id: `txn_${Date.now()}`,
+    type,
+    amount,
+    date: new Date().toISOString().split('T')[0],
+    description,
+    status: "completed",
+    recipient,
+    channel: "USSD"
+  };
+  
+  setUser(prev => {
+    const updatedUser = {
+      ...prev,
+      transactions: [transaction, ...prev.transactions],
+      ...(type === 'debit' ? { balance: prev.balance - amount } : {})
+    };
+    
+    // Update localStorage
+    const userDatabase = JSON.parse(localStorage.getItem('onpinUsers')) || {};
+    userDatabase[prev.did] = updatedUser;
+    localStorage.setItem('onpinUsers', JSON.stringify(userDatabase));
+    
+    return updatedUser;
+  });
+};
+
+const handleSmsCommand = (command) => {
+  let response = '';
+  let transaction = null;
+  const cmd = command.trim().toUpperCase();
+  
+  if (cmd === 'BAL') {
+    response = `Your balance: ₦${user.balance.toLocaleString()}`;
+    transaction = {
+      id: `txn_${Date.now()}`,
+      type: "info",
+      amount: 0,
+      date: new Date().toISOString().split('T')[0],
+      description: "SMS Balance Check",
+      status: "completed",
+      channel: "SMS"
+    };
+  } 
+  else if (cmd.startsWith('SEND')) {
+    const parts = cmd.split(' ');
+    if (parts.length >= 3) {
+      const amount = parseFloat(parts[1]);
+      const recipient = parts[2];
+      
+      if (!isNaN(amount) && recipient.length >= 10) {
+        response = `Confirm send ₦${amount} to ${recipient}? Reply YES to confirm or NO to cancel`;
+      } else {
+        response = 'Invalid format. Use: SEND <amount> <recipient>';
+      }
+    } else {
+      response = 'Invalid format. Use: SEND <amount> <recipient>';
+    }
+  }
+  else if (cmd === 'CONSENT LIST') {
+    response = 'Active consents:\n1. NIMC (Basic identity verification)';
+    transaction = {
+      id: `txn_${Date.now()}`,
+      type: "info",
+      amount: 0,
+      date: new Date().toISOString().split('T')[0],
+      description: "SMS Consent List",
+      status: "completed",
+      channel: "SMS"
+    };
+  }
+  else if (cmd === 'YES' && smsCommand.startsWith('SEND')) {
+    const parts = smsCommand.split(' ');
+    const amount = parseFloat(parts[1]);
+    const recipient = parts[2];
+    
+    if (!isNaN(amount) && amount > 0 && amount <= user.balance) {
+      // Create transaction
+      transaction = {
+        id: `txn_${Date.now()}`,
+        type: "debit",
+        amount: amount,
+        date: new Date().toISOString().split('T')[0],
+        description: `Transfer to ${recipient}`,
+        status: "completed",
+        recipient: recipient,
+        channel: "SMS"
+      };
+      
+      response = `Transfer of ₦${amount} to ${recipient} successful. New balance: ₦${(user.balance - amount).toLocaleString()}`;
+      
+      // Update user balance
+      setUser(prev => {
+        const updatedUser = {
+          ...prev,
+          balance: prev.balance - amount,
+          transactions: [transaction, ...prev.transactions]
+        };
+        
+        // Update localStorage
+        const userDatabase = JSON.parse(localStorage.getItem('onpinUsers')) || {};
+        userDatabase[prev.did] = updatedUser;
+        localStorage.setItem('onpinUsers', JSON.stringify(userDatabase));
+        
+        return updatedUser;
+      });
+    } else {
+      response = 'Transaction failed. Insufficient balance or invalid amount';
+    }
+  }
+  else {
+    response = `Unknown command. Available commands:
+BAL - Check balance
+SEND <amount> <phone> - Send money
+CONSENT LIST - View consents`;
+  }
+  
+  if (transaction) {
+    setUser(prev => {
+      const updatedUser = {
+        ...prev,
+        transactions: [transaction, ...prev.transactions]
+      };
+      
+      // Update localStorage
+      const userDatabase = JSON.parse(localStorage.getItem('onpinUsers')) || {};
+      userDatabase[prev.did] = updatedUser;
+      localStorage.setItem('onpinUsers', JSON.stringify(updatedUser));
+      
+      return updatedUser;
+    });
+  }
+  
+  setSmsCommand('');
+  alert(`SMS Response:\n\n${response}`);
+};
+      
+      const handleFundWallet = () => {
+        if (!fundDetails.bank || !fundDetails.amount) {
+          alert("Please select a bank and enter amount");
+          return;
+        }
+        
+        const amount = parseFloat(fundDetails.amount);
+        if (isNaN(amount) || amount <= 0) {
+          alert(t('enter_valid_amount'));
+          return;
+        }
+        
+        // Add new transaction
+        const newTransaction = {
+          id: `txn_${Date.now()}`,
+          type: "credit",
+          amount: amount,
+          date: new Date().toISOString().split('T')[0],
+          description: `Wallet funding from ${fundDetails.bank}`,
+          status: "completed",
+          recipient: "Self"
+        };
+        
+        setUser(prev => {
+          const updatedUser = {
+            ...prev,
+            balance: prev.balance + amount,
+            transactions: [newTransaction, ...prev.transactions]
+          };
+          
+          // Update localStorage
+          const userDatabase = JSON.parse(localStorage.getItem('onpinUsers')) || {};
+          userDatabase[prev.did] = updatedUser;
+          localStorage.setItem('onpinUsers', JSON.stringify(userDatabase));
+          
+          return updatedUser;
+        });
+        
+        setFundWalletModal(false);
+        setFundDetails({ bank: '', amount: '' });
+        alert(t('funding_success'));
+      };
+      
+      const handleAddBank = () => {
+        if (!bankDetails.name || !bankDetails.accountNumber || !bankDetails.accountName) {
+          alert("Please fill all bank details");
+          return;
+        }
+        
+        const newBank = {
+          name: bankDetails.name,
+          accountNumber: bankDetails.accountNumber,
+          accountName: bankDetails.accountName,
+          verified: false
+        };
+        
+        setUser(prev => {
+          const updatedUser = {
+            ...prev,
+            connectedBanks: [...prev.connectedBanks, newBank]
+          };
+          
+          // Update localStorage
+          const userDatabase = JSON.parse(localStorage.getItem('onpinUsers')) || {};
+          userDatabase[prev.did] = updatedUser;
+          localStorage.setItem('onpinUsers', JSON.stringify(userDatabase));
+          
+          return updatedUser;
+        });
+        
+        setAddBankModal(false);
+        setBankDetails({ name: '', accountNumber: '', accountName: '' });
+        alert(t('bank_added'));
+      };
+
+      const simulateUSSD = () => {
+  const ussdCode = prompt("Enter USSD code (e.g., *123*1#):", "*123*1#");
+  if (ussdCode) {
+    const menu = `
+USSD Menu:
+1. Check Balance
+2. Send Money
+3. Pay Bills
+4. Manage Consent
+5. Lifecycle Services
+6. Help
+    `;
+    const choice = prompt(menu + "\n\nEnter option number:");
+    if (choice) {
+      switch(choice) {
+        case '1':
+          alert(`Your balance: ₦${user.balance.toLocaleString()}`);
+          break;
+        case '2':
+          const amount = prompt("Enter amount to send:");
+          const recipient = prompt("Enter recipient number:");
+          if (amount && recipient) {
+            alert(`Sending ₦${amount} to ${recipient}\n\nEnter PIN to confirm`);
+          }
+          break;
+        // Add other cases as needed
+        default:
+          alert("Service not implemented in this demo");
+      }
+    }
+  }
+};
+
+const simulateSMS = () => {
+  const command = prompt("Enter SMS command (e.g., BAL, SEND 1000 08123456789):");
+  if (command) {
+    const cmd = command.toUpperCase().split(' ')[0];
+    switch(cmd) {
+      case 'BAL':
+        alert(`Your balance: ₦${user.balance.toLocaleString()}`);
+        break;
+      case 'SEND':
+        const parts = command.split(' ');
+        if (parts.length >= 3) {
+          alert(`Sending ₦${parts[1]} to ${parts[2]}\n\nReply with YES to confirm`);
+        }
+        break;
+      case 'CONSENT':
+        alert("Active consents:\n1. NIMC (Basic identity verification)");
+        break;
+      default:
+        alert("Unknown command. Send HELP for available commands");
+    }
+  }
+};
+      
+      const verifyBank = (bankName) => {
+        // Simulate bank verification
+        setTimeout(() => {
+          setUser(prev => {
+            const updatedUser = {
+              ...prev,
+              connectedBanks: prev.connectedBanks.map(bank => 
+                bank.name === bankName ? { ...bank, verified: true } : bank
+              ),
+              kycStatus: {
+                ...prev.kycStatus,
+                banks: [...prev.kycStatus.banks, bankName]
+              }
+            };
+            
+            // Update localStorage
+            const userDatabase = JSON.parse(localStorage.getItem('onpinUsers')) || {};
+            userDatabase[prev.did] = updatedUser;
+            localStorage.setItem('onpinUsers', JSON.stringify(userDatabase));
+            
+            return updatedUser;
+          });
+          
+          setBankVerificationModal(false);
+          alert(t('bank_verified'));
+        }, 2000);
+      };
+      
+      const scanBiometric = (type) => {
+        setBiometricScanning(type);
+        
+        // Simulate biometric scan
+        setTimeout(() => {
+          setBiometricScanning(null);
+          
+          // Random success/failure
+          const success = Math.random() > 0.2;
+          if (success) {
+            alert(t('biometric_success'));
+            
+            // Update user biometrics
+            setUser(prev => {
+              const updatedUser = {
+                ...prev,
+                biometrics: {
+                  ...prev.biometrics,
+                  [type]: true
+                }
+              };
+              
+              // Update localStorage
+              const userDatabase = JSON.parse(localStorage.getItem('onpinUsers')) || {};
+              userDatabase[prev.did] = updatedUser;
+              localStorage.setItem('onpinUsers', JSON.stringify(userDatabase));
+              
+              return updatedUser;
+            });
+          } else {
+            alert(t('biometric_failed'));
+          }
+        }, 3000);
+      };
+      
+      if (!user) {
+        return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+      }
+      
+      return (
+        <div className="min-h-screen flex flex-col">
+          {/* Header */}
+          <header className="bg-green-800 text-white p-4 shadow-md">
+            <div className="container mx-auto flex justify-between items-center">
+              <h1 className="text-2xl font-bold">
+                <div class="w-40 h-auto">
+                    <img src="logo.png" class="w-full h-auto" alt="PFTISS Logo" />
+                </div>
+                </h1>
+              <div className="flex items-center space-x-4">
+                <button 
+                  onClick={startVoiceCommand}
+                  className={`p-2 rounded-full ${voiceCommandActive ? 'bg-green-500 voice-command-active' : 'bg-green-700'}`}
+                  title={t('voice_command')}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                  </svg>
+                </button>
+                <select
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
+                  className="bg-white text-gray-800 rounded px-3 py-1 pr-8 language-selector appearance-none"
+                >
+                  <option value="en">{t('english')}</option>
+                   <option value="yo">{t('yoruba')}</option>
+                    <option value="fr">{t('french')}</option>
+                     <option value="ar">{t('arabic')}</option>
+                      <option value="ig">{t('igbo')}</option>
+
+
+                </select>
+              </div>
+            </div>
+          </header>
+          
+          {/* Main Content */}
+          <main className="flex-grow container mx-auto p-4">
+            <div className="max-w-4xl mx-auto">
+              {/* User Profile Header */}
+              <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                <div className="flex justify-between items-start">
+                  <div className="flex items-center">
+                    <div className="bg-green-100 rounded-full p-3 mr-4">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold">Welcome! {user.name}</h2>
+                        <p className="text-gray-600">{user.location || 'Nigeria'}</p>
+                    <div className="flex flex-wrap gap-2 mt-2 sm:flex-nowrap sm:space-x-2">
+                    <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded whitespace-nowrap">NIN: {user.nin}</span>
+                    <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded whitespace-nowrap">vNIN: {user.nin}</span>
+                    <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded whitespace-nowrap">DID: {user.did}</span>
+                        <button
+                          onClick={() => setActiveTab('consent')}
+                          className={`px-3 py-2 text-sm font-medium whitespace-nowrap rounded-md ${
+                            activeTab === 'consent'
+                              ? 'bg-green-600 text-white' // Active state: green background with white text
+                              : 'bg-gray-200 text-gray-700 hover:bg-gray-300' // Inactive state: light gray background with dark gray text
+                          } transition-colors duration-200`}
+                        >
+                          {t('consent_tab')}
+                        </button>
+                    </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="px-30 py-1 bg-red-100 text-red-600 rounded-md hover:bg-red-200 transition duration-300"
+                  >
+                    {t('logout_button')}
+                  </button>
+                </div>
+                
+                {/* Balance Card */}
+                <div className="mt-6 bg-green-50 rounded-lg p-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-gray-600">{t('wallet_balance')}</p>
+                      <p className="text-2xl font-bold">₦{user.balance.toLocaleString()}</p>
+
+
+                    </div>
+                    <div className="flex space-x-2">
+                      <button 
+                        onClick={() => setFundWalletModal(true)}
+                        className="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-300 text-sm"
+                      >
+                        {t('fund_wallet')}
+                      </button>
+                      <div className="bg-green-100 p-3 rounded-full flex items-center justify-center">
+  <span className="text-green-600 text-2xl font-bold">₦</span>
+
+</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Navigation Tabs */}
+              <div className="flex border-b border-gray-200 mb-6 overflow-x-auto">
+                <div className="flex space-x-1 min-w-max">
+                  <button
+                    onClick={() => setActiveTab('overview')}
+                    className={`px-3 py-2 text-sm font-medium whitespace-nowrap ${activeTab === 'overview' ? 'text-green-600 border-b-2 border-green-600' : 'text-gray-500 hover:text-gray-700'}`}
+                  >
+                    {t('overview_tab')}
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('payments')}
+                    className={`px-3 py-2 text-sm font-medium whitespace-nowrap ${activeTab === 'payments' ? 'text-green-600 border-b-2 border-green-600' : 'text-gray-500 hover:text-gray-700'}`}
+                  >
+                    {t('payments_tab')}
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('identity')}
+                    className={`px-3 py-2 text-sm font-medium whitespace-nowrap ${activeTab === 'identity' ? 'text-green-600 border-b-2 border-green-600' : 'text-gray-500 hover:text-gray-700'}`}
+                  >
+                    {t('identity_status')}
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('consent')}
+                    className={`px-3 py-2 text-sm font-medium whitespace-nowrap ${activeTab === 'consent' ? 'text-green-600 border-b-2 border-green-600' : 'text-gray-500 hover:text-gray-700'}`}
+                  >
+                    {t('consent_tab')}
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('lifecycle')}
+                    className={`px-3 py-2 text-sm font-medium whitespace-nowrap ${activeTab === 'lifecycle' ? 'text-green-600 border-b-2 border-green-600' : 'text-gray-500 hover:text-gray-700'}`}
+                  >
+                    {t('lifecycle_tab')}
+                  </button>
+                </div>
+              </div>
+              
+              {/* Tab Content */}
+              {activeTab === 'overview' && (
+                <div className="bg-white rounded-lg shadow-md p-6">
+                  <h3 className="text-lg font-semibold mb-4">{t('quick_actions')}</h3>
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {/* Transfer */}
+                    <button 
+                      onClick={() => setTransferModalOpen(true)}
+                      className="bg-blue-50 p-4 rounded-lg hover:bg-blue-100 transition duration-300"
+                    >
+                      <div className="flex flex-col items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                        </svg>
+                        <span>{t('transfer')}</span>
+                      </div>
+                    </button>
+                    
+                    {/* Payments */}
+                    <button 
+                      onClick={() => setActiveTab('payments')}
+                      className="bg-green-50 p-4 rounded-lg hover:bg-green-100 transition duration-300"
+                    >
+                      <div className="flex flex-col items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>{t('payments')}</span>
+                      </div>
+                    </button>
+                    
+                    {/* Biometrics */}
+                    <button 
+                      onClick={() => setBiometricModal(true)}
+                      className="bg-purple-50 p-4 rounded-lg hover:bg-purple-100 transition duration-300"
+                    >
+                      <div className="flex flex-col items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-purple-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                        <span>{t('view_biometrics')}</span>
+                      </div>
+                    </button>
+                    
+                    {/* Disaster Relief */}
+                    <button 
+                      onClick={triggerDisasterPayment}
+                      className="bg-red-50 p-4 rounded-lg hover:bg-red-100 transition duration-300"
+                    >
+                      <div className="flex flex-col items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-red-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <span>{t('disaster_relief')}</span>
+                      </div>
+                    </button>
+                    
+                    {/* Bank Verification */}
+                    <button 
+                      onClick={() => setBankVerificationModal(true)}
+                      className="bg-yellow-50 p-4 rounded-lg hover:bg-yellow-100 transition duration-300"
+                    >
+                      <div className="flex flex-col items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-yellow-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+                        </svg>
+                        <span>{t('bank_verification')}</span>
+                      </div>
+                    </button>
+
+                     <button 
+                          onClick={() => handleUssdRequest('*123*1#')}
+                          className="bg-purple-50 p-4 rounded-lg hover:bg-purple-100 transition duration-300"
+                        >
+                          <div className="flex flex-col items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-purple-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                            </svg>
+                            <span>USSD Access</span>
+                            <span className="text-xs text-gray-500 mt-1">*123*1#</span>
+                          </div>
+                        </button>
+                        
+                        {/* SMS Access */}
+                        <button 
+                          onClick={() => {
+                            const command = prompt("Enter SMS command (e.g., BAL, SEND 1000 08123456789):");
+                            if (command) {
+                              setSmsCommand(command);
+                              handleSmsCommand(command);
+                            }
+                          }}
+                          className="bg-green-50 p-4 rounded-lg hover:bg-green-100 transition duration-300"
+                        >
+                          <div className="flex flex-col items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                            </svg>
+                            <span>SMS Access</span>
+                            <span className="text-xs text-gray-500 mt-1">Send to 12345</span>
+                          </div>
+                        </button>
+
+                        {/* Add these to your tab navigation */}
+<button 
+  onClick={() => setActiveTab('loans')}
+  className="bg-yellow-50 p-4 rounded-lg hover:bg-yellow-100 transition duration-300"
+>
+  <div className="flex flex-col items-center">
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-yellow-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+    <span>Loans</span>
+  </div>
+</button>
+
+<button 
+  onClick={() => setActiveTab('bnpl')}
+  className="bg-purple-50 p-4 rounded-lg hover:bg-purple-100 transition duration-300"
+>
+  <div className="flex flex-col items-center">
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-purple-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+    </svg>
+    <span>Remitance</span>
+  </div>
+</button>
+
+<button 
+  onClick={() => setActiveTab('investments')}
+  className="bg-blue-50 p-4 rounded-lg hover:bg-blue-100 transition duration-300"
+>
+  <div className="flex flex-col items-center">
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+    </svg>
+    <span>Invest</span>
+  </div>
+</button>
+
+ <button 
+    onClick={() => setActiveTab('emotional')}
+    className={`p-4 rounded-lg transition duration-300 flex flex-col items-center ${
+      activeTab === 'emotional' 
+        ? 'bg-indigo-100 border border-indigo-200' 
+        : 'bg-indigo-50 hover:bg-indigo-100'
+    }`}
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-indigo-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+    </svg>
+    <span>Emotional Data</span>
+  </button>
+
+  {/* Insurance Button */}
+  <button 
+    onClick={() => setActiveTab('insurance')}
+    className={`p-4 rounded-lg transition duration-300 flex flex-col items-center ${
+      activeTab === 'insurance' 
+        ? 'bg-green-100 border border-green-200' 
+        : 'bg-green-50 hover:bg-green-100'
+    }`}
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+    </svg>
+    <span>Insurance</span>
+  </button>
+         </div>
+                  
+                  <h3 className="text-lg font-semibold mt-6 mb-4">{t('recent_activity')}</h3>
+                  <div className="space-y-3">
+                    {user.transactions.slice(0, 3).map(txn => (
+                      <div 
+                        key={txn.id} 
+                        className="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer"
+                        onClick={() => setTransactionDetail(txn)}
+                      >
+                        <div>
+                          <p className="font-medium">
+                            {txn.type === 'credit' ? t('credit') : t('debit')}: ₦{txn.amount.toLocaleString()}
+                          </p>
+                          <p className="text-sm text-gray-500">{txn.description}</p>
+                        </div>
+                        <span className={`text-xs px-2 py-1 rounded ${
+                          txn.status === 'completed' ? 'bg-green-100 text-green-800' : 
+                          txn.status === 'failed' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {t(txn.status)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  
+                </div>
+              )}
+              
+              {activeTab === 'payments' && (
+                <div className="bg-white rounded-lg shadow-md p-6">
+                  <h3 className="text-lg font-semibold mb-4">{t('payment_services')}</h3>
+                  
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <button 
+                      onClick={() => setTransferModalOpen(true)}
+                      className="bg-blue-50 p-4 rounded-lg hover:bg-blue-100 transition duration-300"
+                    >
+                      <div className="flex flex-col items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <span>{t('send_money')}</span>
+                      </div>
+                    </button>
+                    
+                    <button 
+                      onClick={() => {
+                        const recipient = prompt("Enter recipient wallet ID:");
+                        if (recipient) {
+                          const amount = prompt("Enter amount to request:");
+                          if (amount && !isNaN(parseFloat(amount))) {
+                            alert(`Request for ₦${amount} sent to ${recipient}`);
+                          }
+                        }
+                      }}
+                      className="bg-green-50 p-4 rounded-lg hover:bg-green-100 transition duration-300"
+                    >
+                      <div className="flex flex-col items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                        </svg>
+                        <span>{t('request_money')}</span>
+                      </div>
+                    </button>
+                    
+                    <button 
+                      onClick={() => {
+                        const biller = prompt("Select biller:\n1. PHCN\n2. Water Corporation\n3. DSTV");
+                        if (biller) {
+                          const amount = prompt("Enter amount to pay:");
+                          if (amount && !isNaN(parseFloat(amount))) {
+                            if (parseFloat(amount) > user.balance) {
+                              alert(t('insufficient_funds'));
+                            } else {
+                              // Add transaction
+                              const newTransaction = {
+                                id: `txn_${Date.now()}`,
+                                type: "debit",
+                                amount: parseFloat(amount),
+                                date: new Date().toISOString().split('T')[0],
+                                description: `Bill payment to ${biller}`,
+                                status: "completed",
+                                recipient: biller
+                              };
+                              
+                              setUser(prev => {
+                                const updatedUser = {
+                                  ...prev,
+                                  balance: prev.balance - parseFloat(amount),
+                                  transactions: [newTransaction, ...prev.transactions]
+                                };
+                                
+                                // Update localStorage
+                                const userDatabase = JSON.parse(localStorage.getItem('onpinUsers')) || {};
+                                userDatabase[prev.did] = updatedUser;
+                                localStorage.setItem('onpinUsers', JSON.stringify(userDatabase));
+                                
+                                return updatedUser;
+                              });
+                              
+                              alert(`Payment of ₦${amount} to ${biller} successful`);
+                            }
+                          }
+                        }
+                      }}
+                      className="bg-purple-50 p-4 rounded-lg hover:bg-purple-100 transition duration-300"
+                    >
+                      <div className="flex flex-col items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-purple-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+                        </svg>
+                        <span>{t('pay_bills')}</span>
+                      </div>
+                    </button>
+                    
+                    <button 
+                      onClick={() => {
+                        const provider = prompt("Select provider:\n1. MTN\n2. Airtel\n3. Glo\n4. 9Mobile");
+                        if (provider) {
+                          const type = prompt("Select type:\n1. Airtime\n2. Data");
+                          if (type) {
+                            const amount = prompt("Enter amount:");
+                            if (amount && !isNaN(parseFloat(amount))) {
+                              if (parseFloat(amount) > user.balance) {
+                                alert(t('insufficient_funds'));
+                              } else {
+                                // Add transaction
+                                const newTransaction = {
+                                  id: `txn_${Date.now()}`,
+                                  type: "debit",
+                                  amount: parseFloat(amount),
+                                  date: new Date().toISOString().split('T')[0],
+                                  description: `${type === '1' ? 'Airtime' : 'Data'} purchase for ${provider}`,
+                                  status: "completed",
+                                  recipient: provider
+                                };
+                                
+                                setUser(prev => {
+                                  const updatedUser = {
+                                    ...prev,
+                                    balance: prev.balance - parseFloat(amount),
+                                    transactions: [newTransaction, ...prev.transactions]
+                                  };
+                                  
+                                  // Update localStorage
+                                  const userDatabase = JSON.parse(localStorage.getItem('onpinUsers')) || {};
+                                  userDatabase[prev.did] = updatedUser;
+                                  localStorage.setItem('onpinUsers', JSON.stringify(userDatabase));
+                                  
+                                  return updatedUser;
+                                });
+                                
+                                alert(`${type === '1' ? 'Airtime' : 'Data'} purchase of ₦${amount} for ${provider} successful`);
+                              }
+                            }
+                          }
+                        }
+                      }}
+                      className="bg-yellow-50 p-4 rounded-lg hover:bg-yellow-100 transition duration-300"
+                    >
+                      <div className="flex flex-col items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-yellow-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>{t('airtime_data')}</span>
+                      </div>
+                    </button>
+                  </div>
+                  
+                  <div className="mb-6">
+                    <h3 className="font-medium mb-2">{t('government_services')}</h3>
+                    <button 
+                      onClick={triggerDisasterPayment}
+                      className="w-full flex items-center p-4 bg-red-50 rounded-lg hover:bg-red-100 transition duration-300"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-red-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                      </svg>
+                      <div>
+                        <p className="font-medium">{t('disaster_relief')}</p>
+                        <p className="text-sm text-gray-600">{t('emergency_payments')}</p>
+                      </div>
+                    </button>
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-medium mb-2">{t('recent_transactions')}</h3>
+                    {user.transactions.length > 0 ? (
+                      <div className="space-y-3">
+                        {user.transactions.map(txn => (
+                          <div 
+                            key={txn.id} 
+                            className="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer"
+                            onClick={() => setTransactionDetail(txn)}
+                          >
+                            <div>
+                              <p className="font-medium">
+                                {txn.type === 'credit' ? t('credit') : t('debit')}: ₦{txn.amount.toLocaleString()}
+                              </p>
+                              <p className="text-sm text-gray-500">{txn.description}</p>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <span className="text-sm text-gray-500">{txn.date}</span>
+                              <span className={`text-xs px-2 py-1 rounded ${
+                                txn.status === 'completed' ? 'bg-green-100 text-green-800' : 
+                                txn.status === 'failed' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
+                              }`}>
+                                {t(txn.status)}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-500">{t('no_recent_transfers')}</p>
+                    )}
+                  </div>
+                </div>
+              )}
+              
+              {activeTab === 'identity' && (
+                <div className="bg-white rounded-lg shadow-md p-6">
+                  <h3 className="text-lg font-semibold mb-4">{t('identity_status')}</h3>
+                  
+                  <div className="space-y-6">
+                    {/* NIMC Verification */}
+                    <div className="p-4 border rounded-lg">
+                      <div className="flex justify-between items-center mb-2">
+                        <h4 className="font-medium">NIMC Verification</h4>
+                        <span className={`px-2 py-1 text-xs rounded ${
+                          user.kycStatus.nimc ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {user.kycStatus.nimc ? t('verified') : t('unverified')}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-3">National Identity Management Commission</p>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">NIN: {user.nin}</span>
+                        {!user.kycStatus.nimc && (
+                          <button className="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-300 text-sm">
+                            {t('verify_now')}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* CBN Verification */}
+                    <div className="p-4 border rounded-lg">
+                      <div className="flex justify-between items-center mb-2">
+                        <h4 className="font-medium">CBN Verification</h4>
+                        <span className={`px-2 py-1 text-xs rounded ${
+                          user.kycStatus.cbn ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {user.kycStatus.cbn ? t('verified') : t('unverified')}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-3">Central Bank of Nigeria</p>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">BVN: {user.bvn}</span>
+                        {!user.kycStatus.cbn && (
+                          <button className="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-300 text-sm">
+                            {t('verify_now')}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Bank Connections */}
+                    <div className="p-4 border rounded-lg">
+                      <div className="flex justify-between items-center mb-3">
+                        <h4 className="font-medium">{t('bank_connections')}</h4>
+                        <button 
+                          onClick={() => setAddBankModal(true)}
+                          className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300 text-sm"
+                        >
+                          {t('connect_bank')}
+                        </button>
+                      </div>
+                      
+                      {user.connectedBanks.length > 0 ? (
+                        <div className="space-y-3">
+                          {user.connectedBanks.map(bank => (
+                            <div key={bank.name} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                              <div>
+                                <p className="font-medium">{bank.name}</p>
+                                <p className="text-sm text-gray-600">****{bank.accountNumber.slice(-4)}</p>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <span className={`px-2 py-1 text-xs rounded ${
+                                  bank.verified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                }`}>
+                                  {bank.verified ? t('verified') : t('pending')}
+                                </span>
+                                {!bank.verified && (
+                                  <button 
+                                    onClick={() => verifyBank(bank.name)}
+                                    className="px-2 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-300 text-xs"
+                                  >
+                                    {t('verify_bank')}
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-gray-500">{t('no_connected_banks')}</p>
+                      )}
+                    </div>
+                    
+                    {/* Biometric Data */}
+                    <div className="p-4 border rounded-lg">
+                      <div className="flex justify-between items-center mb-3">
+                        <h4 className="font-medium">{t('biometric_data')}</h4>
+                        <button 
+                          onClick={() => setBiometricModal(true)}
+                          className="px-3 py-1 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition duration-300 text-sm"
+                        >
+                          {t('view_biometrics')}
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="flex flex-col items-center p-2 bg-gray-50 rounded">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span className="text-xs mt-1">{t('face_id')}</span>
+                        </div>
+                        <div className="flex flex-col items-center p-2 bg-gray-50 rounded">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4" />
+                          </svg>
+                          <span className="text-xs mt-1">{t('fingerprint')}</span>
+                        </div>
+                        <div className="flex flex-col items-center p-2 bg-gray-50 rounded">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                          </svg>
+                          <span className="text-xs mt-1">{t('voice_recognition')}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'emotional' && (
+  <div className="bg-white rounded-lg shadow-md p-6">
+    <h3 className="text-lg font-semibold mb-4">Emotional & Physiological Data</h3>
+    
+    {/* Real-time Monitoring */}
+    <div className="p-4 border rounded-lg mb-6 bg-blue-50">
+      <h4 className="font-medium mb-3">Current State</h4>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {/* Stress Level */}
+        <div className="bg-white p-3 rounded-lg shadow-sm text-center">
+          <div className="w-16 h-16 mx-auto mb-2 relative">
+            <svg viewBox="0 0 36 36" className="circular-chart">
+              <path className="circle-bg"
+                d="M18 2.0845
+                  a 15.9155 15.9155 0 0 1 0 31.831
+                  a 15.9155 15.9155 0 0 1 0 -31.831"
+                fill="none"
+                stroke="#eee"
+                strokeWidth="3"
+              />
+              <path className="circle"
+                stroke="#4CAF50"
+                strokeWidth="3"
+                strokeDasharray="70, 100"
+                d="M18 2.0845
+                  a 15.9155 15.9155 0 0 1 0 31.831
+                  a 15.9155 15.9155 0 0 1 0 -31.831"
+              />
+            </svg>
+            <span className="absolute inset-0 flex items-center justify-center text-sm font-bold">70%</span>
+          </div>
+          <p className="text-sm">Stress Level</p>
+        </div>
+        
+        {/* Heart Rate */}
+        <div className="bg-white p-3 rounded-lg shadow-sm text-center">
+          <div className="w-16 h-16 mx-auto mb-2 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+          </div>
+          <p className="text-sm">72 BPM</p>
+        </div>
+        
+        {/* Sleep Quality */}
+        <div className="bg-white p-3 rounded-lg shadow-sm text-center">
+          <div className="w-16 h-16 mx-auto mb-2 relative">
+            <svg viewBox="0 0 36 36" className="circular-chart">
+              <path className="circle-bg"
+                d="M18 2.0845
+                  a 15.9155 15.9155 0 0 1 0 31.831
+                  a 15.9155 15.9155 0 0 1 0 -31.831"
+                fill="none"
+                stroke="#eee"
+                strokeWidth="3"
+              />
+              <path className="circle"
+                stroke="#2196F3"
+                strokeWidth="3"
+                strokeDasharray="85, 100"
+                d="M18 2.0845
+                  a 15.9155 15.9155 0 0 1 0 31.831
+                  a 15.9155 15.9155 0 0 1 0 -31.831"
+              />
+            </svg>
+            <span className="absolute inset-0 flex items-center justify-center text-sm font-bold">85%</span>
+          </div>
+          <p className="text-sm">Sleep Quality</p>
+        </div>
+        
+        {/* Activity Level */}
+        <div className="bg-white p-3 rounded-lg shadow-sm text-center">
+          <div className="w-16 h-16 mx-auto mb-2 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <p className="text-sm">6,200 Steps</p>
+        </div>
+      </div>
+      
+      <div className="mt-4">
+        <button 
+          onClick={() => alert("Starting biometric scan...")}
+          className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition flex items-center justify-center"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+          Scan Current State
+        </button>
+      </div>
+    </div>
+    
+    {/* Historical Data */}
+    <div className="p-4 border rounded-lg mb-6">
+      <h4 className="font-medium mb-3">Historical Trends</h4>
+      <div className="chart-container" style={{height: '200px'}}>
+        <canvas id="emotionalChart"></canvas>
+      </div>
+      
+      <div className="grid grid-cols-2 gap-4 mt-4">
+        <select className="p-2 border rounded-md">
+          <option>Last 7 Days</option>
+          <option>Last 30 Days</option>
+          <option>Last 90 Days</option>
+          <option>Custom Range</option>
+        </select>
+        <select className="p-2 border rounded-md">
+          <option>Stress Level</option>
+          <option>Heart Rate</option>
+          <option>Sleep Quality</option>
+          <option>Activity Level</option>
+        </select>
+      </div>
+    </div>
+    
+    {/* Data Sharing Controls */}
+    <div className="p-4 border rounded-lg">
+      <h4 className="font-medium mb-3">Data Sharing Preferences</h4>
+      
+      <div className="space-y-3">
+        <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
+          <div>
+            <p className="font-medium">Share with Healthcare Providers</p>
+            <p className="text-sm text-gray-600">Allow doctors to access your physiological data</p>
+          </div>
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" className="sr-only peer" defaultChecked />
+            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+          </label>
+        </div>
+        
+        <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
+          <div>
+            <p className="font-medium">Share with Insurance Providers</p>
+            <p className="text-sm text-gray-600">Enable personalized insurance offers</p>
+          </div>
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" className="sr-only peer" />
+            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+          </label>
+        </div>
+        
+        <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
+          <div>
+            <p className="font-medium">Share for Research</p>
+            <p className="text-sm text-gray-600">Contribute anonymized data to health research</p>
+          </div>
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" className="sr-only peer" defaultChecked />
+            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+{activeTab === 'insurance' && (
+  <div className="bg-white rounded-lg shadow-md p-6">
+    <h3 className="text-lg font-semibold mb-4">Insurance Services</h3>
+    
+    {/* Active Policies */}
+    <div className="p-4 border rounded-lg mb-6 bg-green-50">
+      <h4 className="font-medium mb-3">Your Active Policies</h4>
+      
+      {user.insurancePolicies && user.insurancePolicies.length > 0 ? (
+        <div className="space-y-3">
+          {user.insurancePolicies.map((policy, index) => (
+            <div key={index} className="p-3 border rounded-lg bg-white">
+              <div className="flex justify-between items-center mb-2">
+                <div>
+                  <p className="font-medium">{policy.type} Insurance</p>
+                  <p className="text-sm text-gray-600">Policy #: {policy.id}</p>
+                </div>
+                <span className={`px-2 py-1 text-xs rounded ${
+                  policy.status === 'active' ? 'bg-green-100 text-green-800' :
+                  policy.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                  'bg-red-100 text-red-800'
+                }`}>
+                  {policy.status}
+                </span>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-2 mb-2">
+                <div>
+                  <p className="text-xs text-gray-500">Coverage Amount</p>
+                  <p className="font-medium">₦{policy.coverageAmount.toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Premium</p>
+                  <p className="font-medium">₦{policy.premium.toLocaleString()}/month</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Renewal Date</p>
+                  <p className="font-medium">{policy.renewalDate}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Claims</p>
+                  <p className="font-medium">{policy.claims.length} {policy.claims.length === 1 ? 'claim' : 'claims'}</p>
+                </div>
+              </div>
+              
+              <button 
+                onClick={() => setSelectedPolicy(policy)}
+                className="w-full mt-2 px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm"
+              >
+                View Details
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-4">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+          <p className="mt-2 text-gray-500">No active insurance policies</p>
+          <button 
+            onClick={() => setInsuranceModal('discover')}
+            className="mt-3 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+          >
+            Get Insured
+          </button>
+        </div>
+      )}
+ </div>
+    
+    {/* Insurance Marketplace */}
+    <div className="p-4 border rounded-lg mb-6">
+      <h4 className="font-medium mb-3">Insurance Marketplace</h4>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Health Insurance */}
+        <div className="p-4 border rounded-lg hover:shadow-md transition cursor-pointer" onClick={() => setInsuranceModal('health')}>
+          <div className="flex items-start mb-3">
+            <div className="bg-blue-100 p-2 rounded-full mr-3">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+              </svg>
+            </div>
+            <div>
+              <h4 className="font-medium">Health Insurance</h4>
+              <p className="text-sm text-gray-600">Comprehensive medical coverage</p>
+              <p className="text-xs text-green-600 mt-1">From ₦5,000/month</p>
+            </div>
+          </div>
+        </div>
+        
+        {/* Life Insurance */}
+        <div className="p-4 border rounded-lg hover:shadow-md transition cursor-pointer" onClick={() => setInsuranceModal('life')}>
+          <div className="flex items-start mb-3">
+            <div className="bg-green-100 p-2 rounded-full mr-3">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+            </div>
+            <div>
+              <h4 className="font-medium">Life Insurance</h4>
+              <p className="text-sm text-gray-600">Financial protection for your family</p>
+              <p className="text-xs text-green-600 mt-1">From ₦3,000/month</p>
+            </div>
+          </div>
+        </div>
+        
+        {/* Auto Insurance */}
+        <div className="p-4 border rounded-lg hover:shadow-md transition cursor-pointer" onClick={() => setInsuranceModal('auto')}>
+          <div className="flex items-start mb-3">
+            <div className="bg-yellow-100 p-2 rounded-full mr-3">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+              </svg>
+            </div>
+            <div>
+              <h4 className="font-medium">Auto Insurance</h4>
+              <p className="text-sm text-gray-600">Vehicle protection and roadside assistance</p>
+              <p className="text-xs text-green-600 mt-1">From ₦7,000/month</p>
+            </div>
+          </div>
+        </div>
+        
+        {/* Property Insurance */}
+        <div className="p-4 border rounded-lg hover:shadow-md transition cursor-pointer" onClick={() => setInsuranceModal('property')}>
+          <div className="flex items-start mb-3">
+            <div className="bg-purple-100 p-2 rounded-full mr-3">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+            </div>
+            <div>
+              <h4 className="font-medium">Property Insurance</h4>
+              <p className="text-sm text-gray-600">Protect your home and belongings</p>
+              <p className="text-xs text-green-600 mt-1">From ₦4,500/month</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    {/* Personalized Recommendations */}
+    <div className="p-4 border rounded-lg">
+      <h4 className="font-medium mb-3">Personalized Recommendations</h4>
+      
+      <div className="bg-blue-50 p-4 rounded-lg mb-3">
+        <div className="flex items-start">
+          <div className="bg-blue-100 p-2 rounded-full mr-3">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+          </div>
+          <div>
+            <p className="font-medium">Based on your health data</p>
+            <p className="text-sm text-gray-600">We recommend enhanced health coverage with lower premiums</p>
+          </div>
+        </div>
+      </div>
+      
+      <div className="bg-green-50 p-4 rounded-lg">
+        <div className="flex items-start">
+          <div className="bg-green-100 p-2 rounded-full mr-3">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+          </div>
+          <div>
+            <p className="font-medium">Based on your lifestyle</p>
+            <p className="text-sm text-gray-600">Consider our comprehensive life insurance package</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+
+              {activeTab === 'consent' && (
+  <div className="bg-white rounded-lg shadow-md p-6">
+    <h3 className="text-lg font-semibold mb-4">Consent Management</h3>
+    
+    <div className="space-y-4">
+      <div className="p-4 border rounded-lg">
+        <h4 className="font-medium mb-2">Grant Consent to Organizations</h4>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
+            <div>
+              <p className="font-medium">Central Bank of Nigeria (CBN)</p>
+              <p className="text-sm text-gray-600">Financial data access</p>
+            </div>
+            <button 
+              onClick={() => alert("Consent granted to CBN")}
+              className="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-300 text-sm"
+            >
+              Grant
+            </button>
+          </div>
+          
+          <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
+            <div>
+              <p className="font-medium">AICFTA</p>
+              <p className="text-sm text-gray-600">Trade and commerce data</p>
+            </div>
+            <button 
+              onClick={() => alert("Consent granted to AICFTA")}
+              className="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-300 text-sm"
+            >
+              Grant
+            </button>
+          </div>
+          
+          <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
+            <div>
+              <p className="font-medium">NIMC (ZKP)</p>
+              <p className="text-sm text-gray-600">Zero-knowledge proof identity verification</p>
+            </div>
+            <button 
+              onClick={() => alert("Consent granted to NIMC with ZKP")}
+              className="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-300 text-sm"
+            >
+              Grant
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div className="p-4 border rounded-lg">
+        <h4 className="font-medium mb-2">Active Consents</h4>
+        {user.activeConsents && user.activeConsents.length > 0 ? (
+          <div className="space-y-3">
+            {user.activeConsents.map(consent => (
+              <div key={consent.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                <div>
+                  <p className="font-medium">{consent.organization}</p>
+                  <p className="text-sm text-gray-600">
+                    Granted on: {consent.date} | Expires: {consent.expiry || "Never"}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">{consent.scope}</p>
+                </div>
+                <button 
+                  onClick={() => {
+                    // Revoke consent logic
+                    setUser(prev => {
+                      const updatedUser = {
+                        ...prev,
+                        activeConsents: prev.activeConsents.filter(c => c.id !== consent.id)
+                      };
+                      
+                      // Update localStorage
+                      const userDatabase = JSON.parse(localStorage.getItem('onpinUsers')) || {};
+                      userDatabase[prev.did] = updatedUser;
+                      localStorage.setItem('onpinUsers', JSON.stringify(userDatabase));
+                      
+                      return updatedUser;
+                    });
+                    alert(`Consent revoked from ${consent.organization}`);
+                  }}
+                  className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-300 text-sm"
+                >
+                  Revoke
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500">No active consents</p>
+        )}
+      </div>
+    </div>
+  </div>
+)}
+{activeTab === 'lifecycle' && (
+  <div className="bg-white rounded-lg shadow-md p-6">
+    <h3 className="text-lg font-semibold mb-4">Identity Lifecycle Management</h3>
+    
+    {/* Identity Status Card */}
+    <div className="p-4 border rounded-lg mb-6 bg-gradient-to-r from-blue-50 to-green-50">
+      <div className="flex justify-between items-center mb-2">
+        <h4 className="font-medium text-lg">Digital Identity Status</h4>
+        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+          user.identityStatus === 'active' ? 'bg-green-100 text-green-800' :
+          user.identityStatus === 'suspended' ? 'bg-yellow-100 text-yellow-800' :
+          'bg-red-100 text-red-800'
+        }`}>
+          {user.identityStatus === 'active' ? 'Active' : 
+           user.identityStatus === 'suspended' ? 'Suspended' : 'Revoked'}
+        </span>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div className="bg-white p-3 rounded-lg shadow-sm">
+          <p className="text-sm text-gray-500">Issued</p>
+          <p className="font-medium">{user.identityIssueDate || "Not available"}</p>
+        </div>
+        <div className="bg-white p-3 rounded-lg shadow-sm">
+          <p className="text-sm text-gray-500">Last Verified</p>
+          <p className="font-medium">{user.lastVerified || "Not verified"}</p>
+        </div>
+        <div className="bg-white p-3 rounded-lg shadow-sm">
+          <p className="text-sm text-gray-500">Next Verification</p>
+          <p className="font-medium">{user.nextVerification || "Due now"}</p>
+        </div>
+      </div>
+      
+      <div className="flex space-x-3">
+        <button 
+          onClick={() => {
+            setUser(prev => ({...prev, identityStatus: 'active'}));
+            alert("Identity status updated to Active");
+          }}
+          className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+        >
+          Activate
+        </button>
+        <button 
+          onClick={() => {
+            setUser(prev => ({...prev, identityStatus: 'suspended'}));
+            alert("Identity temporarily suspended");
+          }}
+          className="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition"
+        >
+          Suspend
+        </button>
+        <button 
+          onClick={() => {
+            const confirmed = confirm("This will permanently revoke this identity. Continue?");
+            if (confirmed) {
+              setUser(prev => ({...prev, identityStatus: 'revoked'}));
+              alert("Identity revoked");
+            }
+          }}
+          className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
+        >
+          Revoke
+        </button>
+      </div>
+    </div>
+
+    {/* Lifecycle Events Section */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      {/* Birth Registration */}
+      <div className="p-4 border rounded-lg bg-blue-50">
+        <div className="flex items-start mb-3">
+          <div className="bg-blue-100 p-2 rounded-full mr-3">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div>
+            <h4 className="font-medium text-lg mb-1">Issue at Birth</h4>
+            <p className="text-sm text-gray-600 mb-3">Register a newborn's digital identity immediately after birth</p>
+            
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Child's Name</label>
+                <input type="text" className="w-full px-3 py-2 border rounded-md" placeholder="Full name" />
+              </div>
+               <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Father's Full Name</label>
+                <input type="text" className="w-full px-3 py-2 border rounded-md" placeholder="Full name" />
+              </div>
+               <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Mother's Full Name</label>
+                <input type="text" className="w-full px-3 py-2 border rounded-md" placeholder="Full name" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Child's Date of Birth</label>
+                <input type="date" className="w-full px-3 py-2 border rounded-md" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Place of Birth</label>
+                <input type="text" className="w-full px-3 py-2 border rounded-md" placeholder="Hospital/Clinic" />
+              </div>
+              
+              <button 
+                onClick={() => alert("Birth registration submitted for verification")}
+                className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+              >
+                Register Birth
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Death Reporting */}
+      <div className="p-4 border rounded-lg bg-red-50">
+        <div className="flex items-start mb-3">
+          <div className="bg-red-100 p-2 rounded-full mr-3">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+            </svg>
+          </div>
+          <div>
+            <h4 className="font-medium text-lg mb-1">Revoke at Death</h4>
+            <p className="text-sm text-gray-600 mb-3">Report death to revoke digital identity and associated services</p>
+            
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Date of Death</label>
+                <input type="date" className="w-full px-3 py-2 border rounded-md" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Place of Death</label>
+                <input type="text" className="w-full px-3 py-2 border rounded-md" placeholder="Location" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Death Certificate Number</label>
+                <input type="text" className="w-full px-3 py-2 border rounded-md" placeholder="If available" />
+              </div>
+              
+              <button 
+                onClick={() => {
+                  const confirmed = confirm("This will permanently revoke this identity. Continue?");
+                  if (confirmed) {
+                    setUser(prev => ({...prev, identityStatus: 'revoked'}));
+                    alert("Death reported. Identity will be revoked after verification.");
+                  }
+                }}
+                className="w-full px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
+              >
+                Report Death
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* Linked Services Section */}
+    <div className="p-4 border rounded-lg">
+      <h4 className="font-medium text-lg mb-4">Linked Services</h4>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Education Service */}
+        <div className="p-3 border rounded-lg bg-gray-50">
+          <div className="flex justify-between items-start mb-2">
+            <div>
+              <h5 className="font-medium">Education</h5>
+              <p className="text-sm text-gray-600">ID: 455356345646</p>
+            </div>
+            <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Active</span>
+          </div>
+          <div className="flex justify-between mt-3">
+            <button 
+              onClick={() => alert("Education service details")}
+              className="px-3 py-1 bg-blue-600 text-white rounded-md text-sm"
+            >
+              View
+            </button>
+            <button 
+              onClick={() => alert("Education service management")}
+              className="px-3 py-1 bg-gray-600 text-white rounded-md text-sm"
+            >
+              Manage
+            </button>
+          </div>
+        </div>
+        
+        {/* Health Service */}
+        <div className="p-3 border rounded-lg bg-gray-50">
+          <div className="flex justify-between items-start mb-2">
+            <div>
+              <h5 className="font-medium">Health</h5>
+              <p className="text-sm text-gray-600">NHIS: 7890123456</p>
+            </div>
+            <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Active</span>
+          </div>
+          <div className="flex justify-between mt-3">
+            <button 
+              onClick={() => alert("Health service details")}
+              className="px-3 py-1 bg-blue-600 text-white rounded-md text-sm"
+            >
+              View
+            </button>
+            <button 
+              onClick={() => alert("Health service management")}
+              className="px-3 py-1 bg-gray-600 text-white rounded-md text-sm"
+            >
+              Manage
+            </button>
+          </div>
+        </div>
+        
+        {/* Add New Service */}
+        <div className="p-3 border-2 border-dashed rounded-lg bg-gray-50 flex items-center justify-center">
+          <button 
+            onClick={() => alert("Add new linked service")}
+            className="flex items-center text-blue-600"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+            </svg>
+            Link New Service
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+
+
+            </div>
+          </main>
+          
+          {/* USSD Modal Component */}
+{ussdModalOpen && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-xl font-bold">USSD Session</h3>
+        <button 
+          onClick={() => {
+            setUssdModalOpen(false);
+            setUssdHistory([]);
+            setCurrentMenu(null);
+          }} 
+          className="text-gray-500 hover:text-gray-700 text-2xl"
+        >
+          ×
+        </button>
+      </div>
+      
+      <div className="bg-gray-100 p-4 rounded-lg mb-4 font-mono whitespace-pre-wrap min-h-32 max-h-64 overflow-y-auto">
+        {currentUssdCode && <div className="text-blue-600">&gt; {currentUssdCode}</div>}
+        {ussdHistory.map((item, index) => (
+          <React.Fragment key={index}>
+            <div className="text-blue-600">{item}</div>
+            {/* Only show response for the last history item */}
+            {index === ussdHistory.length - 1 && (
+              <div>{ussdResponse}</div>
+            )}
+          </React.Fragment>
+        ))}
+        {/* Show current response if no history */}
+        {ussdHistory.length === 0 && <div>{ussdResponse}</div>}
+      </div>
+      
+      <div className="mt-4">
+        <input
+          type="text"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyPress={(e) => {
+            if (e.key === 'Enter') {
+              handleUssdInput(inputValue);
+            }
+          }}
+          className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder={
+            currentMenu === 'send_money' ? 'Enter amount and recipient (e.g. 5000 08123456789)' :
+            currentMenu === 'pay_bills' ? 'Select biller option (1-4)' :
+            currentMenu === 'manage_consent' ? 'Select consent option (1-4)' :
+            currentMenu === 'lifecycle' ? 'Select lifecycle option (1-4)' :
+            'Enter option (1-6)'
+          }
+          autoFocus
+        />
+      </div>
+    </div>
+  </div>
+)}
+
+{activeTab === 'loans' && (
+  <div className="bg-white rounded-lg shadow-md p-6">
+    <h3 className="text-lg font-semibold mb-4">Loan Services</h3>
+    
+    {/* Loan Products */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      {/* Personal Loan */}
+      <div className="p-4 border rounded-lg hover:shadow-md transition">
+        <div className="flex items-start mb-3">
+          <div className="bg-blue-100 p-2 rounded-full mr-3">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div>
+            <h4 className="font-medium">Personal Loan</h4>
+            <p className="text-sm text-gray-600">Up to ₦5,000,000 | 12-36 months</p>
+            <p className="text-xs text-green-600 mt-1">Interest rate: 15% p.a.</p>
+          </div>
+        </div>
+        <button 
+          onClick={() => setLoanModal({type: 'personal', open: true})}
+          className="w-full mt-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+        >
+          Apply Now
+        </button>
+      </div>
+      
+      {/* Emergency Loan */}
+      <div className="p-4 border rounded-lg hover:shadow-md transition">
+        <div className="flex items-start mb-3">
+          <div className="bg-red-100 p-2 rounded-full mr-3">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <div>
+            <h4 className="font-medium">Emergency Loan</h4>
+            <p className="text-sm text-gray-600">Up to ₦500,000 | 1-6 months</p>
+            <p className="text-xs text-green-600 mt-1">Interest rate: 5% p.a.</p>
+          </div>
+        </div>
+        <button 
+          onClick={() => setLoanModal({type: 'emergency', open: true})}
+          className="w-full mt-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
+        >
+          Apply Now
+        </button>
+      </div>
+    </div>
+    
+    {/* Active Loans */}
+    <div className="mb-6">
+      <h4 className="font-medium mb-2">Your Active Loans</h4>
+      {user.loans && user.loans.length > 0 ? (
+        <div className="space-y-3">
+          {user.loans.map((loan, index) => (
+            <div key={index} className="p-4 border rounded-lg">
+              <div className="flex justify-between items-center mb-2">
+                <div>
+                  <p className="font-medium">{loan.type} Loan</p>
+                  <p className="text-sm text-gray-600">Loan ID: {loan.id}</p>
+                </div>
+                <span className={`px-2 py-1 text-xs rounded ${
+                  loan.status === 'active' ? 'bg-green-100 text-green-800' :
+                  loan.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                  'bg-red-100 text-red-800'
+                }`}>
+                  {loan.status}
+                </span>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                <div>
+                  <p className="text-xs text-gray-500">Amount</p>
+                  <p className="font-medium">₦{loan.amount.toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Interest</p>
+                  <p className="font-medium">{loan.interestRate}% p.a.</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Due Date</p>
+                  <p className="font-medium">{loan.dueDate}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Balance</p>
+                  <p className="font-medium">₦{loan.balance.toLocaleString()}</p>
+                </div>
+              </div>
+              
+              <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div 
+                  className="bg-green-600 h-2.5 rounded-full" 
+                  style={{width: `${(loan.paidAmount / loan.totalAmount) * 100}%`}}
+                ></div>
+              </div>
+              <div className="flex justify-between text-xs text-gray-500 mt-1">
+                <span>Paid: ₦{loan.paidAmount.toLocaleString()}</span>
+                <span>Total: ₦{loan.totalAmount.toLocaleString()}</span>
+              </div>
+              
+              {loan.status === 'active' && (
+                <button 
+                  onClick={() => setRepaymentModal({loanId: loan.id, open: true})}
+                  className="w-full mt-3 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+                >
+                  Make Repayment
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-gray-500">No active loans</p>
+      )}
+    </div>
+    
+    {/* Loan History */}
+    <div>
+      <h4 className="font-medium mb-2">Loan History</h4>
+      {user.loanHistory && user.loanHistory.length > 0 ? (
+        <div className="space-y-3">
+          {user.loanHistory.map((loan, index) => (
+            <div key={index} className="p-3 border rounded-lg flex justify-between items-center">
+              <div>
+                <p className="font-medium">{loan.type} Loan</p>
+                <p className="text-sm text-gray-600">{loan.date} | ₦{loan.amount.toLocaleString()}</p>
+              </div>
+              <span className={`px-2 py-1 text-xs rounded ${
+                loan.status === 'completed' ? 'bg-green-100 text-green-800' :
+                loan.status === 'defaulted' ? 'bg-red-100 text-red-800' :
+                'bg-gray-100 text-gray-800'
+              }`}>
+                {loan.status}
+              </span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-gray-500">No loan history</p>
+      )}
+    </div>
+  </div>
+)}
+
+{activeTab === 'bnpl' && (
+  <div className="bg-white rounded-lg shadow-md p-6">
+    <h3 className="text-lg font-semibold mb-4">Remitance</h3>
+    
+    {/* BNPL Partners */}
+    <div className="mb-6">
+      <h4 className="font-medium mb-2">Available Partners</h4>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        {bnplPartners.map((partner, index) => (
+          <div key={index} className="p-3 border rounded-lg hover:shadow-md transition cursor-pointer">
+            <div className="flex flex-col items-center">
+              <div className="w-16 h-16 mb-2 bg-gray-100 rounded-full flex items-center justify-center">
+                <img src={partner.logo} alt={partner.name} className="w-12 h-12 object-contain" />
+              </div>
+              <p className="text-center font-medium">{partner.name}</p>
+              <p className="text-xs text-center text-gray-500">{partner.terms}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+    
+    {/* Active BNPL Plans */}
+    <div className="mb-6">
+      <h4 className="font-medium mb-2">Your Active Plans</h4>
+      {user.bnplPlans && user.bnplPlans.length > 0 ? (
+        <div className="space-y-3">
+          {user.bnplPlans.map((plan, index) => (
+            <div key={index} className="p-4 border rounded-lg">
+              <div className="flex justify-between items-center mb-2">
+                <div>
+                  <p className="font-medium">{plan.merchant}</p>
+                  <p className="text-sm text-gray-600">{plan.description}</p>
+                </div>
+                <span className={`px-2 py-1 text-xs rounded ${
+                  plan.status === 'active' ? 'bg-green-100 text-green-800' :
+                  plan.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                  'bg-red-100 text-red-800'
+                }`}>
+                  {plan.status}
+                </span>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                <div>
+                  <p className="text-xs text-gray-500">Amount</p>
+                  <p className="font-medium">₦{plan.amount.toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Installments</p>
+                  <p className="font-medium">{plan.installments} payments</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Next Payment</p>
+                  <p className="font-medium">{plan.nextPaymentDate}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Remaining</p>
+                  <p className="font-medium">₦{plan.remaining.toLocaleString()}</p>
+                </div>
+              </div>
+              
+              <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div 
+                  className="bg-blue-600 h-2.5 rounded-full" 
+                  style={{width: `${((plan.amount - plan.remaining) / plan.amount) * 100}%`}}
+                ></div>
+              </div>
+              
+              {plan.status === 'active' && (
+                <button 
+                  onClick={() => setBnplPaymentModal({planId: plan.id, open: true})}
+                  className="w-full mt-3 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+                >
+                  Pay Installment
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-gray-500">No active Remitance</p>
+      )}
+    </div>
+    
+    {/* How BNPL Works */}
+    <div className="p-4 bg-blue-50 rounded-lg">
+      <h4 className="font-medium mb-2">How Remitance Works</h4>
+      <div className="space-y-2">
+        <div className="flex items-start">
+          <div className="bg-blue-100 p-1 rounded-full mr-2 mt-1">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <p className="text-sm">Shop at partner merchants and select "Pay with Remitance" at checkout</p>
+        </div>
+        <div className="flex items-start">
+          <div className="bg-blue-100 p-1 rounded-full mr-2 mt-1">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <p className="text-sm">Choose your repayment plan (1-12 months)</p>
+        </div>
+        <div className="flex items-start">
+          <div className="bg-blue-100 p-1 rounded-full mr-2 mt-1">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <p className="text-sm">Complete your purchase with no upfront payment</p>
+        </div>
+        <div className="flex items-start">
+          <div className="bg-blue-100 p-1 rounded-full mr-2 mt-1">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <p className="text-sm">Repay in installments with 0% interest</p>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+{activeTab === 'investments' && (
+  <div className="bg-white rounded-lg shadow-md p-6">
+    <h3 className="text-lg font-semibold mb-4">Investment Opportunities</h3>
+    
+    {/* Investment Products */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      {/* Treasury Bills */}
+      <div className="p-4 border rounded-lg hover:shadow-md transition">
+        <div className="flex items-start mb-3">
+          <div className="bg-green-100 p-2 rounded-full mr-3">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+          </div>
+          <div>
+            <h4 className="font-medium">Treasury Bills</h4>
+            <p className="text-sm text-gray-600">Government-backed, low risk</p>
+            <p className="text-xs text-green-600 mt-1">Yield: 12-15% p.a.</p>
+          </div>
+        </div>
+        <button 
+          onClick={() => setInvestmentModal({type: 'treasury', open: true})}
+          className="w-full mt-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+        >
+          Invest Now
+        </button>
+      </div>
+      
+      {/* Bonds */}
+      <div className="p-4 border rounded-lg hover:shadow-md transition">
+        <div className="flex items-start mb-3">
+          <div className="bg-blue-100 p-2 rounded-full mr-3">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+          </div>
+          <div>
+            <h4 className="font-medium">Corporate Bonds</h4>
+            <p className="text-sm text-gray-600">Fixed income securities</p>
+            <p className="text-xs text-green-600 mt-1">Yield: 14-18% p.a.</p>
+          </div>
+        </div>
+        <button 
+          onClick={() => setInvestmentModal({type: 'bonds', open: true})}
+          className="w-full mt-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+        >
+          Invest Now
+        </button>
+      </div>
+      
+      {/* Mutual Funds */}
+      <div className="p-4 border rounded-lg hover:shadow-md transition">
+        <div className="flex items-start mb-3">
+          <div className="bg-purple-100 p-2 rounded-full mr-3">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+          </div>
+          <div>
+            <h4 className="font-medium">Mutual Funds</h4>
+            <p className="text-sm text-gray-600">Diversified portfolio</p>
+            <p className="text-xs text-green-600 mt-1">Return: 15-25% p.a.</p>
+          </div>
+        </div>
+        <button 
+          onClick={() => setInvestmentModal({type: 'funds', open: true})}
+          className="w-full mt-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition"
+        >
+          Invest Now
+        </button>
+      </div>
+      
+      {/* Stocks */}
+      <div className="p-4 border rounded-lg hover:shadow-md transition">
+        <div className="flex items-start mb-3">
+          <div className="bg-yellow-100 p-2 rounded-full mr-3">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+          </div>
+          <div>
+            <h4 className="font-medium">Stocks</h4>
+            <p className="text-sm text-gray-600">Equity investments</p>
+            <p className="text-xs text-green-600 mt-1">Potential return: 20%+ p.a.</p>
+          </div>
+        </div>
+        <button 
+          onClick={() => setInvestmentModal({type: 'stocks', open: true})}
+          className="w-full mt-2 px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition"
+        >
+          Invest Now
+        </button>
+      </div>
+    </div>
+    
+    {/* Active Investments */}
+    <div className="mb-6">
+      <h4 className="font-medium mb-2">Your Investments</h4>
+      {user.investments && user.investments.length > 0 ? (
+        <div className="space-y-3">
+          {user.investments.map((investment, index) => (
+            <div key={index} className="p-4 border rounded-lg">
+              <div className="flex justify-between items-center mb-2">
+                <div>
+                  <p className="font-medium">{investment.type}</p>
+                  <p className="text-sm text-gray-600">Investment ID: {investment.id}</p>
+                </div>
+                <span className={`px-2 py-1 text-xs rounded ${
+                  investment.status === 'active' ? 'bg-green-100 text-green-800' :
+                  investment.status === 'matured' ? 'bg-blue-100 text-blue-800' :
+                  'bg-gray-100 text-gray-800'
+                }`}>
+                  {investment.status}
+                </span>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                <div>
+                  <p className="text-xs text-gray-500">Amount</p>
+                  <p className="font-medium">₦{investment.amount.toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Return</p>
+                  <p className="font-medium">{investment.returnRate}% p.a.</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Maturity</p>
+                  <p className="font-medium">{investment.maturityDate}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Current Value</p>
+                  <p className="font-medium">₦{investment.currentValue.toLocaleString()}</p>
+                </div>
+              </div>
+              
+              {investment.status === 'active' && (
+                <button 
+                  onClick={() => setWithdrawModal({investmentId: investment.id, open: true})}
+                  className="w-full mt-3 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
+                >
+                  Early Withdrawal
+                </button>
+              )}
+              {investment.status === 'matured' && (
+                <button 
+                  onClick={() => {
+                    // Add to wallet balance
+                    setUser(prev => ({
+                      ...prev,
+                      balance: prev.balance + investment.currentValue,
+                      investments: prev.investments.filter(i => i.id !== investment.id),
+                      investmentHistory: [...prev.investmentHistory, investment]
+                    }));
+                    alert(`₦${investment.currentValue.toLocaleString()} has been credited to your wallet`);
+                  }}
+                  className="w-full mt-3 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+                >
+                  Withdraw Funds
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-gray-500">No active investments</p>
+      )}
+    </div>
+    
+    {/* Investment History */}
+    <div>
+      <h4 className="font-medium mb-2">Investment History</h4>
+      {user.investmentHistory && user.investmentHistory.length > 0 ? (
+        <div className="space-y-3">
+          {user.investmentHistory.map((investment, index) => (
+            <div key={index} className="p-3 border rounded-lg flex justify-between items-center">
+              <div>
+                <p className="font-medium">{investment.type}</p>
+                <p className="text-sm text-gray-600">
+                  {investment.maturityDate} | ₦{investment.amount.toLocaleString()} → ₦{investment.currentValue.toLocaleString()}
+                </p>
+              </div>
+              <span className="text-sm text-green-600">
+                +{(((investment.currentValue - investment.amount) / investment.amount) * 100).toFixed(1)}%
+              </span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-gray-500">No investment history</p>
+      )}
+    </div>
+  </div>
+)}
+
+
+
+          {/* Transfer Modal */}
+          {transferModalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+                <h3 className="text-xl font-bold mb-4">{t('make_transfer')}</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-gray-700 mb-1">{t('to')}</label>
+                    <input
+                      type="text"
+                      value={transferDetails.recipient}
+                      onChange={(e) => setTransferDetails({...transferDetails, recipient: e.target.value})}
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                      placeholder={t('enter_recipient')}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 mb-1">{t('amount')} (₦)</label>
+                    <input
+                      type="number"
+                      value={transferDetails.amount}
+                      onChange={(e) => setTransferDetails({...transferDetails, amount: e.target.value})}
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                      placeholder={t('enter_amount')}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 mb-1">{t('purpose')} ({t('optional')})</label>
+                    <input
+                      type="text"
+                      value={transferDetails.purpose}
+                      onChange={(e) => setTransferDetails({...transferDetails, purpose: e.target.value})}
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                      placeholder={t('purpose')}
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end space-x-3 mt-6">
+                  <button
+                    onClick={() => setTransferModalOpen(false)}
+                    className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition duration-300"
+                  >
+                    {t('cancel')}
+                  </button>
+                  <button
+                    onClick={handleTransfer}
+                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-300"
+                  >
+                    {t('send')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Fund Wallet Modal */}
+          {fundWalletModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+                <h3 className="text-xl font-bold mb-4">{t('fund_wallet')}</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-gray-700 mb-1">{t('select_bank')}</label>
+                    <select
+                      value={fundDetails.bank}
+                      onChange={(e) => setFundDetails({...fundDetails, bank: e.target.value})}
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    >
+                      <option value="">Select Bank</option>
+                      {banks.map(bank => (
+                        <option key={bank.code} value={bank.name}>{bank.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 mb-1">{t('fund_amount')} (₦)</label>
+                    <input
+                      type="number"
+                      value={fundDetails.amount}
+                      onChange={(e) => setFundDetails({...fundDetails, amount: e.target.value})}
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                      placeholder={t('enter_amount')}
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end space-x-3 mt-6">
+                  <button
+                    onClick={() => setFundWalletModal(false)}
+                    className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition duration-300"
+                  >
+                    {t('cancel')}
+                  </button>
+                  <button
+                    onClick={handleFundWallet}
+                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-300"
+                  >
+                    {t('fund_now')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Add Bank Modal */}
+          {addBankModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+                <h3 className="text-xl font-bold mb-4">{t('add_bank')}</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-gray-700 mb-1">{t('bank_name')}</label>
+                    <select
+                      value={bankDetails.name}
+                      onChange={(e) => setBankDetails({...bankDetails, name: e.target.value})}
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    >
+                      <option value="">Select Bank</option>
+                      {banks.map(bank => (
+                        <option key={bank.code} value={bank.name}>{bank.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 mb-1">{t('account_number')}</label>
+                    <input
+                      type="text"
+                      value={bankDetails.accountNumber}
+                      onChange={(e) => setBankDetails({...bankDetails, accountNumber: e.target.value})}
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                      placeholder="Enter account number"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 mb-1">{t('account_name')}</label>
+                    <input
+                      type="text"
+                      value={bankDetails.accountName}
+                      onChange={(e) => setBankDetails({...bankDetails, accountName: e.target.value})}
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                      placeholder="Enter account name"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end space-x-3 mt-6">
+                  <button
+                    onClick={() => setAddBankModal(false)}
+                    className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition duration-300"
+                  >
+                    {t('cancel')}
+                  </button>
+                  <button
+                    onClick={handleAddBank}
+                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-300"
+                  >
+                    {t('add_now')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Transaction Detail Modal */}
+          {transactionDetail && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+                <h3 className="text-xl font-bold mb-4">{t('transaction_details')}</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">{t('transaction_id')}:</span>
+                    <span>{transactionDetail.id}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">{t('date')}:</span>
+                    <span>{transactionDetail.date}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">{t('recipient')}:</span>
+                    <span>{transactionDetail.recipient}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">{t('amount')}:</span>
+                    <span>₦{transactionDetail.amount.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">{t('purpose')}:</span>
+                    <span>{transactionDetail.description}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">{t('status')}:</span>
+                    <span className={`${
+                      transactionDetail.status === 'completed' ? 'text-green-600' : 
+                      transactionDetail.status === 'failed' ? 'text-red-600' : 'text-yellow-600'
+                    }`}>
+                      {t(transactionDetail.status)}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex justify-end mt-6">
+                  <button
+                    onClick={() => setTransactionDetail(null)}
+                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-300"
+                  >
+                    {t('close')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Bank Verification Modal */}
+          {bankVerificationModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+                <h3 className="text-xl font-bold mb-4">{t('bank_verification')}</h3>
+                <p className="mb-4">{t('verify_identity')}</p>
+                
+                {user.connectedBanks.filter(b => !b.verified).length > 0 ? (
+                  <div className="space-y-3">
+                    {user.connectedBanks.filter(b => !b.verified).map(bank => (
+                      <div key={bank.name} className="p-3 border rounded-lg">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="font-medium">{bank.name}</p>
+                            <p className="text-sm text-gray-600">****{bank.accountNumber.slice(-4)}</p>
+                          </div>
+                          <button
+                            onClick={() => verifyBank(bank.name)}
+                            className="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-300 text-sm"
+                          >
+                            {t('verify_now')}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500">{t('no_connected_banks')}</p>
+                )}
+                
+                <div className="flex justify-end mt-6">
+                  <button
+                    onClick={() => setBankVerificationModal(false)}
+                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-300"
+                  >
+                    {t('close')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Biometric Data Modal */}
+          {biometricModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+                <h3 className="text-xl font-bold mb-4">{t('biometric_data')}</h3>
+                <div className="space-y-4">
+                  <div className="p-4 border rounded-lg relative">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>{t('face_id')}</span>
+                      </div>
+                      <span className="text-sm bg-gray-100 px-2 py-1 rounded">
+                        {user.biometrics.face ? "*****xyz123" : t('not_enrolled')}
+                      </span>
+                    </div>
+                    {biometricScanning === 'face' && (
+                      <div className="absolute inset-0 bg-blue-50 bg-opacity-50 flex items-center justify-center">
+                        <div className="text-center">
+                          <div className="w-32 h-32 border-4 border-blue-500 rounded-full mx-auto mb-4 relative overflow-hidden">
+                            <div className="biometric-scan absolute top-0 left-0 right-0 h-1 bg-blue-500"></div>
+                          </div>
+                          <p className="text-blue-600 font-medium">{t('scan_face')}</p>
+                        </div>
+                      </div>
+                    )}
+                    <button
+                      onClick={() => scanBiometric('face')}
+                      className="w-full mt-2 px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300 text-sm"
+                    >
+                      {user.biometrics.face ? "Verify Again" : t('enroll_now')}
+                    </button>
+                  </div>
+                  
+                  <div className="p-4 border rounded-lg relative">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-purple-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4" />
+                        </svg>
+                        <span>{t('fingerprint')}</span>
+                      </div>
+                      <span className="text-sm bg-gray-100 px-2 py-1 rounded">
+                        {user.biometrics.fingerprint ? "*****abc456" : t('not_enrolled')}
+                      </span>
+                    </div>
+                    {biometricScanning === 'fingerprint' && (
+                      <div className="absolute inset-0 bg-purple-50 bg-opacity-50 flex items-center justify-center">
+                        <div className="text-center">
+                          <div className="w-32 h-32 bg-purple-100 rounded-lg mx-auto mb-4 flex items-center justify-center relative overflow-hidden">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4" />
+                            </svg>
+                            <div className="biometric-scan absolute top-0 left-0 right-0 h-1 bg-purple-500"></div>
+                          </div>
+                          <p className="text-purple-600 font-medium">{t('scan_fingerprint')}</p>
+                        </div>
+                      </div>
+                    )}
+                    <button
+                      onClick={() => scanBiometric('fingerprint')}
+                      className="w-full mt-2 px-3 py-1 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition duration-300 text-sm"
+                    >
+                      {user.biometrics.fingerprint ? "Verify Again" : t('enroll_now')}
+                    </button>
+                  </div>
+                  
+                  <div className="p-4 border rounded-lg relative">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                        </svg>
+                        <span>{t('voice_recognition')}</span>
+                      </div>
+                      <span className="text-sm bg-gray-100 px-2 py-1 rounded">
+                        {user.biometrics.voice ? "*****def789" : t('not_enrolled')}
+                      </span>
+                    </div>
+                    {biometricScanning === 'voice' && (
+                      <div className="absolute inset-0 bg-green-50 bg-opacity-50 flex items-center justify-center">
+                        <div className="text-center">
+                          <div className="w-32 h-32 bg-green-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-green-500 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                            </svg>
+                          </div>
+                          <p className="text-green-600 font-medium">{t('speak_now')}</p>
+                        </div>
+                      </div>
+                    )}
+                    <button
+                      onClick={() => scanBiometric('voice')}
+                      className="w-full mt-2 px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-300 text-sm"
+                    >
+                      {user.biometrics.voice ? "Verify Again" : t('enroll_now')}
+                    </button>
+                  </div>
+                </div>
+                <div className="flex justify-end mt-6">
+                  <button
+                    onClick={() => setBiometricModal(false)}
+                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-300"
+                  >
+                    {t('close')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* Loan Application Modal */}
+{loanModal.open && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+      <h3 className="text-xl font-bold mb-4">Apply for {loanModal.type} Loan</h3>
+      
+      <div className="space-y-4">
+        <div>
+          <label className="block text-gray-700 mb-1">Loan Amount (₦)</label>
+          <input
+            type="number"
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            placeholder="Enter amount"
+          />
+        </div>
+        
+        <div>
+          <label className="block text-gray-700 mb-1">Repayment Period</label>
+          <select className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+            {loanModal.type === 'personal' ? (
+              <>
+                <option value="12">12 months</option>
+                <option value="24">24 months</option>
+                <option value="36">36 months</option>
+              </>
+            ) : (
+              <>
+                <option value="1">1 month</option>
+                <option value="3">3 months</option>
+                <option value="6">6 months</option>
+              </>
+            )}
+          </select>
+        </div>
+        
+        <div>
+          <label className="block text-gray-700 mb-1">Purpose</label>
+          <textarea
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            rows="3"
+            placeholder="Briefly describe what you need the loan for"
+          ></textarea>
+        </div>
+        
+        <div className="bg-yellow-50 p-3 rounded-md">
+          <p className="text-sm text-yellow-700">
+            By applying, you agree to our terms and conditions. Interest rate: {loanModal.type === 'personal' ? '15%' : '5%'} p.a.
+          </p>
+        </div>
+      </div>
+      
+      <div className="flex justify-end space-x-3 mt-6">
+        <button
+          onClick={() => setLoanModal({open: false, type: ''})}
+          className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition duration-300"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={() => {
+            // Generate a sample loan
+            const newLoan = {
+              id: `loan_${Date.now()}`,
+              type: loanModal.type,
+              amount: 500000,
+              interestRate: loanModal.type === 'personal' ? 15 : 5,
+              dueDate: new Date(Date.now() + (loanModal.type === 'personal' ? 365 : 30) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+              status: 'pending',
+              balance: 500000 * (1 + (loanModal.type === 'personal' ? 0.15 : 0.05)),
+              paidAmount: 0,
+              totalAmount: 500000 * (1 + (loanModal.type === 'personal' ? 0.15 : 0.05))
+            };
+            
+            setUser(prev => ({
+              ...prev,
+              loans: [...prev.loans, newLoan]
+            }));
+            
+            setLoanModal({open: false, type: ''});
+            alert("Loan application submitted for approval");
+          }}
+          className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-300"
+        >
+          Submit Application
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+{/* Loan Repayment Modal */}
+{repaymentModal.open && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+      <h3 className="text-xl font-bold mb-4">Make Loan Repayment</h3>
+      
+      {user.loans.find(l => l.id === repaymentModal.loanId) && (
+        <>
+          <div className="space-y-3 mb-4">
+            <div className="flex justify-between">
+              <span className="text-gray-600">Loan Type:</span>
+              <span>{user.loans.find(l => l.id === repaymentModal.loanId).type}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Outstanding Balance:</span>
+              <span>₦{user.loans.find(l => l.id === repaymentModal.loanId).balance.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Next Payment Due:</span>
+              <span>{user.loans.find(l => l.id === repaymentModal.loanId).dueDate}</span>
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-gray-700 mb-1">Repayment Amount (₦)</label>
+            <input
+              type="number"
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              placeholder="Enter amount"
+            />
+          </div>
+          
+          <div className="flex justify-end space-x-3 mt-6">
+            <button
+              onClick={() => setRepaymentModal({open: false, loanId: ''})}
+              className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition duration-300"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                const loan = user.loans.find(l => l.id === repaymentModal.loanId);
+                const amount = 100000; // Sample repayment amount
+                
+                if (amount > loan.balance) {
+                  alert("Repayment amount exceeds outstanding balance");
+                  return;
+                }
+                
+                if (amount > user.balance) {
+                  alert("Insufficient funds in your wallet");
+                  return;
+                }
+                
+                // Update loan and user balance
+                setUser(prev => {
+                  const updatedLoans = prev.loans.map(l => {
+                    if (l.id === repaymentModal.loanId) {
+                      return {
+                        ...l,
+                        balance: l.balance - amount,
+                        paidAmount: l.paidAmount + amount,
+                        status: l.balance - amount <= 0 ? 'completed' : l.status
+                      };
+                    }
+                    return l;
+                  });
+                  
+                  // Move completed loans to history
+                  const completedLoans = updatedLoans.filter(l => l.status === 'completed');
+                  const activeLoans = updatedLoans.filter(l => l.status !== 'completed');
+                  
+                  return {
+                    ...prev,
+                    balance: prev.balance - amount,
+                    loans: activeLoans,
+                    loanHistory: [...prev.loanHistory, ...completedLoans]
+                  };
+                });
+                
+                setRepaymentModal({open: false, loanId: ''});
+                alert("Repayment successful");
+              }}
+              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-300"
+            >
+              Make Payment
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  </div>
+)}
+
+
+
+{/* BNPL Payment Modal */}
+{bnplPaymentModal.open && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+      <h3 className="text-xl font-bold mb-4">Use Remitance</h3>
+      
+      {user.bnplPlans.find(p => p.id === bnplPaymentModal.planId) && (
+        <>
+          <div className="space-y-3 mb-4">
+            <div className="flex justify-between">
+              <span className="text-gray-600">Merchant:</span>
+              <span>{user.bnplPlans.find(p => p.id === bnplPaymentModal.planId).merchant}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Installment Amount:</span>
+              <span>₦{user.bnplPlans.find(p => p.id === bnplPaymentModal.planId).installmentAmount.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Due Date:</span>
+              <span>{user.bnplPlans.find(p => p.id === bnplPaymentModal.planId).nextPaymentDate}</span>
+            </div>
+          </div>
+          
+          <div className="flex justify-end space-x-3 mt-6">
+            <button
+              onClick={() => setBnplPaymentModal({open: false, planId: ''})}
+              className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition duration-300"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                const plan = user.bnplPlans.find(p => p.id === bnplPaymentModal.planId);
+                const amount = plan.installmentAmount;
+                
+                if (amount > user.balance) {
+                  alert("Insufficient funds in your wallet");
+                  return;
+                }
+                
+                // Update BNPL plan and user balance
+                setUser(prev => {
+                  const updatedPlans = prev.bnplPlans.map(p => {
+                    if (p.id === bnplPaymentModal.planId) {
+                      const newRemaining = p.remaining - amount;
+                      return {
+                        ...p,
+                        remaining: newRemaining,
+                        nextPaymentDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                        status: newRemaining <= 0 ? 'completed' : p.status
+                      };
+                    }
+                    return p;
+                  });
+                  
+                  // Move completed plans to history
+                  const completedPlans = updatedPlans.filter(p => p.status === 'completed');
+                  const activePlans = updatedPlans.filter(p => p.status !== 'completed');
+                  
+                  return {
+                    ...prev,
+                    balance: prev.balance - amount,
+                    bnplPlans: activePlans,
+                    bnplHistory: [...prev.bnplHistory, ...completedPlans]
+                  };
+                });
+                
+                setBnplPaymentModal({open: false, planId: ''});
+                alert("Installment payment successful");
+              }}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300"
+            >
+              Pay Now
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  </div>
+)}
+
+
+
+{/* Investment Application Modal */}
+{investmentModal.open && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+      <h3 className="text-xl font-bold mb-4">Invest in {investmentModal.type}</h3>
+      
+      <div className="space-y-4">
+        <div>
+          <label className="block text-gray-700 mb-1">Investment Amount (₦)</label>
+          <input
+            type="number"
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            placeholder="Minimum ₦10,000"
+          />
+        </div>
+        
+        <div>
+          <label className="block text-gray-700 mb-1">Investment Period</label>
+          <select className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+            <option value="3">3 months</option>
+            <option value="6">6 months</option>
+            <option value="12">12 months</option>
+            {investmentModal.type === 'treasury' && <option value="24">24 months</option>}
+            {investmentModal.type === 'bonds' && <option value="36">36 months</option>}
+          </select>
+        </div>
+        
+        <div className="bg-blue-50 p-3 rounded-md">
+          <p className="text-sm text-blue-700">
+            Expected return: {
+              investmentModal.type === 'treasury' ? '12-15%' :
+              investmentModal.type === 'bonds' ? '14-18%' :
+              investmentModal.type === 'funds' ? '15-25%' : '20%+'
+            } p.a.
+          </p>
+        </div>
+      </div>
+      
+      <div className="flex justify-end space-x-3 mt-6">
+        <button
+          onClick={() => setInvestmentModal({open: false, type: ''})}
+          className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition duration-300"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={() => {
+            const amount = 100000; // Sample investment amount
+            const returnRate = 
+              investmentModal.type === 'treasury' ? 13.5 :
+              investmentModal.type === 'bonds' ? 16 :
+              investmentModal.type === 'funds' ? 20 : 25;
+            
+            if (amount > user.balance) {
+              alert("Insufficient funds in your wallet");
+              return;
+            }
+            
+            // Create new investment
+            const newInvestment = {
+              id: `inv_${Date.now()}`,
+              type: investmentModal.type,
+              amount: amount,
+              returnRate: returnRate,
+              maturityDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+              status: 'active',
+              currentValue: amount * (1 + returnRate/100)
+            };
+            
+            setUser(prev => ({
+              ...prev,
+              balance: prev.balance - amount,
+              investments: [...prev.investments, newInvestment]
+            }));
+            
+            setInvestmentModal({open: false, type: ''});
+            alert("Investment created successfully");
+          }}
+          className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-300"
+        >
+          Invest Now
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+{/* Investment Withdrawal Modal */}
+{withdrawModal.open && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+      <h3 className="text-xl font-bold mb-4">Withdraw Investment</h3>
+      
+      {user.investments.find(i => i.id === withdrawModal.investmentId) && (
+        <>
+          <div className="space-y-3 mb-4">
+            <div className="flex justify-between">
+              <span className="text-gray-600">Investment Type:</span>
+              <span>{user.investments.find(i => i.id === withdrawModal.investmentId).type}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Original Amount:</span>
+              <span>₦{user.investments.find(i => i.id === withdrawModal.investmentId).amount.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Current Value:</span>
+              <span>₦{user.investments.find(i => i.id === withdrawModal.investmentId).currentValue.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Maturity Date:</span>
+              <span>{user.investments.find(i => i.id === withdrawModal.investmentId).maturityDate}</span>
+            </div>
+          </div>
+          
+          <div className="bg-yellow-50 p-3 rounded-md mb-4">
+            <p className="text-sm text-yellow-700">
+              Early withdrawal may incur penalties and reduced returns. Are you sure you want to proceed?
+            </p>
+          </div>
+          
+          <div className="flex justify-end space-x-3 mt-6">
+            <button
+              onClick={() => setWithdrawModal({open: false, investmentId: ''})}
+              className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition duration-300"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                const investment = user.investments.find(i => i.id === withdrawModal.investmentId);
+                const withdrawalAmount = investment.currentValue * 0.9; // 10% penalty
+                
+                // Update user balance and investments
+                setUser(prev => ({
+                  ...prev,
+                  balance: prev.balance + withdrawalAmount,
+                  investments: prev.investments.filter(i => i.id !== withdrawModal.investmentId),
+                  investmentHistory: [...prev.investmentHistory, {
+                    ...investment,
+                    currentValue: withdrawalAmount,
+                    status: 'early_withdrawal'
+                  }]
+                }));
+                
+                setWithdrawModal({open: false, investmentId: ''});
+                alert(`₦${withdrawalAmount.toLocaleString()} has been credited to your wallet (10% penalty applied)`);
+              }}
+              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-300"
+            >
+              Confirm Withdrawal
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  </div>
+)}
+          
+          {/* Footer */}
+          <footer className="bg-gray-800 text-white p-4 text-center">
+            <p>© 2023 ONPIN - National Identity Wallet</p>
+          </footer>
+        </div>
+      );
+    }
+
+    // Render the app
+    ReactDOM.render(<DashboardApp />, document.getElementById('root'));
+  </script>
+</body>
+</html>
