@@ -1622,6 +1622,32 @@
           if (score >= 670) return 'fair';
           return 'poor';
         },
+
+         calculateCreditScoreWithCollateral: (user) => {
+    let baseScore = CreditScoringSystem.calculateCreditScore(user);
+    
+    // Add collateral boost (up to 50 points)
+    if (user.collateralValue > 0) {
+      const collateralBoost = Math.min(user.collateralValue / 100000, 50);
+      return Math.min(baseScore + collateralBoost, 850);
+    }
+    
+    return baseScore;
+  },
+  
+  getLoanEligibilityWithCollateral: (score, user) => {
+    const baseEligibility = CreditScoringSystem.getLoanEligibility(score, user);
+    
+    if (user.collateralValue > 0) {
+      return {
+        ...baseEligibility,
+        maxAmount: baseEligibility.maxAmount + (user.collateralValue * 0.7), // 70% LTV
+        interestRate: Math.max(baseEligibility.interestRate - 2, 8) // Reduce interest rate
+      };
+    }
+    
+    return baseEligibility;
+  },
         
         getLoanEligibility: (score, user) => {
           const minScore = 600;
@@ -1695,6 +1721,18 @@
         const [claimDescription, setClaimDescription] = React.useState('');
 
 
+        const [tokenizedModalOpen, setTokenizedModalOpen] = React.useState(false);
+        const [nftModalOpen, setNftModalOpen] = React.useState(false);
+        const [stablecoinModalOpen, setStablecoinModalOpen] = React.useState(false);
+        const [carbonModalOpen, setCarbonModalOpen] = React.useState(false);
+        const [realEstateModalOpen, setRealEstateModalOpen] = React.useState(false);
+        const [commodityModalOpen, setCommodityModalOpen] = React.useState(false);
+        const [agriculturalModalOpen, setAgriculturalModalOpen] = React.useState(false);
+
+        const [collateralModalOpen, setCollateralModalOpen] = React.useState(false);
+        const [aiVerificationModalOpen, setAiVerificationModalOpen] = React.useState(false);
+        const [verificationStatus, setVerificationStatus] = React.useState('idle');
+        const [verificationProgress, setVerificationProgress] = React.useState(0);
         
         // Modal states
         const [transferModalOpen, setTransferModalOpen] = React.useState(false);
@@ -1718,6 +1756,43 @@
           program: '',
           amount: ''
         });
+
+
+        // State for each tokenized asset type
+      const [nftMarketplace, setNftMarketplace] = React.useState([
+        { id: 1, name: 'Digital Art #1', price: 50000, creator: 'Artist1', image: '🎨' },
+        { id: 2, name: 'Collectible #1', price: 25000, creator: 'Creator2', image: '🖼️' },
+        { id: 3, name: 'Rare Item #1', price: 100000, creator: 'Artist3', image: '💎' }
+      ]);
+
+      const [stablecoinOptions, setStablecoinOptions] = React.useState([
+        { id: 'ngnt', name: 'NGNT', rate: 1, balance: 0 },
+        { id: 'usdt', name: 'USDT', rate: 1500, balance: 0 }
+      ]);
+
+      const [carbonProjects, setCarbonProjects] = React.useState([
+        { id: 1, name: 'Reforestation Project', price: 5000, tons: 1, location: 'Cross River' },
+        { id: 2, name: 'Solar Energy Project', price: 7500, tons: 1, location: 'Kano' },
+        { id: 3, name: 'Clean Cookstoves', price: 3000, tons: 1, location: 'Lagos' }
+      ]);
+
+      const [realEstateProperties, setRealEstateProperties] = React.useState([
+        { id: 1, name: 'Lagos Apartment', price: 500000, tokens: 1000, value: 500 },
+        { id: 2, name: 'Abuja Commercial', price: 1000000, tokens: 2000, value: 500 },
+        { id: 3, name: 'Portharcourt Land', price: 750000, tokens: 1500, value: 500 }
+      ]);
+
+      const [commodityOptions, setCommodityOptions] = React.useState([
+        { id: 'gold', name: 'Gold', price: 85000, unit: 'gram', balance: 0 },
+        { id: 'silver', name: 'Silver', price: 1200, unit: 'gram', balance: 0 },
+        { id: 'oil', name: 'Crude Oil', price: 85000, unit: 'barrel', balance: 0 }
+      ]);
+
+      const [agriculturalProjects, setAgriculturalProjects] = React.useState([
+        { id: 1, name: 'Rice Farm', price: 250000, yield: '15%', duration: '6 months' },
+        { id: 2, name: 'Cassava Plantation', price: 180000, yield: '12%', duration: '9 months' },
+        { id: 3, name: 'Poultry Farm', price: 350000, yield: '18%', duration: '4 months' }
+      ]);
 
         const welfarePrograms = [
           { id: 'poverty_alleviation', name: 'Poverty Alleviation Fund', amount: 50000 },
@@ -1747,8 +1822,13 @@
         const [airtimeDetails, setAirtimeDetails] = React.useState({
           network: '', phone: '', amount: ''
         });
+
         const [loanApplication, setLoanApplication] = React.useState({
-          type: '', amount: '', purpose: '', income: ''
+          type: '', 
+          amount: '', 
+          purpose: '', 
+          income: '',
+          collateral: null
         });
         const [investmentDetails, setInvestmentDetails] = React.useState({
           type: '', amount: '', duration: ''
@@ -1762,6 +1842,7 @@
         const [emotionalData, setEmotionalData] = React.useState({
           mood: 50, stress: 30, happiness: 70, anxiety: 20
         });
+
         
         // Biometric states
         const [biometricScanning, setBiometricScanning] = React.useState(null);
@@ -1938,11 +2019,28 @@
         
         // Sample data
         const banks = [
-          { name: "Access Bank", code: "044" },
-          { name: "Zenith Bank", code: "057" },
-          { name: "GTBank", code: "058" },
-          { name: "First Bank", code: "011" },
-          { name: "UBA", code: "033" }
+                      { name: "Access Bank", code: "044" },
+            { name: "Diamond Bank", code: "063" },
+            { name: "Ecobank", code: "050" },
+            { name: "Enterprise Bank", code: "084" },
+            { name: "Fidelity Bank", code: "070" },
+            { name: "First Bank of Nigeria", code: "011" },
+            { name: "FCMB", code: "214" },
+            { name: "GTBank", code: "058" },
+            { name: "Heritage Bank", code: "030" },
+            { name: "Jaiz Bank", code: "301" },
+            { name: "Keystone Bank", code: "082" },
+            { name: "Mainstreet Bank", code: "014" },
+            { name: "Polaris Bank", code: "076" },
+            { name: "Providus Bank", code: "101" },
+            { name: "Stanbic IBTC", code: "221" },
+            { name: "Sterling Bank", code: "232" },
+            { name: "UBA", code: "033" },
+            { name: "e-Naira", code: "034" },
+            { name: "Union Bank", code: "032" },
+            { name: "Unity Bank", code: "215" },
+            { name: "Wema Bank", code: "035" },
+            { name: "Zenith Bank", code: "057" }
         ];
         
         const billers = [
@@ -2019,6 +2117,50 @@
         currentValue: 227000
       }
     ],
+    // Add these properties to the user object initialization
+taxId: user.taxId || 'TIN-123456789',
+dob: user.dob || '1990-01-01',
+gender: user.gender || 'Male',
+stateOfOrigin: user.stateOfOrigin || 'Lagos',
+welfareApplications: user.welfareApplications || [],
+votingHistory: user.votingHistory || [],
+pension: user.pension || {
+  contributions: 1200000,
+  currentValue: 1500000,
+  monthlyPension: 75000,
+  retirementDate: '2035-06-30'
+},
+mortgage: user.mortgage || null,
+savingsAccounts: user.savingsAccounts || [
+  {
+    id: 'sav-1',
+    name: 'Regular Savings',
+    accountNumber: 'SAV123456789',
+    balance: 150000,
+    interestRate: 1.5
+  }
+],
+
+
+
+collateralValue: user.collateralValue || 0,
+collateralAssets: user.collateralAssets || [],
+
+// In your useEffect where user data is initialized
+nfts: user.nfts || [],
+nftsValue: user.nftsValue || 0,
+stablecoins: user.stablecoins || { ngnt: 0, usdt: 0 },
+carbonCredits: user.carbonCredits || 0,
+carbonValue: user.carbonValue || 0,
+realEstateTokens: user.realEstateTokens || [],
+realEstateValue: user.realEstateValue || 0,
+commodityTokens: user.commodityTokens || { gold: 0, silver: 0, oil: 0 },
+commodityValue: user.commodityValue || 0,
+agriculturalTokens: user.agriculturalTokens || [],
+agriculturalValue: user.agriculturalValue || 0,
+tokenizedTransactions: user.tokenizedTransactions || [],
+
+
     insurancePolicies: user.insurancePolicies || [
       {
         id: 'ins_1',
@@ -2170,31 +2312,60 @@
           alert(t('topup_successful'));
         };
 
-        const handleLoanApplication = () => {
-          if (!loanApplication.type || !loanApplication.amount || !loanApplication.purpose) {
-            alert('Please fill all required fields');
-            return;
-          }
-          
-          const newLoan = {
-            id: `loan_${Date.now()}`,
-            type: loanApplication.type,
-            amount: parseFloat(loanApplication.amount),
-            purpose: loanApplication.purpose,
-            monthlyIncome: parseFloat(loanApplication.income),
-            status: 'pending',
-            applicationDate: new Date().toISOString().split('T')[0],
-            interestRate: 15
-          };
-          
-          updateUser({
-            loans: [...user.loans, newLoan]
-          });
-          
-          setLoanModal(false);
-          setLoanApplication({ type: '', amount: '', purpose: '', income: '' });
-          alert(t('loan_applied'));
-        };
+const handleLoanApplication = () => {
+  if (!loanApplication.type || !loanApplication.amount || !loanApplication.purpose) {
+    alert('Please fill all required fields');
+    return;
+  }
+  
+  const loanProduct = loanProducts.find(p => p.type === loanApplication.type);
+  const amount = parseFloat(loanApplication.amount);
+  
+  // Check if loan amount exceeds maximum for this loan type
+  if (amount > loanProduct.max) {
+    alert(`Loan amount cannot exceed ₦${loanProduct.max.toLocaleString()} for ${loanProduct.name}`);
+    return;
+  }
+  
+  // Check collateral requirements for loans that need it
+  if (loanProduct.requiresCollateral) {
+    if (!loanApplication.collateralId) {
+      alert('This loan requires collateral. Please select collateral assets.');
+      return;
+    }
+    
+    const selectedCollateral = user.collateralAssets.find(a => a.id === loanApplication.collateralId);
+    
+    if (selectedCollateral.value < amount * 1.5) {
+      alert(`Insufficient collateral. You need assets worth at least ₦${(amount * 1.5).toLocaleString()} for this loan.`);
+      return;
+    }
+  }
+  
+  const newLoan = {
+    id: `loan_${Date.now()}`,
+    type: loanApplication.type,
+    amount: amount,
+    purpose: loanApplication.purpose,
+    monthlyIncome: parseFloat(loanApplication.income || 0),
+    status: 'pending',
+    applicationDate: new Date().toISOString().split('T')[0],
+    interestRate: parseFloat(loanProduct.rate.replace('%', '')),
+    requiresCollateral: loanProduct.requiresCollateral,
+    collateral: loanApplication.collateralId ? {
+      id: loanApplication.collateralId,
+      value: loanApplication.collateralValue
+    } : null
+  };
+  
+  updateUser({
+    loans: [...(user.loans || []), newLoan]
+  });
+  
+  setLoanModal(false);
+  setLoanApplication({ type: '', amount: '', purpose: '', income: '', collateralId: '', collateralValue: 0 });
+  alert('Loan application submitted successfully!');
+};
 
         const handleInvestment = () => {
           if (!investmentDetails.type || !investmentDetails.amount) {
@@ -2705,7 +2876,6 @@
                       </div>
                       <div>
                         <h2 className="text-xl font-bold">{t('welcome_message').replace('{{name}}', user.name)}</h2>
-                        <p className="text-gray-600">{user.location ? user.location : t('country_default')}</p>
                         <div className="flex flex-wrap gap-2 mt-2">
                           <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">{t('nin_label')}: {user.nin}</span>
                           <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">{t('did_label')}: {user.did}</span>
@@ -2755,6 +2925,11 @@
                       { key: 'consent', label: t('consent_tab') },
                       { key: 'lifecycle', label: t('lifecycle_tab') },
                       { key: 'loans', label: t('loan_application') },
+                      { key: 'welfare', label: 'Welfare Disbursements' },
+                      { key: 'evoting', label: 'E-Voting' },
+                      { key: 'pension', label: 'Pension' },
+                      { key: 'mortgage', label: 'Mortgage' },
+                      { key: 'savings', label: 'Savings' },
                       { key: 'remittance', label: t('remittance_services') },
                       { key: 'investments', label: t('investment_options') },
                       { key: 'insurance', label: t('insurance_policies') },
@@ -2828,6 +3003,55 @@
                             </svg>
                             <span className="text-sm">{t('credit_score')}</span>
                             <span className="text-xs text-purple-600">{creditScore}</span>
+                          </div>
+                        </button>
+
+                        {/* Tokenized Quick Actions */}
+                        <button
+                          onClick={() => setActiveTab('tokenized')}
+                          className="bg-indigo-50 p-4 rounded-lg hover:bg-indigo-100 transition duration-300"
+                        >
+                          <div className="flex flex-col items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-indigo-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span className="text-sm">Tokenized Assets</span>
+                          </div>
+                        </button>
+
+                        <button
+                          onClick={() => setNftModalOpen(true)}
+                          className="bg-pink-50 p-4 rounded-lg hover:bg-pink-100 transition duration-300"
+                        >
+                          <div className="flex flex-col items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-pink-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span className="text-sm">NFT Marketplace</span>
+                          </div>
+                        </button>
+
+                        <button
+                          onClick={() => setStablecoinModalOpen(true)}
+                          className="bg-teal-50 p-4 rounded-lg hover:bg-teal-100 transition duration-300"
+                        >
+                          <div className="flex flex-col items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-teal-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            <span className="text-sm">Stablecoins</span>
+                          </div>
+                        </button>
+
+                        <button
+                          onClick={() => setCarbonModalOpen(true)}
+                          className="bg-emerald-50 p-4 rounded-lg hover:bg-emerald-100 transition duration-300"
+                        >
+                          <div className="flex flex-col items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-emerald-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                            </svg>
+                            <span className="text-sm">Carbon Credits</span>
                           </div>
                         </button>
                       </div>
@@ -2940,147 +3164,480 @@
                   </div>
                 )}
 
-                {/* Credit Score Tab */}
-                {activeTab === 'credit' && (
-                  <div className="bg-white rounded-lg shadow-md p-6">
-                    <h3 className="text-lg font-semibold mb-6">{t('credit_score')}</h3>
-                    
-                    {/* Credit Score Gauge */}
-                    <div className="text-center mb-8">
-                      <div className="credit-gauge">
-                        <svg viewBox="0 0 200 100">
-                          <path
-                            d="M 20 80 A 80 80 0 0 1 180 80"
-                            fill="none"
-                            stroke="#e5e7eb"
-                            strokeWidth="20"
-                          />
-                          <path
-                            d="M 20 80 A 80 80 0 0 1 180 80"
-                            fill="none"
-                            stroke={
-                              creditRating === 'excellent' ? '#10b981' :
-                              creditRating === 'good' ? '#3b82f6' :
-                              creditRating === 'fair' ? '#f59e0b' : '#ef4444'
-                            }
-                            strokeWidth="20"
-                            strokeDasharray={`${(creditScore - 300) / 550 * 251.2} 251.2`}
-                            strokeLinecap="round"
-                          />
-                        </svg>
-                        <div className="credit-score-text">
-                          <div className="text-4xl font-bold">{creditScore}</div>
-                          <div className="text-lg text-gray-600">{t(creditRating)}</div>
-                        </div>
-                      </div>
-                    </div>
+                {/* Tokenized Assets Tab */}
+{activeTab === 'tokenized' && (
+  <div className="space-y-6">
+    <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold">Tokenized Assets</h3>
+      </div>
 
-                    {/* Credit Details Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                      <div className="p-4 border rounded-lg">
-                        <h4 className="font-medium mb-2">{t('loan_eligibility')}</h4>
-                        <div className="flex items-center space-x-2 mb-2">
-                          <span className={`px-2 py-1 text-xs rounded ${
-                            loanEligibility.eligible ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                          }`}>
-                            {loanEligibility.eligible ? t('eligible') : t('not_eligible')}
-                          </span>
-                        </div>
-                        {loanEligibility.eligible && (
-                          <div className="text-sm text-gray-600">
-                            <p>Max Amount: ₦{loanEligibility.maxAmount.toLocaleString()}</p>
-                            <p>Interest Rate: {loanEligibility.interestRate}% p.a.</p>
-                          </div>
-                        )}
-                      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* NFT Section */}
+        <div className="p-4 border rounded-lg">
+          <div className="flex items-center mb-3">
+            <div className="w-10 h-10 bg-pink-100 rounded-full flex items-center justify-center mr-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h4 className="font-medium">NFT Marketplace</h4>
+          </div>
+          <p className="text-sm text-gray-600 mb-4">Buy, sell, and trade digital collectibles and artwork</p>
+          <div className="space-y-2 mb-4">
+            <div className="flex justify-between text-sm">
+              <span>Your NFTs:</span>
+              <span className="font-medium">{user.nfts?.length || 0}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span>Total Value:</span>
+              <span className="font-medium">₦{(user.nftsValue || 0).toLocaleString()}</span>
+            </div>
+          </div>
+          <button
+            onClick={() => setNftModalOpen(true)}
+            className="w-full px-4 py-2 bg-pink-600 text-white rounded-md hover:bg-pink-700 transition"
+          >
+            Explore NFTs
+          </button>
 
-                      <div className="p-4 border rounded-lg">
-                        <h4 className="font-medium mb-2">{t('credit_history')}</h4>
-                        <div className="text-sm text-gray-600">
-                          <p>Total Transactions: {user.transactions.length}</p>
-                          <p>Completed Payments: {user.transactions.filter(t => t.status === 'completed').length}</p>
-                          <p>Account Age: {user.createdAt ? Math.floor((Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24)) : 0} days</p>
-                        </div>
-                      </div>
-                    </div>
 
-                    {/* Credit Factors */}
-                    <div className="mb-8">
-                      <h4 className="font-medium mb-4">{t('credit_factors')}</h4>
-                      <div className="space-y-4">
-                        {[
-                          { key: 'paymentHistory', label: t('payment_history'), value: creditFactors.paymentHistory, color: 'bg-green-600' },
-                          { key: 'creditUtilization', label: t('credit_utilization'), value: creditFactors.creditUtilization, color: 'bg-blue-600' },
-                          { key: 'creditLength', label: t('credit_length'), value: Math.min(creditFactors.creditLength / 60 * 100, 100), color: 'bg-purple-600' },
-                          { key: 'creditMix', label: t('credit_mix'), value: creditFactors.creditMix, color: 'bg-yellow-600' }
-                        ].map(factor => (
-                          <div key={factor.key}>
-                            <div className="flex justify-between text-sm mb-1">
-                              <span>{factor.label}</span>
-                              <span>{factor.value.toFixed(1)}%</span>
-                            </div>
-                            <div className="w-full bg-gray-200 rounded-full h-2">
-                              <div 
-                                className={`${factor.color} h-2 rounded-full progress-bar`}
-                                style={{width: `${factor.value}%`}}
-                              ></div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+        </div>
 
-                    {/* Actions */}
-                    <div className="flex flex-wrap gap-4">
-                      <button
-                        onClick={() => {
-                          const report = CreditScoringSystem.generateCreditReport(user);
-                          const reportData = JSON.stringify(report, null, 2);
-                          const blob = new Blob([reportData], { type: 'application/json' });
-                          const url = URL.createObjectURL(blob);
-                          const a = document.createElement('a');
-                          a.href = url;
-                          a.download = `credit_report_${user.did}.json`;
-                          a.click();
-                          URL.revokeObjectURL(url);
-                        }}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-                      >
-                        {t('download_report')}
-                      </button>
-                      <button
-                        onClick={() => alert('Credit report shared with lender')}
-                        className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
-                      >
-                        {t('share_with_lender')}
-                      </button>
-                      <button
-                        onClick={() => {
-                          const key = CreditScoringSystem.generateAPIKey(user.did);
-                          setApiKey(key);
-                          updateUser({ apiKey: key });
-                          alert(`API Key generated: ${key}`);
-                        }}
-                        className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition"
-                      >
-                        {t('generate_api_key')}
-                      </button>
-                    </div>
+        {/* Stablecoin Section */}
+        <div className="p-4 border rounded-lg">
+          <div className="flex items-center mb-3">
+            <div className="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center mr-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            <h4 className="font-medium">Stablecoins</h4>
+          </div>
+          <p className="text-sm text-gray-600 mb-4">Digital currencies pegged to stable assets like the Naira</p>
+          <div className="space-y-2 mb-4">
+            <div className="flex justify-between text-sm">
+              <span>NGNT Balance:</span>
+              <span className="font-medium">₦{(user.stablecoins?.ngnt || 0).toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span>USDT Balance:</span>
+              <span className="font-medium">${(user.stablecoins?.usdt || 0).toLocaleString()}</span>
+            </div>
+          </div>
+          <button
+            onClick={() => setStablecoinModalOpen(true)}
+            className="w-full px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition"
+          >
+            Manage Stablecoins
+          </button>
+        </div>
 
-                    {/* API Key Display */}
-                    {(apiKey || user.apiKey) && (
-                      <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                        <h4 className="font-medium mb-2">{t('api_access')}</h4>
-                        <div className="font-mono text-sm bg-white p-2 rounded border">
-                          {apiKey || user.apiKey}
-                        </div>
-                        <p className="text-xs text-gray-600 mt-2">
-                          Use this API key to access credit scoring data for lending decisions.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
+        {/* Carbon Credits Section */}
+        <div className="p-4 border rounded-lg">
+          <div className="flex items-center mb-3">
+            <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center mr-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+              </svg>
+            </div>
+            <h4 className="font-medium">Carbon Credits</h4>
+          </div>
+          <p className="text-sm text-gray-600 mb-4">Trade carbon offset credits and support environmental projects</p>
+          <div className="space-y-2 mb-4">
+            <div className="flex justify-between text-sm">
+              <span>Your Credits:</span>
+              <span className="font-medium">{user.carbonCredits || 0} tons</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span>Total Value:</span>
+              <span className="font-medium">₦{(user.carbonValue || 0).toLocaleString()}</span>
+            </div>
+          </div>
+          <button
+            onClick={() => setCarbonModalOpen(true)}
+            className="w-full px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition"
+          >
+            Trade Carbon Credits
+          </button>
+        </div>
+
+        {/* Real Estate Tokenization */}
+        <div className="p-4 border rounded-lg">
+          <div className="flex items-center mb-3">
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+            </div>
+            <h4 className="font-medium">Real Estate Tokens</h4>
+          </div>
+          <p className="text-sm text-gray-600 mb-4">Fractional ownership of real estate properties</p>
+          <div className="space-y-2 mb-4">
+            <div className="flex justify-between text-sm">
+              <span>Properties Owned:</span>
+              <span className="font-medium">{user.realEstateTokens?.length || 0}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span>Total Value:</span>
+              <span className="font-medium">₦{(user.realEstateValue || 0).toLocaleString()}</span>
+            </div>
+          </div>
+          <button
+  onClick={() => setRealEstateModalOpen(true)}
+  className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+>
+  Explore Properties
+</button>
+        </div>
+
+        {/* Commodity Tokens */}
+        <div className="p-4 border rounded-lg">
+          <div className="flex items-center mb-3">
+            <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center mr-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+              </svg>
+            </div>
+            <h4 className="font-medium">Commodity Tokens</h4>
+          </div>
+          <p className="text-sm text-gray-600 mb-4">Tokenized gold, silver, and agricultural products</p>
+          <div className="space-y-2 mb-4">
+            <div className="flex justify-between text-sm">
+              <span>Gold Holdings:</span>
+              <span className="font-medium">{user.commodityTokens?.gold || 0} oz</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span>Total Value:</span>
+              <span className="font-medium">₦{(user.commodityValue || 0).toLocaleString()}</span>
+            </div>
+          </div>
+         <button
+  onClick={() => setCommodityModalOpen(true)}
+  className="w-full px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition"
+>
+  Trade Commodities
+</button>
+        </div>
+
+        {/* Agricultural Tokens */}
+        <div className="p-4 border rounded-lg">
+          <div className="flex items-center mb-3">
+            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.701 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18zm-3-9v-2a2 2 0 00-2-2H8a2 2 0 00-2 2v2h12z" />
+              </svg>
+            </div>
+            <h4 className="font-medium">Agricultural Tokens</h4>
+          </div>
+          <p className="text-sm text-gray-600 mb-4">Invest in tokenized farm produce and agricultural projects</p>
+          <div className="space-y-2 mb-4">
+            <div className="flex justify-between text-sm">
+              <span>Active Farms:</span>
+              <span className="font-medium">{user.agriculturalTokens?.length || 0}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span>Estimated Yield:</span>
+              <span className="font-medium">₦{(user.agriculturalValue || 0).toLocaleString()}</span>
+            </div>
+          </div>
+         <button
+  onClick={() => setAgriculturalModalOpen(true)}
+  className="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+>
+  Invest in Agriculture
+</button>
+        </div>
+      </div>
+    </div>
+
+    {/* Recent Tokenized Transactions */}
+    <div className="bg-white rounded-lg shadow-md p-6">
+      <h3 className="text-lg font-semibold mb-4">Recent Tokenized Transactions</h3>
+      <div className="space-y-3">
+        {user.tokenizedTransactions?.slice(0, 5).map(txn => (
+          <div
+            key={txn.id}
+            className="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer"
+            onClick={() => setTransactionDetail(txn)}
+          >
+            <div className="flex items-center">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center mr-3 ${
+                txn.type === 'credit' ? 'bg-green-100' : 'bg-red-100'
+              }`}>
+                <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${
+                  txn.type === 'credit' ? 'text-green-600' : 'text-red-600'
+                }`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                    d={txn.type === 'credit' ? "M12 6v6m0 0v6m0-6h6m-6 0H6" : "M20 12H4"} />
+                </svg>
+              </div>
+              <div>
+                <p className="font-medium">{txn.description}</p>
+                <p className="text-sm text-gray-500">{txn.date} • {txn.assetType}</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className={`font-semibold ${
+                txn.type === 'credit' ? 'text-green-600' : 'text-red-600'
+              }`}>
+                {txn.type === 'credit' ? '+' : '-'}₦{txn.amount.toLocaleString()}
+              </p>
+              <span className={`text-xs px-2 py-1 rounded ${
+                txn.status === 'completed' ? 'bg-green-100 text-green-800' :
+                txn.status === 'failed' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
+              }`}>
+                {t(txn.status)}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+)}
+
+{/* Credit Score Tab */}
+{activeTab === 'credit' && (
+  <div className="bg-white rounded-lg shadow-md p-6">
+    <h3 className="text-lg font-semibold mb-6">{t('credit_score')}</h3>
+    
+    {/* Credit Score Gauge */}
+    <div className="text-center mb-8">
+      <div className="credit-gauge">
+        <svg viewBox="0 0 200 100">
+          <path
+            d="M 20 80 A 80 80 0 0 1 180 80"
+            fill="none"
+            stroke="#e5e7eb"
+            strokeWidth="20"
+          />
+          <path
+            d="M 20 80 A 80 80 0 0 1 180 80"
+            fill="none"
+            stroke={
+              creditRating === 'excellent' ? '#10b981' :
+              creditRating === 'good' ? '#3b82f6' :
+              creditRating === 'fair' ? '#f59e0b' : '#ef4444'
+            }
+            strokeWidth="20"
+            strokeDasharray={`${(creditScore - 300) / 550 * 251.2} 251.2`}
+            strokeLinecap="round"
+          />
+        </svg>
+        <div className="credit-score-text">
+          <div className="text-4xl font-bold">{creditScore}</div>
+          <div className="text-lg text-gray-600">{t(creditRating)}</div>
+        </div>
+      </div>
+    </div>
+
+    {/* Credit Details Grid */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div className="p-4 border rounded-lg">
+        <h4 className="font-medium mb-2">{t('loan_eligibility')}</h4>
+        <div className="flex items-center space-x-2 mb-2">
+          <span className={`px-2 py-1 text-xs rounded ${
+            loanEligibility.eligible ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+          }`}>
+            {loanEligibility.eligible ? t('eligible') : t('not_eligible')}
+          </span>
+        </div>
+        {loanEligibility.eligible && (
+          <div className="text-sm text-gray-600">
+            <p>Max Amount: ₦{loanEligibility.maxAmount.toLocaleString()}</p>
+            <p>Interest Rate: {loanEligibility.interestRate}% p.a.</p>
+            {user.collateralValue > 0 && (
+              <p className="text-green-600 font-medium">
+                + Collateral Boost: ₦{(user.collateralValue * 0.7).toLocaleString()} additional
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="p-4 border rounded-lg">
+        <h4 className="font-medium mb-2">{t('credit_history')}</h4>
+        <div className="text-sm text-gray-600">
+          <p>Total Transactions: {user.transactions.length}</p>
+          <p>Completed Payments: {user.transactions.filter(t => t.status === 'completed').length}</p>
+          <p>Account Age: {user.createdAt ? Math.floor((Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24)) : 0} days</p>
+          {user.collateralValue > 0 && (
+            <p className="text-green-600 font-medium">
+              Collateral Value: ₦{user.collateralValue.toLocaleString()}
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+
+    {/* Credit Factors */}
+    <div className="mb-8">
+      <h4 className="font-medium mb-4">{t('credit_factors')}</h4>
+      <div className="space-y-4">
+        {[
+          { key: 'paymentHistory', label: t('payment_history'), value: creditFactors.paymentHistory, color: 'bg-green-600' },
+          { key: 'creditUtilization', label: t('credit_utilization'), value: creditFactors.creditUtilization, color: 'bg-blue-600' },
+          { key: 'creditLength', label: t('credit_length'), value: Math.min(creditFactors.creditLength / 60 * 100, 100), color: 'bg-purple-600' },
+          { key: 'creditMix', label: t('credit_mix'), value: creditFactors.creditMix, color: 'bg-yellow-600' },
+          { key: 'collateral', label: 'Collateral Value', value: user.collateralValue > 0 ? Math.min((user.collateralValue / 5000000) * 100, 100) : 0, color: 'bg-teal-600' }
+        ].map(factor => (
+          <div key={factor.key}>
+            <div className="flex justify-between text-sm mb-1">
+              <span>{factor.label}</span>
+              <span>{factor.value.toFixed(1)}%</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                className={`${factor.color} h-2 rounded-full progress-bar`}
+                style={{width: `${factor.value}%`}}
+              ></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* Collateral Section */}
+    <div className="mb-8 p-4 border rounded-lg bg-blue-50">
+      <h4 className="font-medium mb-4 text-blue-800">Collateral Verification</h4>
+      
+      {user.collateralValue > 0 ? (
+        <div>
+          <div className="flex items-center mb-3">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            <span className="text-green-700 font-medium">Collateral Verified</span>
+          </div>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <p className="text-gray-600">Total Value:</p>
+              <p className="font-semibold">₦{user.collateralValue.toLocaleString()}</p>
+            </div>
+            <div>
+              <p className="text-gray-600">Loan Value:</p>
+              <p className="font-semibold">₦{(user.collateralValue * 0.7).toLocaleString()}</p>
+            </div>
+          </div>
+          <div className="mt-3">
+            <p className="text-sm text-gray-600">Verified Assets:</p>
+            <div className="flex flex-wrap gap-2 mt-1">
+              {user.collateralAssets?.map(asset => (
+                <span key={asset.id} className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                  {asset.type}: ₦{asset.value.toLocaleString()}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div>
+          <p className="text-gray-600 mb-3">Add collateral to improve your creditworthiness and access higher loan amounts.</p>
+          <button
+            onClick={() => setCollateralModalOpen(true)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+          >
+            Verify Collateral Assets
+          </button>
+        </div>
+      )}
+    </div>
+
+    {/* AI Verification Interface */}
+    <div className="mb-8 p-4 border rounded-lg bg-gray-50">
+      <h4 className="font-medium mb-4">AI Collateral Verification</h4>
+      <p className="text-sm text-gray-600">Before you can proceed, we need to verify your property details.</p>
+      < br />
+      <div className="space-y-4">
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <div>
+            <h5 className="font-medium">Property Valuation</h5>
+            <p className="text-sm text-gray-600">AI-powered assessment</p>
+          </div>
+        </div>
+        
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+          </div>
+          <div>
+            <h5 className="font-medium">Document Verification</h5>
+            <p className="text-sm text-gray-600">AI analysis of ownership documents</p>
+          </div>
+        </div>
+        
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <div>
+            <h5 className="font-medium">Market Analysis</h5>
+            <p className="text-sm text-gray-600">Real-time market value estimation</p>
+          </div>
+        </div>
+      </div>
+      
+      <button
+        onClick={() => setAiVerificationModalOpen(true)}
+        className="mt-4 w-full px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition flex items-center justify-center"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+        Complete Your Verification
+      </button>
+    </div>
+
+    {/* Actions */}
+    <div className="flex flex-wrap gap-4">
+      <button
+        onClick={() => {
+          const report = CreditScoringSystem.generateCreditReport(user);
+          const reportData = JSON.stringify(report, null, 2);
+          const blob = new Blob([reportData], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `credit_report_${user.did}.json`;
+          a.click();
+          URL.revokeObjectURL(url);
+        }}
+        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+      >
+        {t('download_report')}
+      </button>
+      <button
+        onClick={() => alert('Credit report shared with lender')}
+        className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+      >
+        {t('share_with_lender')}
+      </button>
+    </div>
+
+    {/* API Key Display */}
+    {(apiKey || user.apiKey) && (
+      <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+        <h4 className="font-medium mb-2">{t('api_access')}</h4>
+        <div className="font-mono text-sm bg-white p-2 rounded border">
+          {apiKey || user.apiKey}
+        </div>
+        <p className="text-xs text-gray-600 mt-2">
+          Use this API key to access credit scoring data for lending decisions.
+        </p>
+      </div>
+    )}
+  </div>
+)}
   {/* Payments Tab */}
   {activeTab === 'payments' && (
     <div className="space-y-6">
@@ -3123,7 +3680,7 @@
             </button>
           </div>
 
-          {/* Welfare Disbursements */}
+          {/* Welfare
           <div className="p-4 border rounded-lg">
             <h4 className="font-medium mb-2">Welfare Disbursements</h4>
             <p className="text-sm text-gray-600 mb-4">Request government welfare funds</p>
@@ -3133,7 +3690,22 @@
             >
               Request Funds
             </button>
-          </div>
+          </div>  Disbursements */}
+
+          {/* Tax Payment Option */}
+<div className="p-4 border rounded-lg">
+  <h4 className="font-medium mb-2">Tax Payment</h4>
+  <p className="text-sm text-gray-600 mb-4">Pay your taxes to FIRS</p>
+  <button
+    onClick={() => {
+      // You'll need to create a tax payment modal similar to bill payment
+      alert("Tax payment feature will be implemented here");
+    }}
+    className="w-full px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
+  >
+    Pay Taxes
+  </button>
+</div>
         </div>
       </div>
 
@@ -3359,6 +3931,12 @@
                 <p className="font-medium">{user.lga || 'Not provided'}</p>
               </div>
             </div>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+  <div>
+    <span className="text-gray-600">Tax ID:</span>
+    <p className="font-medium">{user.taxId || 'Not provided'}</p>
+  </div>
+</div>
           </div>
         </div>
 
@@ -3691,203 +4269,605 @@
 )}
 
                 {/* Lifecycle Tab */}
-                {activeTab === 'lifecycle' && (
-                  <div className="bg-white rounded-lg shadow-md p-6">
-                    <h3 className="text-lg font-semibold mb-4">{t('lifecycle_tab')}</h3>
+{/* Lifecycle Tab */}
+{activeTab === 'lifecycle' && (
+  <div className="bg-white rounded-lg shadow-md p-6">
+    <h3 className="text-lg font-semibold mb-4">Identity Lifecycle Management</h3>
+    
+    <div className="space-y-6">
+      {/* Identity Lifecycle Timeline */}
+      <div className="p-4 border rounded-lg">
+        <h4 className="font-medium mb-4">Identity Lifecycle</h4>
+        <div className="relative">
+          <div className="absolute left-4 top-0 h-full w-0.5 bg-gray-200"></div>
+          {[
+            { event: 'Birth Registration', date: user.dob || 'Not set', status: 'completed' },
+            { event: 'NIN Issuance', date: user.identityIssueDate || 'Not set', status: 'completed' },
+            { event: 'Identity Verification', date: user.lastVerified || 'Not set', status: 'completed' },
+            { event: 'Next Verification', date: user.nextVerification || 'Not set', status: 'pending' },
+            { event: 'Identity Status', date: 'Current', status: user.identityStatus }
+          ].map((item, index) => (
+            <div key={index} className="flex items-center mb-6 relative">
+              <div className={`z-10 w-8 h-8 rounded-full flex items-center justify-center ${
+                item.status === 'completed' ? 'bg-green-500' : 
+                item.status === 'pending' ? 'bg-yellow-500' : 
+                'bg-gray-500'
+              }`}>
+                <span className="text-white text-sm">{index + 1}</span>
+              </div>
+              <div className="ml-4 flex-1">
+                <h5 className="font-medium">{item.event}</h5>
+                <p className="text-sm text-gray-600">{item.date}</p>
+                <span className={`text-xs px-2 py-1 rounded ${
+                  item.status === 'completed' ? 'bg-green-100 text-green-800' :
+                  item.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                  'bg-gray-100 text-gray-800'
+                }`}>
+                  {item.status}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Certificate Services */}
+      <div className="p-4 border rounded-lg">
+        <h4 className="font-medium mb-4">Certificate Services</h4>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[
+            { key: 'birth', label: 'Birth Certificate', icon: '👶' },
+            { key: 'marriage', label: 'Marriage Certificate', icon: '💒' },
+            { key: 'divorce', label: 'Divorce Certificate', icon: '📋' },
+            { key: 'death', label: 'Death Certificate', icon: '⚰️' }
+          ].map(cert => (
+            <button
+              key={cert.key}
+              onClick={() => {
+                alert(`${cert.label} request submitted. You will be notified when ready.`);
+              }}
+              className="p-4 border rounded-lg hover:bg-gray-50 transition text-center"
+            >
+              <div className="text-2xl mb-2">{cert.icon}</div>
+              <div className="text-sm font-medium">{cert.label}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Linked Services */}
+      <div className="p-4 border rounded-lg">
+        <h4 className="font-medium mb-4">Linked Services</h4>
+        <div className="space-y-3">
+          {[
+            { name: 'National Health Insurance Scheme', status: 'active', connected: true },
+            { name: 'National Pension Commission', status: 'active', connected: true },
+            { name: 'Federal Inland Revenue Service', status: 'active', connected: false },
+            { name: 'National Social Investment Programme', status: 'pending', connected: false }
+          ].map((service, index) => (
+            <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div>
+                <p className="font-medium">{service.name}</p>
+                <p className="text-sm text-gray-600">Status: {service.status}</p>
+              </div>
+              <span className={`text-xs px-2 py-1 rounded ${
+                service.connected ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+              }`}>
+                {service.connected ? 'Connected' : 'Not Connected'}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+{/* Loans Tab */}
+{activeTab === 'loans' && (
+  <div className="space-y-6">
+    <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold">Loan Services</h3>
+        <button
+          onClick={() => setLoanModal(true)}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+        >
+          {t('loan_application')}
+        </button>
+      </div>
+
+      {/* Active Loans */}
+      <div className="mb-6">
+        <h4 className="font-medium mb-4">Active Loans</h4>
+        <div className="space-y-4">
+          {user.loans?.filter(loan => loan.status === 'active').map(loan => (
+            <div key={loan.id} className="p-4 border rounded-lg">
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <h5 className="font-medium capitalize">{loan.type} Loan</h5>
+                  <p className="text-sm text-gray-600">{loan.purpose}</p>
+                </div>
+                <div className="flex flex-col items-end">
+                  <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded mb-1">
+                    {loan.status}
+                  </span>
+                  {loan.requiresCollateral && (
+                    <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded">
+                      Secured
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div>
+                  <p className="text-gray-600">Loan Amount</p>
+                  <p className="font-semibold">₦{loan.amount?.toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Balance</p>
+                  <p className="font-semibold">₦{loan.balance?.toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Interest Rate</p>
+                  <p className="font-semibold">{loan.interestRate}%</p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Due Date</p>
+                  <p className="font-semibold">{loan.dueDate}</p>
+                </div>
+              </div>
+              {loan.requiresCollateral && loan.collateral && (
+                <div className="mt-3 p-2 bg-blue-50 rounded">
+                  <p className="text-xs text-blue-800">
+                    <span className="font-medium">Collateral:</span> {loan.collateral.type} (₦{loan.collateral.value?.toLocaleString()})
+                  </p>
+                </div>
+              )}
+              <div className="mt-4 flex space-x-2">
+                <button
+                  onClick={() => {
+                    const paymentAmount = Math.min(50000, loan.balance);
+                    if (paymentAmount > user.balance) {
+                      alert(t('insufficient_funds'));
+                      return;
+                    }
                     
-                    <div className="space-y-6">
-                      {/* Identity Lifecycle */}
-                      <div className="p-4 border rounded-lg">
-                        <h4 className="font-medium mb-4">Identity Lifecycle Management</h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="p-3 bg-green-50 rounded-lg">
-                            <h5 className="font-medium text-green-800">{t('issue_at_birth')}</h5>
-                            <p className="text-sm text-green-600">Automatic identity issuance upon birth registration</p>
-                            <p className="text-xs text-green-500 mt-2">Status: Active since {user.identityIssueDate}</p>
-                          </div>
-                          <div className="p-3 bg-gray-50 rounded-lg">
-                            <h5 className="font-medium text-gray-800">{t('revoke_at_death')}</h5>
-                            <p className="text-sm text-gray-600">Identity revocation upon death certificate</p>
-                            <p className="text-xs text-gray-500 mt-2">Status: Not applicable</p>
-                          </div>
-                        </div>
-                      </div>
+                    const updatedLoan = {
+                      ...loan,
+                      balance: loan.balance - paymentAmount,
+                      paidAmount: (loan.paidAmount || 0) + paymentAmount
+                    };
+                    
+                    const updatedLoans = user.loans.map(l => 
+                      l.id === loan.id ? updatedLoan : l
+                    );
+                    
+                    updateUser({ loans: updatedLoans });
+                    
+                    addTransaction({
+                      type: "debit",
+                      amount: paymentAmount,
+                      description: `Loan Repayment - ${loan.type}`,
+                      recipient: "Loan Account"
+                    });
+                    
+                    alert(t('payment_made'));
+                  }}
+                  className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition"
+                >
+                  {t('make_payment')}
+                </button>
+                <button className="px-3 py-1 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition">
+                  {t('view_details')}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
 
-                      {/* Certificate
-                      <div className="p-4 border rounded-lg">
-                        <h4 className="font-medium mb-4">Certificate Services</h4>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                          {[
-                            { key: 'birth', label: t('birth_certificate'), icon: '👶' },
-                            { key: 'marriage', label: t('marriage_certificate'), icon: '💒' },
-                            { key: 'divorce', label: t('divorce_certificate'), icon: '📋' },
-                            { key: 'death', label: t('death_certificate'), icon: '⚰️' }
-                          ].map(cert => (
-                            <button
-                              key={cert.key}
-                              onClick={() => {
-                                alert(`${cert.label} request submitted. You will be notified when ready.`);
-                              }}
-                              className="p-4 border rounded-lg hover:bg-gray-50 transition text-center"
-                            >
-                              <div className="text-2xl mb-2">{cert.icon}</div>
-                              <div className="text-sm font-medium">{cert.label}</div>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                      Services */}
+      {/* Loan Options */}
+      <div>
+        <h4 className="font-medium mb-4">Available Loan Products</h4>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[
+            { 
+              type: 'personal', 
+              name: 'Personal Loan', 
+              rate: '15%', 
+              max: '₦2M', 
+              duration: '12-36 months',
+              requiresCollateral: false,
+              description: 'Unsecured loan for personal expenses',
+              bestFor: 'Short-term needs, debt consolidation'
+            },
+            { 
+              type: 'business', 
+              name: 'Business Loan', 
+              rate: '12%', 
+              max: '₦10M', 
+              duration: '12-60 months',
+              requiresCollateral: true,
+              collateralNote: 'Assets or property required for amounts above ₦5M',
+              description: 'For business expansion and operations',
+              bestFor: 'Business owners, entrepreneurs'
+            },
+            { 
+              type: 'emergency', 
+              name: 'Emergency Loan', 
+              rate: '18%', 
+              max: '₦500K', 
+              duration: '6-12 months',
+              requiresCollateral: false,
+              description: 'Quick funds for urgent situations',
+              bestFor: 'Medical emergencies, urgent repairs'
+            },
+            { 
+              type: 'mortgage', 
+              name: 'Mortgage Loan', 
+              rate: '10%', 
+              max: '₦50M', 
+              duration: '60-240 months',
+              requiresCollateral: true,
+              collateralNote: 'Property being purchased serves as collateral',
+              description: 'For home purchase or construction',
+              bestFor: 'Home buyers, property investors'
+            },
+            { 
+              type: 'asset_finance', 
+              name: 'Asset Financing', 
+              rate: '11%', 
+              max: '₦20M', 
+              duration: '12-48 months',
+              requiresCollateral: true,
+              collateralNote: 'Financed asset serves as collateral',
+              description: 'For vehicle, equipment, or machinery purchase',
+              bestFor: 'Vehicle buyers, equipment acquisition'
+            },
+            { 
+              type: 'education', 
+              name: 'Education Loan', 
+              rate: '9%', 
+              max: '₦5M', 
+              duration: '12-60 months',
+              requiresCollateral: false,
+              description: 'For tuition and educational expenses',
+              bestFor: 'Students, parents financing education'
+            }
+          ].map(product => (
+            <div key={product.type} className="p-4 border rounded-lg relative">
+              {product.requiresCollateral && (
+                <div className="absolute top-2 right-2">
+                  <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
+                    Requires Collateral
+                  </span>
+                </div>
+              )}
+              <h5 className="font-medium mb-2">{product.name}</h5>
+              <div className="space-y-2 text-sm text-gray-600 mb-3">
+                <p><span className="font-medium">Interest Rate:</span> {product.rate}</p>
+                <p><span className="font-medium">Max Amount:</span> {product.max}</p>
+                <p><span className="font-medium">Duration:</span> {product.duration}</p>
+                <p className="text-xs">{product.description}</p>
+                <p className="text-xs text-blue-600"><span className="font-medium">Best for:</span> {product.bestFor}</p>
+              </div>
+              {product.requiresCollateral && (
+                <div className="mb-3 p-2 bg-blue-50 rounded">
+                  <p className="text-xs text-blue-800">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    {product.collateralNote}
+                  </p>
+                </div>
+              )}
+              <button
+                onClick={() => {
+                  setLoanApplication(prev => ({ ...prev, type: product.type }));
+                  setLoanModal(true);
+                }}
+                className="w-full px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+              >
+                Apply Now
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
 
-                      {/* Linked Services */}
-                      <div className="p-4 border rounded-lg">
-                        <h4 className="font-medium mb-4">{t('linked_services')}</h4>
-                        <div className="space-y-3">
-                          {[
-                            { name: 'National Health Insurance Scheme', status: 'active', connected: true },
-                            { name: 'National Pension Commission', status: 'active', connected: true },
-                            { name: 'Federal Inland Revenue Service', status: 'active', connected: false },
-                            { name: 'National Social Investment Programme', status: 'pending', connected: false }
-                          ].map((service, index) => (
-                            <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                              <div>
-                                <p className="font-medium">{service.name}</p>
-                                <p className="text-sm text-gray-600">Status: {service.status}</p>
-                              </div>
-                              <span className={`text-xs px-2 py-1 rounded ${
-                                service.connected ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                              }`}>
-                                {service.connected ? 'Connected' : 'Not Connected'}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
+      {/* Collateral Information Section */}
+      <div className="mt-8 p-4 border rounded-lg bg-blue-50">
+        <h4 className="font-medium mb-3 text-blue-800">About Collateral Requirements</h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          <div>
+            <h5 className="font-medium mb-1">Loans That Require Collateral:</h5>
+            <ul className="list-disc list-inside text-blue-700">
+              <li>Business Loans (above ₦5M)</li>
+              <li>Mortgage Loans</li>
+              <li>Asset Financing</li>
+              <li>Large Personal Loans</li>
+            </ul>
+          </div>
+          <div>
+            <h5 className="font-medium mb-1">Accepted Collateral Types:</h5>
+            <ul className="list-disc list-inside text-blue-700">
+              <li>Real Estate Properties</li>
+              <li>Vehicles</li>
+              <li>Equipment/Machinery</li>
+              <li>Investment Certificates</li>
+              <li>Guarantor Agreements</li>
+            </ul>
+          </div>
+        </div>
+        <div className="mt-3">
+          <button
+            onClick={() => setCollateralModalOpen(true)}
+            className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Add Collateral to Your Profile
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+                {/* Welfare Disbursements Tab */}
+{activeTab === 'welfare' && (
+  <div className="space-y-6">
+    <div className="bg-white rounded-lg shadow-md p-6">
+      <h3 className="text-lg font-semibold mb-4">Welfare Disbursements</h3>
+      
+      <div className="grid grid-cols-1 gap-6 mb-6">
+        <div className="p-4 border rounded-lg">
+          <h4 className="font-medium mb-2">Available Programs</h4>
+          <div className="space-y-3">
+            {welfarePrograms.map(program => (
+              <div key={program.id} className="p-3 bg-gray-50 rounded-lg">
+                <h5 className="font-medium">{program.name}</h5>
+                <p className="text-sm text-gray-600">Amount: ₦{program.amount.toLocaleString()}</p>
+                <button
+                  onClick={() => {
+                    setWelfareDetails({ program: program.id, amount: program.amount });
+                    setWelfareModal(true);
+                  }}
+                  className="mt-2 w-full py-1 bg-purple-600 text-white text-sm rounded hover:bg-purple-700 transition"
+                >
+                  Apply Now
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+)}
+
+{/* E-Voting Tab */}
+{activeTab === 'evoting' && (
+  <div className="space-y-6">
+    <div className="bg-white rounded-lg shadow-md p-6">
+      <h3 className="text-lg font-semibold mb-4">E-Voting</h3>
+
+      <div className="grid grid-cols-1 gap-6 mb-6">
+        <div className="p-4 border rounded-lg">
+          <h4 className="font-medium mb-2">Current Elections</h4>
+          <div className="space-y-4">
+            {[
+              { id: 'elec-1', title: 'Presidential Election 2027', date: '2027-02-25', status: 'upcoming' },
+              { id: 'elec-2', title: 'State Governors Election', date: '2027-03-11', status: 'upcoming' },
+              { id: 'elec-3', title: 'Local Council Elections', date: '2027-04-15', status: 'upcoming' }
+            ].map(election => (
+              <div key={election.id} className="p-3 bg-gray-50 rounded-lg">
+                <h5 className="font-medium">{election.title}</h5>
+                <p className="text-sm text-gray-600">Date: {election.date}</p>
+                <div className="flex justify-between items-center mt-2">
+                  <span className={`text-xs px-2 py-1 rounded ${
+                    election.status === 'active' ? 'bg-green-100 text-green-800' :
+                    'bg-blue-100 text-blue-800'
+                  }`}>
+                    {election.status}
+                  </span>
+                  {election.status === 'active' ? (
+                    <button
+                      className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition"
+                      onClick={() => {
+                        alert(`✅ Your vote for ${election.title} has been recorded successfully!`);
+                      }}
+                    >
+                      Vote Now
+                    </button>
+                  ) : (
+                    <span className="px-3 py-1 text-gray-500 text-sm rounded border border-gray-300">
+                      Coming Soon
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+
+
+{/* Pension Tab */}
+{activeTab === 'pension' && (
+  <div className="space-y-6">
+    <div className="bg-white rounded-lg shadow-md p-6">
+      <h3 className="text-lg font-semibold mb-4">Pension Management</h3>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div className="p-4 border rounded-lg">
+          <h4 className="font-medium mb-2">Pension Summary</h4>
+          <div className="space-y-3">
+            <div className="flex justify-between">
+              <span>Total Contributions:</span>
+              <span className="font-medium">₦{(user.pension?.contributions || 0).toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Current Value:</span>
+              <span className="font-medium">₦{(user.pension?.currentValue || 0).toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Monthly Pension:</span>
+              <span className="font-medium">₦{(user.pension?.monthlyPension || 0).toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Retirement Date:</span>
+              <span className="font-medium">{user.pension?.retirementDate || 'Not set'}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-4 border rounded-lg">
+          <h4 className="font-medium mb-2">Pension Options</h4>
+          <div className="space-y-3">
+            <button className="w-full p-3 bg-blue-50 rounded-lg text-left hover:bg-blue-100 transition">
+              <h5 className="font-medium">Make Contribution</h5>
+              <p className="text-sm text-gray-600">Add to your pension fund</p>
+            </button>
+            <button className="w-full p-3 bg-green-50 rounded-lg text-left hover:bg-green-100 transition">
+              <h5 className="font-medium">View Statement</h5>
+              <p className="text-sm text-gray-600">Download contribution history</p>
+            </button>
+            <button className="w-full p-3 bg-purple-50 rounded-lg text-left hover:bg-purple-100 transition">
+              <h5 className="font-medium">Pension Calculator</h5>
+              <p className="text-sm text-gray-600">Estimate your retirement benefits</p>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+{/* Mortgage Tab */}
+{activeTab === 'mortgage' && (
+  <div className="space-y-6">
+    <div className="bg-white rounded-lg shadow-md p-6">
+      <h3 className="text-lg font-semibold mb-4">Mortgage Services</h3>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div className="p-4 border rounded-lg">
+          <h4 className="font-medium mb-2">My Mortgage</h4>
+          {user.mortgage ? (
+            <div className="space-y-3">
+              <div className="flex justify-between">
+                <span>Property Value:</span>
+                <span className="font-medium">₦{user.mortgage.propertyValue.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Loan Amount:</span>
+                <span className="font-medium">₦{user.mortgage.loanAmount.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Interest Rate:</span>
+                <span className="font-medium">{user.mortgage.interestRate}%</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Monthly Payment:</span>
+                <span className="font-medium">₦{user.mortgage.monthlyPayment.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Remaining Balance:</span>
+                <span className="font-medium">₦{user.mortgage.remainingBalance.toLocaleString()}</span>
+              </div>
+            </div>
+          ) : (
+            <p className="text-gray-500">No active mortgage</p>
+          )}
+        </div>
+
+        <div className="p-4 border rounded-lg">
+          <h4 className="font-medium mb-2">Mortgage Options</h4>
+          <div className="space-y-3">
+            <button className="w-full p-3 bg-blue-50 rounded-lg text-left hover:bg-blue-100 transition">
+              <h5 className="font-medium">Apply for Mortgage</h5>
+              <p className="text-sm text-gray-600">Get pre-approved for a home loan</p>
+            </button>
+            <button className="w-full p-3 bg-green-50 rounded-lg text-left hover:bg-green-100 transition">
+              <h5 className="font-medium">Make Payment</h5>
+              <p className="text-sm text-gray-600">Pay your monthly mortgage</p>
+            </button>
+            <button className="w-full p-3 bg-purple-50 rounded-lg text-left hover:bg-purple-100 transition">
+              <h5 className="font-medium">Refinance Options</h5>
+              <p className="text-sm text-gray-600">Explore better interest rates</p>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+{/* Savings Tab */}
+{activeTab === 'savings' && (
+  <div className="space-y-6">
+    <div className="bg-white rounded-lg shadow-md p-6">
+      <h3 className="text-lg font-semibold mb-4">Savings Accounts</h3>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div className="p-4 border rounded-lg">
+          <h4 className="font-medium mb-2">My Savings</h4>
+          <div className="space-y-4">
+            {user.savingsAccounts?.map(account => (
+              <div key={account.id} className="p-3 bg-gray-50 rounded-lg">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h5 className="font-medium">{account.name}</h5>
+                    <p className="text-sm text-gray-600">Account: {account.accountNumber}</p>
                   </div>
-                )}
+                  <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                    Active
+                  </span>
+                </div>
+                <p className="text-2xl font-bold mt-2">₦{account.balance.toLocaleString()}</p>
+                <p className="text-sm text-gray-600">Interest Rate: {account.interestRate}%</p>
+                <div className="flex space-x-2 mt-2">
+                  <button className="text-sm text-blue-600 hover:text-blue-800">
+                    Add Money
+                  </button>
+                  <button className="text-sm text-green-600 hover:text-green-800">
+                    Withdraw
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
-                {/* Loans Tab */}
-                {activeTab === 'loans' && (
-                  <div className="space-y-6">
-                    <div className="bg-white rounded-lg shadow-md p-6">
-                      <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-lg font-semibold">Loan Services</h3>
-                        <button
-                          onClick={() => setLoanModal(true)}
-                          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-                        >
-                          {t('loan_application')}
-                        </button>
-                      </div>
-
-                      {/* Active Loans */}
-                      <div className="mb-6">
-                        <h4 className="font-medium mb-4">Active Loans</h4>
-                        <div className="space-y-4">
-                          {user.loans?.filter(loan => loan.status === 'active').map(loan => (
-                            <div key={loan.id} className="p-4 border rounded-lg">
-                              <div className="flex justify-between items-start mb-2">
-                                <div>
-                                  <h5 className="font-medium capitalize">{loan.type} Loan</h5>
-                                  <p className="text-sm text-gray-600">{loan.purpose}</p>
-                                </div>
-                                <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded">
-                                  {loan.status}
-                                </span>
-                              </div>
-                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                                <div>
-                                  <p className="text-gray-600">Loan Amount</p>
-                                  <p className="font-semibold">₦{loan.amount?.toLocaleString()}</p>
-                                </div>
-                                <div>
-                                  <p className="text-gray-600">Balance</p>
-                                  <p className="font-semibold">₦{loan.balance?.toLocaleString()}</p>
-                                </div>
-                                <div>
-                                  <p className="text-gray-600">Interest Rate</p>
-                                  <p className="font-semibold">{loan.interestRate}%</p>
-                                </div>
-                                <div>
-                                  <p className="text-gray-600">Due Date</p>
-                                  <p className="font-semibold">{loan.dueDate}</p>
-                                </div>
-                              </div>
-                              <div className="mt-4 flex space-x-2">
-                                <button
-                                  onClick={() => {
-                                    const paymentAmount = Math.min(50000, loan.balance);
-                                    if (paymentAmount > user.balance) {
-                                      alert(t('insufficient_funds'));
-                                      return;
-                                    }
-                                    
-                                    const updatedLoan = {
-                                      ...loan,
-                                      balance: loan.balance - paymentAmount,
-                                      paidAmount: (loan.paidAmount || 0) + paymentAmount
-                                    };
-                                    
-                                    const updatedLoans = user.loans.map(l => 
-                                      l.id === loan.id ? updatedLoan : l
-                                    );
-                                    
-                                    updateUser({ loans: updatedLoans });
-                                    
-                                    addTransaction({
-                                      type: "debit",
-                                      amount: paymentAmount,
-                                      description: `Loan Repayment - ${loan.type}`,
-                                      recipient: "Loan Account"
-                                    });
-                                    
-                                    alert(t('payment_made'));
-                                  }}
-                                  className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition"
-                                >
-                                  {t('make_payment')}
-                                </button>
-                                <button className="px-3 py-1 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition">
-                                  {t('view_details')}
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Loan Options */}
-                      <div>
-                        <h4 className="font-medium mb-4">Available Loan Products</h4>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          {[
-                            { type: 'personal', name: 'Personal Loan', rate: '15%', max: '₦2M', duration: '12-36 months' },
-                            { type: 'business', name: 'Business Loan', rate: '12%', max: '₦10M', duration: '12-60 months' },
-                            { type: 'emergency', name: 'Emergency Loan', rate: '18%', max: '₦500K', duration: '6-12 months' }
-                          ].map(product => (
-                            <div key={product.type} className="p-4 border rounded-lg">
-                              <h5 className="font-medium mb-2">{product.name}</h5>
-                              <div className="space-y-1 text-sm text-gray-600">
-                                <p>Interest Rate: {product.rate}</p>
-                                <p>Max Amount: {product.max}</p>
-                                <p>Duration: {product.duration}</p>
-                              </div>
-                              <button
-                                onClick={() => {
-                                  setLoanApplication(prev => ({ ...prev, type: product.type }));
-                                  setLoanModal(true);
-                                }}
-                                className="mt-3 w-full px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-                              >
-                                Apply Now
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
+        <div className="p-4 border rounded-lg">
+          <h4 className="font-medium mb-2">Open New Account</h4>
+          <div className="space-y-3">
+            <button className="w-full p-3 bg-blue-50 rounded-lg text-left hover:bg-blue-100 transition">
+              <h5 className="font-medium">Regular Savings</h5>
+              <p className="text-sm text-gray-600">1.5% interest, no minimum balance</p>
+            </button>
+            <button className="w-full p-3 bg-green-50 rounded-lg text-left hover:bg-green-100 transition">
+              <h5 className="font-medium">Fixed Deposit</h5>
+              <p className="text-sm text-gray-600">Up to 8% interest, fixed term</p>
+            </button>
+            <button className="w-full p-3 bg-purple-50 rounded-lg text-left hover:bg-purple-100 transition">
+              <h5 className="font-medium">Target Savings</h5>
+              <p className="text-sm text-gray-600">Save for specific goals</p>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
                 
                 {/* Remittance Tab */}
   {activeTab === 'remittance' && (
@@ -4120,6 +5100,153 @@
       </div>
     </div>
   )}
+
+
+
+  {/* Collateral Verification Modal */}
+{collateralModalOpen && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+      <h3 className="text-xl font-bold mb-4">Add Collateral Assets</h3>
+      <div className="space-y-4">
+        <div>
+          <label className="block text-gray-700 mb-1">Asset Type</label>
+          <select className="w-full px-3 py-2 border rounded-md">
+            <option value="">Select Asset Type</option>
+            <option value="real_estate">Real Estate</option>
+            <option value="vehicle">Vehicle</option>
+            <option value="equipment">Equipment/Machinery</option>
+            <option value="investment">Investments</option>
+            <option value="other">Other Valuables</option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-gray-700 mb-1">Estimated Value (₦)</label>
+          <input
+            type="number"
+            className="w-full px-3 py-2 border rounded-md"
+            placeholder="Enter estimated value"
+          />
+        </div>
+        <div>
+          <label className="block text-gray-700 mb-1">Upload Documentation</label>
+          <input
+            type="file"
+            className="w-full px-3 py-2 border rounded-md"
+            multiple
+          />
+        </div>
+      </div>
+      <div className="flex justify-end space-x-3 mt-6">
+        <button
+          onClick={() => setCollateralModalOpen(false)}
+          className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={() => {
+            // Simulate adding collateral
+            updateUser({
+              collateralValue: 2500000,
+              collateralAssets: [
+                { id: 'coll-1', type: 'real_estate', value: 2500000, description: '3-bedroom apartment in Lagos' }
+              ]
+            });
+            setCollateralModalOpen(false);
+            alert('Collateral added successfully!');
+          }}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+        >
+          Add Collateral
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+{/* AI Verification Modal */}
+{aiVerificationModalOpen && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+      <h3 className="text-xl font-bold mb-4">AI Collateral Verification</h3>
+      
+      {verificationStatus === 'idle' && (
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto bg-purple-100 rounded-full flex items-center justify-center mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <p className="text-gray-600 mb-4">Our AI system will verify your collateral assets using advanced algorithms and data analysis.</p>
+          <button
+            onClick={() => {
+              setVerificationStatus('processing');
+              // Simulate AI verification process
+              let progress = 0;
+              const interval = setInterval(() => {
+                progress += 10;
+                setVerificationProgress(progress);
+                if (progress >= 100) {
+                  clearInterval(interval);
+                  setVerificationStatus('completed');
+                }
+              }, 500);
+            }}
+            className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition"
+          >
+            Start Verification
+          </button>
+        </div>
+      )}
+      
+      {verificationStatus === 'processing' && (
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-600 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </div>
+          <h4 className="font-medium mb-2">Verifying Collateral</h4>
+          <p className="text-sm text-gray-600 mb-3">AI analysis in progress...</p>
+          <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+            <div 
+              className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+              style={{width: `${verificationProgress}%`}}
+            ></div>
+          </div>
+          <p className="text-xs text-gray-500">{verificationProgress}% Complete</p>
+        </div>
+      )}
+      
+      {verificationStatus === 'completed' && (
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto bg-green-100 rounded-full flex items-center justify-center mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h4 className="font-medium mb-2">Verification Complete</h4>
+          <p className="text-sm text-gray-600 mb-3">Your collateral has been successfully verified by our AI system.</p>
+          <div className="bg-green-50 p-3 rounded-lg mb-4">
+            <p className="text-green-800 font-medium">Collateral Value: ₦2,500,000</p>
+            <p className="text-green-700 text-sm">Maximum Loan Value: ₦1,750,000</p>
+          </div>
+          <button
+            onClick={() => {
+              setAiVerificationModalOpen(false);
+              setVerificationStatus('idle');
+              setVerificationProgress(0);
+            }}
+            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+          >
+            Done
+          </button>
+        </div>
+      )}
+    </div>
+  </div>
+)}
                 
                 {/* Investments Tab */}
                 {activeTab === 'investments' && (
@@ -4990,6 +6117,476 @@
             </main>
 
             {/* Modals */}
+
+{/* NFT Marketplace Modal */}
+{nftModalOpen && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-screen overflow-y-auto">
+      <h3 className="text-xl font-bold mb-4">NFT Marketplace</h3>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        {nftMarketplace.map(nft => (
+          <div key={nft.id} className="border rounded-lg p-4 hover:shadow-md transition">
+            <div className="text-4xl text-center mb-3">{nft.image}</div>
+            <h4 className="font-medium mb-1">{nft.name}</h4>
+            <p className="text-sm text-gray-600 mb-2">by {nft.creator}</p>
+            <p className="font-semibold">₦{nft.price.toLocaleString()}</p>
+            <button
+              onClick={() => {
+                if (user.balance >= nft.price) {
+                  const newNfts = [...(user.nfts || []), nft];
+                  updateUser({
+                    nfts: newNfts,
+                    nftsValue: (user.nftsValue || 0) + nft.price,
+                    balance: user.balance - nft.price
+                  });
+                  
+                  addTransaction({
+                    type: "debit",
+                    amount: nft.price,
+                    description: `NFT Purchase: ${nft.name}`,
+                    recipient: "NFT Marketplace"
+                  });
+                  
+                  alert(`Successfully purchased ${nft.name}!`);
+                } else {
+                  alert('Insufficient funds to purchase this NFT');
+                }
+              }}
+              className="w-full mt-3 px-3 py-2 bg-pink-600 text-white rounded hover:bg-pink-700 transition"
+            >
+              Buy Now
+            </button>
+          </div>
+        ))}
+      </div>
+      
+      <div className="flex justify-end">
+        <button
+          onClick={() => setNftModalOpen(false)}
+          className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+{/* Stablecoin Modal */}
+{stablecoinModalOpen && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+      <h3 className="text-xl font-bold mb-4">Stablecoin Management</h3>
+      
+      <div className="space-y-4 mb-6">
+        {stablecoinOptions.map(coin => (
+          <div key={coin.id} className="border rounded-lg p-4">
+            <h4 className="font-medium mb-2">{coin.name}</h4>
+            <div className="flex justify-between items-center mb-3">
+              <span>Your Balance:</span>
+              <span className="font-semibold">
+                {coin.id === 'ngnt' ? '₦' : '$'}{user.stablecoins?.[coin.id]?.toLocaleString() || 0}
+              </span>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => {
+                  const amount = coin.id === 'ngnt' ? 50000 : 100;
+                  const nairaAmount = coin.id === 'ngnt' ? amount : amount * coin.rate;
+                  
+                  if (user.balance >= nairaAmount) {
+                    updateUser({
+                      stablecoins: {
+                        ...user.stablecoins,
+                        [coin.id]: (user.stablecoins?.[coin.id] || 0) + amount
+                      },
+                      balance: user.balance - nairaAmount
+                    });
+                    
+                    addTransaction({
+                      type: "debit",
+                      amount: nairaAmount,
+                      description: `Buy ${coin.name}`,
+                      recipient: "Stablecoin Exchange"
+                    });
+                    
+                    alert(`Successfully purchased ${amount} ${coin.name}`);
+                  } else {
+                    alert('Insufficient funds');
+                  }
+                }}
+                className="px-3 py-1 bg-teal-600 text-white text-sm rounded hover:bg-teal-700 transition"
+              >
+                Buy
+              </button>
+              <button
+                onClick={() => {
+                  const currentBalance = user.stablecoins?.[coin.id] || 0;
+                  if (currentBalance > 0) {
+                    const amount = Math.min(currentBalance, coin.id === 'ngnt' ? 50000 : 100);
+                    const nairaAmount = coin.id === 'ngnt' ? amount : amount * coin.rate;
+                    
+                    updateUser({
+                      stablecoins: {
+                        ...user.stablecoins,
+                        [coin.id]: currentBalance - amount
+                      },
+                      balance: user.balance + nairaAmount
+                    });
+                    
+                    addTransaction({
+                      type: "credit",
+                      amount: nairaAmount,
+                      description: `Sell ${coin.name}`,
+                      recipient: "Stablecoin Exchange"
+                    });
+                    
+                    alert(`Successfully sold ${amount} ${coin.name}`);
+                  } else {
+                    alert(`No ${coin.name} to sell`);
+                  }
+                }}
+                className="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700 transition"
+              >
+                Sell
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+      
+      <div className="flex justify-end">
+        <button
+          onClick={() => setStablecoinModalOpen(false)}
+          className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+{/* Carbon Credits Modal */}
+{carbonModalOpen && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+      <h3 className="text-xl font-bold mb-4">Carbon Credit Marketplace</h3>
+      
+      <div className="space-y-4 mb-6">
+        {carbonProjects.map(project => (
+          <div key={project.id} className="border rounded-lg p-4">
+            <h4 className="font-medium mb-1">{project.name}</h4>
+            <p className="text-sm text-gray-600 mb-2">{project.location}</p>
+            <div className="flex justify-between items-center mb-3">
+              <span>Price per ton:</span>
+              <span className="font-semibold">₦{project.price.toLocaleString()}</span>
+            </div>
+            
+            <button
+              onClick={() => {
+                if (user.balance >= project.price) {
+                  updateUser({
+                    carbonCredits: (user.carbonCredits || 0) + project.tons,
+                    carbonValue: (user.carbonValue || 0) + project.price,
+                    balance: user.balance - project.price
+                  });
+                  
+                  addTransaction({
+                    type: "debit",
+                    amount: project.price,
+                    description: `Carbon Credit: ${project.name}`,
+                    recipient: "Carbon Exchange"
+                  });
+                  
+                  alert(`Successfully purchased ${project.tons} ton of carbon credits!`);
+                } else {
+                  alert('Insufficient funds to purchase carbon credits');
+                }
+              }}
+              className="w-full px-3 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 transition"
+            >
+              Buy {project.tons} Ton
+            </button>
+          </div>
+        ))}
+      </div>
+      
+      {user.carbonCredits > 0 && (
+        <div className="mb-6 p-3 bg-blue-50 rounded-lg">
+          <h4 className="font-medium mb-2">Your Carbon Credits</h4>
+          <p className="text-sm">You own {user.carbonCredits} tons valued at ₦{user.carbonValue?.toLocaleString()}</p>
+          <button
+            onClick={() => {
+              const salePrice = user.carbonValue * 0.9; // 10% market fee
+              updateUser({
+                carbonCredits: 0,
+                carbonValue: 0,
+                balance: user.balance + salePrice
+              });
+              
+              addTransaction({
+                type: "credit",
+                amount: salePrice,
+                description: "Carbon Credit Sale",
+                recipient: "Carbon Exchange"
+              });
+              
+              alert(`Sold carbon credits for ₦${salePrice.toLocaleString()}`);
+            }}
+            className="mt-2 px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition"
+          >
+            Sell All Credits
+          </button>
+        </div>
+      )}
+      
+      <div className="flex justify-end">
+        <button
+          onClick={() => setCarbonModalOpen(false)}
+          className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+{/* Real Estate Modal */}
+{realEstateModalOpen && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+      <h3 className="text-xl font-bold mb-4">Real Estate Tokenization</h3>
+      
+      <div className="space-y-4 mb-6">
+        {realEstateProperties.map(property => (
+          <div key={property.id} className="border rounded-lg p-4">
+            <h4 className="font-medium mb-1">{property.name}</h4>
+            <div className="flex justify-between items-center mb-3">
+              <span>Price per token:</span>
+              <span className="font-semibold">₦{property.value.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between items-center mb-3">
+              <span>Total property value:</span>
+              <span className="font-semibold">₦{property.price.toLocaleString()}</span>
+            </div>
+            
+            <button
+              onClick={() => {
+                const tokensToBuy = 10;
+                const cost = tokensToBuy * property.value;
+                
+                if (user.balance >= cost) {
+                  const newProperties = [...(user.realEstateTokens || []), {
+                    id: property.id,
+                    name: property.name,
+                    tokens: tokensToBuy,
+                    value: property.value
+                  }];
+                  
+                  updateUser({
+                    realEstateTokens: newProperties,
+                    realEstateValue: (user.realEstateValue || 0) + cost,
+                    balance: user.balance - cost
+                  });
+                  
+                  addTransaction({
+                    type: "debit",
+                    amount: cost,
+                    description: `Real Estate: ${property.name} (${tokensToBuy} tokens)`,
+                    recipient: "Real Estate Exchange"
+                  });
+                  
+                  alert(`Successfully purchased ${tokensToBuy} tokens of ${property.name}!`);
+                } else {
+                  alert('Insufficient funds to purchase real estate tokens');
+                }
+              }}
+              className="w-full px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+            >
+              Buy 10 Tokens
+            </button>
+          </div>
+        ))}
+      </div>
+      
+      <div className="flex justify-end">
+        <button
+          onClick={() => setRealEstateModalOpen(false)}
+          className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+{/* Commodities Modal */}
+{commodityModalOpen && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+      <h3 className="text-xl font-bold mb-4">Commodity Trading</h3>
+      
+      <div className="space-y-4 mb-6">
+        {commodityOptions.map(commodity => (
+          <div key={commodity.id} className="border rounded-lg p-4">
+            <h4 className="font-medium mb-1">{commodity.name}</h4>
+            <div className="flex justify-between items-center mb-3">
+              <span>Price per {commodity.unit}:</span>
+              <span className="font-semibold">₦{commodity.price.toLocaleString()}</span>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => {
+                  const units = commodity.id === 'oil' ? 1 : 10;
+                  const cost = units * commodity.price;
+                  
+                  if (user.balance >= cost) {
+                    updateUser({
+                      commodityTokens: {
+                        ...user.commodityTokens,
+                        [commodity.id]: (user.commodityTokens?.[commodity.id] || 0) + units
+                      },
+                      commodityValue: (user.commodityValue || 0) + cost,
+                      balance: user.balance - cost
+                    });
+                    
+                    addTransaction({
+                      type: "debit",
+                      amount: cost,
+                      description: `Commodity: ${commodity.name} (${units} ${commodity.unit})`,
+                      recipient: "Commodity Exchange"
+                    });
+                    
+                    alert(`Successfully purchased ${units} ${commodity.unit} of ${commodity.name}!`);
+                  } else {
+                    alert('Insufficient funds to purchase commodities');
+                  }
+                }}
+                className="px-3 py-1 bg-amber-600 text-white text-sm rounded hover:bg-amber-700 transition"
+              >
+                Buy
+              </button>
+              <button
+                onClick={() => {
+                  const currentBalance = user.commodityTokens?.[commodity.id] || 0;
+                  if (currentBalance > 0) {
+                    const units = Math.min(currentBalance, commodity.id === 'oil' ? 1 : 10);
+                    const value = units * commodity.price;
+                    
+                    updateUser({
+                      commodityTokens: {
+                        ...user.commodityTokens,
+                        [commodity.id]: currentBalance - units
+                      },
+                      commodityValue: (user.commodityValue || 0) - value,
+                      balance: user.balance + value
+                    });
+                    
+                    addTransaction({
+                      type: "credit",
+                      amount: value,
+                      description: `Commodity Sale: ${commodity.name} (${units} ${commodity.unit})`,
+                      recipient: "Commodity Exchange"
+                    });
+                    
+                    alert(`Successfully sold ${units} ${commodity.unit} of ${commodity.name}!`);
+                  } else {
+                    alert(`No ${commodity.name} to sell`);
+                  }
+                }}
+                className="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700 transition"
+              >
+                Sell
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+      
+      <div className="flex justify-end">
+        <button
+          onClick={() => setCommodityModalOpen(false)}
+          className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+{/* Agricultural Tokens Modal */}
+{agriculturalModalOpen && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+      <h3 className="text-xl font-bold mb-4">Agricultural Investment</h3>
+      
+      <div className="space-y-4 mb-6">
+        {agriculturalProjects.map(project => (
+          <div key={project.id} className="border rounded-lg p-4">
+            <h4 className="font-medium mb-1">{project.name}</h4>
+            <div className="flex justify-between items-center mb-2">
+              <span>Investment:</span>
+              <span className="font-semibold">₦{project.price.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between items-center mb-2">
+              <span>Expected yield:</span>
+              <span className="font-semibold">{project.yield}</span>
+            </div>
+            <div className="flex justify-between items-center mb-3">
+              <span>Duration:</span>
+              <span className="font-semibold">{project.duration}</span>
+            </div>
+            
+            <button
+              onClick={() => {
+                if (user.balance >= project.price) {
+                  const newProjects = [...(user.agriculturalTokens || []), project];
+                  
+                  updateUser({
+                    agriculturalTokens: newProjects,
+                    agriculturalValue: (user.agriculturalValue || 0) + project.price,
+                    balance: user.balance - project.price
+                  });
+                  
+                  addTransaction({
+                    type: "debit",
+                    amount: project.price,
+                    description: `Agriculture: ${project.name}`,
+                    recipient: "Agricultural Investment"
+                  });
+                  
+                  alert(`Successfully invested in ${project.name}! Returns in ${project.duration}.`);
+                } else {
+                  alert('Insufficient funds for this investment');
+                }
+              }}
+              className="w-full px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+            >
+              Invest Now
+            </button>
+          </div>
+        ))}
+      </div>
+      
+      <div className="flex justify-end">
+        <button
+          onClick={() => setAgriculturalModalOpen(false)}
+          className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
             
             {/* Transfer Modal */}
             {transferModalOpen && (
@@ -5174,72 +6771,182 @@
             )}
 
             {/* Loan Application Modal */}
-            {loanModal && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
-                  <h3 className="text-xl font-bold mb-4">{t('loan_application')}</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-gray-700 mb-1">Loan Type</label>
-                      <select
-                        value={loanApplication.type}
-                        onChange={(e) => setLoanApplication({...loanApplication, type: e.target.value})}
-                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                      >
-                        <option value="">Select Loan Type</option>
-                        <option value="personal">Personal Loan</option>
-                        <option value="business">Business Loan</option>
-                        <option value="emergency">Emergency Loan</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-gray-700 mb-1">{t('loan_amount')} (₦)</label>
-                      <input
-                        type="number"
-                        value={loanApplication.amount}
-                        onChange={(e) => setLoanApplication({...loanApplication, amount: e.target.value})}
-                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                        placeholder="Enter loan amount"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-gray-700 mb-1">{t('loan_purpose')}</label>
-                      <input
-                        type="text"
-                        value={loanApplication.purpose}
-                        onChange={(e) => setLoanApplication({...loanApplication, purpose: e.target.value})}
-                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                        placeholder="Purpose of loan"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-gray-700 mb-1">{t('monthly_income')} (₦)</label>
-                      <input
-                        type="number"
-                        value={loanApplication.income}
-                        onChange={(e) => setLoanApplication({...loanApplication, income: e.target.value})}
-                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                        placeholder="Enter monthly income"
-                      />
-                    </div>
-                  </div>
-                  <div className="flex justify-end space-x-3 mt-6">
-                    <button
-                      onClick={() => setLoanModal(false)}
-                      className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition duration-300"
-                    >
-                      {t('cancel')}
-                    </button>
-                    <button
-                      onClick={handleLoanApplication}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300"
-                    >
-                      {t('apply_loan')}
-                    </button>
+{/* Loan Application Modal */}
+{loanModal && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+      <h3 className="text-xl font-bold mb-4">{t('loan_application')}</h3>
+      <div className="space-y-4">
+        <div>
+          <label className="block text-gray-700 mb-1">Loan Type</label>
+          <select
+            value={loanApplication.type}
+            onChange={(e) => setLoanApplication({...loanApplication, type: e.target.value})}
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+          >
+            <option value="">Select Loan Type</option>
+            <option value="personal">Personal Loan</option>
+            <option value="business">Business Loan</option>
+            <option value="emergency">Emergency Loan</option>
+            <option value="mortgage">Mortgage Loan</option>
+            <option value="asset_finance">Asset Financing</option>
+            <option value="education">Education Loan</option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-gray-700 mb-1">{t('loan_amount')} (₦)</label>
+          <input
+            type="number"
+            value={loanApplication.amount}
+            onChange={(e) => setLoanApplication({...loanApplication, amount: e.target.value})}
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            placeholder="Enter loan amount"
+          />
+        </div>
+        <div>
+          <label className="block text-gray-700 mb-1">{t('loan_purpose')}</label>
+          <input
+            type="text"
+            value={loanApplication.purpose}
+            onChange={(e) => setLoanApplication({...loanApplication, purpose: e.target.value})}
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            placeholder="Purpose of loan"
+          />
+        </div>
+        <div>
+          <label className="block text-gray-700 mb-1">{t('monthly_income')} (₦)</label>
+          <input
+            type="number"
+            value={loanApplication.income}
+            onChange={(e) => setLoanApplication({...loanApplication, income: e.target.value})}
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            placeholder="Enter monthly income"
+          />
+        </div>
+
+        {/* Collateral Section - Only shown for loans that require collateral */}
+        {['business', 'mortgage', 'asset_finance'].includes(loanApplication.type) && (
+          <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+            <h4 className="font-medium text-blue-800 mb-2 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              Collateral Required
+            </h4>
+            
+            {user.collateralValue > 0 ? (
+              <div>
+                <p className="text-sm text-blue-700 mb-3">
+                  This loan requires collateral. Minimum collateral value: ₦{(parseFloat(loanApplication.amount || 0) * 1.5).toLocaleString()}
+                </p>
+                
+                <div className="mb-3">
+                  <p className="text-sm font-medium mb-1">Your Available Collateral:</p>
+                  <div className="bg-white p-2 rounded border">
+                    <p className="text-sm">Total Value: <span className="font-medium">₦{user.collateralValue.toLocaleString()}</span></p>
                   </div>
                 </div>
+                
+                <div className="mb-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Select Collateral to Use:</label>
+                  <div className="max-h-40 overflow-y-auto border rounded">
+                    {user.collateralAssets?.map(asset => (
+                      <label key={asset.id} className="flex items-center p-2 border-b hover:bg-gray-50">
+                        <input
+                          type="radio"
+                          name="collateral"
+                          value={asset.id}
+                          checked={loanApplication.collateralId === asset.id}
+                          onChange={() => setLoanApplication({
+                            ...loanApplication, 
+                            collateralId: asset.id,
+                            collateralValue: asset.value
+                          })}
+                          className="mr-2"
+                        />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium capitalize">{asset.type}</p>
+                          <p className="text-xs text-gray-600">₦{asset.value.toLocaleString()}</p>
+                          {asset.description && (
+                            <p className="text-xs text-gray-500">{asset.description}</p>
+                          )}
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                
+                {loanApplication.collateralId && (
+                  <div className="p-2 bg-green-50 rounded border border-green-200">
+                    <p className="text-sm text-green-700 flex items-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Selected collateral meets requirements
+                    </p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div>
+                <p className="text-sm text-red-600 mb-3">
+                  This loan requires collateral, but you don't have any collateral assets registered yet.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLoanModal(false);
+                    setCollateralModalOpen(true);
+                  }}
+                  className="flex items-center text-sm text-blue-600 hover:text-blue-800"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  Add Collateral Assets
+                </button>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Collateral Not Required Notice */}
+        {loanApplication.type && !['business', 'mortgage', 'asset_finance'].includes(loanApplication.type) && (
+          <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+            <p className="text-sm text-green-700 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              This loan type does not require collateral
+            </p>
+          </div>
+        )}
+      </div>
+      <div className="flex justify-end space-x-3 mt-6">
+        <button
+          onClick={() => {
+            setLoanModal(false);
+            setLoanApplication({ type: '', amount: '', purpose: '', income: '', collateralId: '', collateralValue: 0 });
+          }}
+          className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition duration-300"
+        >
+          {t('cancel')}
+        </button>
+        <button
+          onClick={handleLoanApplication}
+          disabled={['business', 'mortgage', 'asset_finance'].includes(loanApplication.type) && !loanApplication.collateralId}
+          className={`px-4 py-2 rounded-md transition duration-300 ${
+            ['business', 'mortgage', 'asset_finance'].includes(loanApplication.type) && !loanApplication.collateralId
+              ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
+              : 'bg-blue-600 text-white hover:bg-blue-700'
+          }`}
+        >
+          {t('apply_loan')}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
             {/* Investment Modal */}
             {investmentModal && (
@@ -5716,7 +7423,7 @@
 
             {/* Footer */}
             <footer className="bg-gray-800 text-white p-4 text-center">
-              <p>© 2024 ONPIN - National Identity Wallet with AI Credit Scoring & Financial Services</p>
+              <p>© 2025 ONPIN - National Identity Wallet with AI Credit Scoring & Financial Services</p>
             </footer>
           </div>
         );
