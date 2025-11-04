@@ -1,0 +1,2383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ONPII Identity Wallet - Sign Up</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .biometric-icon {
+            transition: all 0.3s ease;
+        }
+        .biometric-icon:hover {
+            transform: scale(1.1);
+        }
+        .progress-bar {
+            transition: width 0.5s ease;
+        }
+        .language-selector {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23334d5c'%3E%3Cpath d='M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 010 16z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+            background-size: 1.5em;
+        }
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding: 0 10px;
+        }
+        .step-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            max-width: 120px;
+        }
+        .step-circle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+        }
+        .step-circle.active {
+            background: #EAAB21;
+            color: white;
+        }
+        .step-circle.completed {
+            background: #838484;
+            color: white;
+        }
+        .step-label {
+            font-size: 11px;
+            text-align: center;
+            color: #6b7280;
+            line-height: 1.2;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .step-label.active {
+            color: #EAAB21;
+            font-weight: 600;
+        }
+        .form-step {
+            display: none;
+        }
+        .form-step.active {
+            display: block;
+        }
+        .radio-group {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            justify-content: center;
+        }
+        .radio-btn {
+            padding: 12px 24px;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        .radio-btn:hover {
+            border-color: #EAAB21;
+        }
+        .radio-btn.active {
+            background: #EAAB21;
+            color: white;
+            border-color: #EAAB21;
+        }
+        .biometric-card {
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .biometric-card:hover {
+            border-color: #EAAB21;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .biometric-card.completed {
+            border-color: #838484;
+            background-color: #f8f9fa;
+        }
+        .biometric-icon-container {
+            background: #dbeafe;
+            padding: 12px;
+            border-radius: 50%;
+            display: inline-flex;
+            margin-bottom: 16px;
+        }
+        .biometric-card.completed .biometric-icon-container {
+            background: #dcfce7;
+        }
+        .error-message {
+            color: #dc2626;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+        .success-message {
+            color: #EAAB21;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+        .info-card {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+        .completion-card {
+            background: #f8f9fa;
+            border: 1px solid #bbf7d0;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+        }
+        .did-display, .nin-display {
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 12px;
+            font-family: monospace;
+            font-size: 14px;
+            word-break: break-all;
+            margin: 8px 0;
+        }
+        .progress-container {
+            background: #f3f4f6;
+            border-radius: 8px;
+            height: 8px;
+            margin: 16px 0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: #EAAB21;
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        .btn-primary {
+            background: #EAAB21;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #812138;
+        }
+        .btn-primary:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #EAAB21;
+        }
+        .form-input.error {
+            border-color: #dc2626;
+        }
+        .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+        }
+        .form-select:focus {
+            outline: none;
+            border-color: #EAAB21;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+        }
+        @media (max-width: 768px) {
+            .grid-2, .grid-3 {
+                grid-template-columns: 1fr;
+            }
+            .radio-group {
+                flex-direction: column;
+                align-items: center;
+            }
+            .step-item {
+                max-width: 80px;
+            }
+            .step-circle {
+                width: 28px;
+                height: 28px;
+                font-size: 12px;
+            }
+            .step-label {
+                font-size: 10px;
+                height: 28px;
+            }
+        }
+        
+        /* Added styles for phone verification and document scanning */
+        .verification-digit {
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            font-size: 18px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+        }
+        
+        .verification-digit:focus {
+            outline: none;
+            border-color: #EAAB21;
+        }
+        
+        .scanning-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .document-scan-overlay {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+            animation: scanLine 2s linear infinite;
+        }
+        
+        @keyframes scanLine {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(200px); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div id="app">
+        <!-- Header -->
+<header class="bg-[#812138] text-white p-4 shadow-md">
+    <div class="container mx-auto flex justify-between items-center">
+        <h1 class="text-xl font-bold flex items-center space-x-3">
+        <img src="logo.png" class="w-20 h-auto" alt="Logo" />
+        <span class="text-[#EAAB21] tracking-wide">Bestaf Payments</span>
+        </h1>
+
+        <div class="flex items-center space-x-4">
+        <select
+            id="languageSelect"
+            class="bg-[#282828] text-[#EAAB21] border border-[#838484] rounded px-3 py-1 pr-8 appearance-none focus:outline-none focus:ring-2 focus:ring-[#EAAB21]"
+        >
+            <option value="en">English</option>
+            <option value="yo">Yoruba</option>
+            <option value="ig">Igbo</option>
+            <option value="ha">Hausa</option>
+            <option value="fr">Français</option>
+            <option value="ar">العربية</option>
+        </select>
+        </div>
+    </div>
+    </header>
+
+        <!-- Main Content -->
+        <main class="container mx-auto p-4 flex items-center justify-center min-h-screen">
+            <!-- Registration Form -->
+            <div id="registrationForm" class="max-w-2xl w-full bg-white rounded-lg shadow-md p-6">
+                <h2 id="signupTitle" class="text-2xl font-bold mb-6 text-center">Create ONPIN Wallet</h2>
+                
+                <!-- Progress Indicator -->
+                <div class="progress-container">
+                    <div id="progressFill" class="progress-fill" style="width: 16.67%"></div>
+                </div>
+                
+                <!-- Step Indicator -->
+                <div class="step-indicator" id="stepIndicator">
+                    <!-- Steps will be dynamically generated -->
+                </div>
+
+                <!-- Form Steps -->
+                <form id="signupForm">
+                    <!-- Step 1: NIN Check -->
+                    <div id="step1" class="form-step active">
+                        <div class="space-y-6">
+                            <div class="text-center">
+                                <label id="hasNinLabel" class="form-label text-lg">Do you have NIN?</label>
+                                <div class="radio-group">
+                                    <button type="button" class="radio-btn" id="hasNinYes" data-value="true">
+                                        <span id="yesText">Yes</span>
+                                    </button>
+                                    <button type="button" class="radio-btn" id="hasNinNo" data-value="false">
+                                        <span id="noText">No</span>
+                                    </button>
+                                </div>
+                                <div id="hasNinError" class="error-message" style="display: none;"></div>
+                            </div>
+
+                            <div id="ninInputContainer" style="display: none;">
+                                <label id="ninLabel" class="form-label">National Identification Number (NIN)</label>
+                                <input type="text" id="ninInput" class="form-input" placeholder="11-digit NIN" maxlength="11">
+                                <div id="ninError" class="error-message" style="display: none;"></div>
+                            </div>
+
+                            <div id="generateNinInfo" class="info-card" style="display: none;">
+                                <p id="generateNinText">Please proceed to create your National Identification Number (NIN)</p>
+                                <p class="text-sm text-gray-600 mt-2">Proceed to get your NIN</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Personal Information with Phone Verification -->
+                    <div id="step2" class="form-step">
+                        <div class="space-y-4">
+                            <div class="form-group">
+                                <label id="nameLabel" class="form-label">Full Name</label>
+                                <input type="text" id="nameInput" class="form-input">
+                                <div id="nameError" class="error-message" style="display: none;"></div>
+                            </div>
+
+                            <!-- Phone verification section - compulsory for all users -->
+                            <div class="form-group">
+                                <label id="phoneLabel" class="form-label">Phone Number (Required)</label>
+                                <div style="display: flex; gap: 10px;">
+                                    <select id="countryCodeSelect" class="form-select" style="width: 120px;">
+                                        <option value="+234">+234 (NG)</option>
+                                        <option value="+1">+1 (US)</option>
+                                        <option value="+44">+44 (UK)</option>
+                                        <option value="+91">+91 (IN)</option>
+                                    </select>
+                                    <input type="tel" id="phoneInput" class="form-input" placeholder="8012345678" style="flex: 1;">
+                                </div>
+                                <div id="phoneError" class="error-message" style="display: none;"></div>
+                            </div>
+
+                            <!-- Phone Verification Section -->
+                            <div class="biometric-card" id="phoneVerificationCard">
+                                <div class="biometric-icon-container">
+                                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                    </svg>
+                                </div>
+                                <p class="mb-4">Phone verification is required for all users</p>
+                                <button type="button" class="btn btn-primary" id="sendCodeBtn">Send Verification Code</button>
+                                <div id="codeSentMessage" style="display: none; margin-top: 10px;">
+                                    <p class="text-green-600 text-sm">✓ Verification code sent!</p>
+                                </div>
+                            </div>
+
+                            <!-- Verification Code Input -->
+                            <div id="verificationCodeSection" style="display: none;">
+                                <div class="form-group">
+                                    <label class="form-label">Enter 6-Digit Verification Code</label>
+                                    <div style="display: flex; gap: 10px; justify-content: center; margin: 20px 0;">
+                                        <input type="text" class="verification-digit" maxlength="1">
+                                        <input type="text" class="verification-digit" maxlength="1">
+                                        <input type="text" class="verification-digit" maxlength="1">
+                                        <input type="text" class="verification-digit" maxlength="1">
+                                        <input type="text" class="verification-digit" maxlength="1">
+                                        <input type="text" class="verification-digit" maxlength="1">
+                                    </div>
+                                    <div style="text-align: center;">
+                                        <button type="button" class="btn btn-primary" id="verifyCodeBtn">Verify Code</button>
+                                        <p class="text-sm text-gray-600 mt-2">
+                                            Didn't receive code? <button type="button" id="resendCodeBtn" style="color: #3b82f6; background: none; border: none; text-decoration: underline; cursor: pointer;">Resend</button>
+                                        </p>
+                                    </div>
+                                    <div id="verificationResult" style="display: none; text-align: center; margin-top: 15px;">
+                                        <p id="verificationSuccess" class="text-green-600" style="display: none;">✓ Phone number verified successfully!</p>
+                                        <p id="verificationError" class="text-red-600" style="display: none;">✗ Invalid verification code. Please try again.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label id="pinLabel" class="form-label">PIN</label>
+                                    <input type="password" id="pinInput" class="form-input" placeholder="4-digit PIN" maxlength="4">
+                                    <div id="pinError" class="error-message" style="display: none;"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label id="confirmPinLabel" class="form-label">Confirm PIN</label>
+                                    <input type="password" id="confirmPinInput" class="form-input" placeholder="Confirm PIN" maxlength="4">
+                                    <div id="confirmPinError" class="error-message" style="display: none;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: KYC Details (for non-NIN users) or Completion (for NIN users) -->
+                    <div id="step3" class="form-step">
+                        <!-- KYC Details for non-NIN users -->
+                        <div id="kycDetails" style="display: none;">
+                            <h3 class="text-lg font-medium mb-4">Personal Details</h3>
+                            <div class="space-y-4">
+                                <div class="grid-2">
+                                    <div class="form-group">
+                                        <label id="fatherNameLabel" class="form-label">Father's Full Name</label>
+                                        <input type="text" id="fatherNameInput" class="form-input">
+                                        <div id="fatherNameError" class="error-message" style="display: none;"></div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label id="motherNameLabel" class="form-label">Mother's Full Name</label>
+                                        <input type="text" id="motherNameInput" class="form-input">
+                                        <div id="motherNameError" class="error-message" style="display: none;"></div>
+                                    </div>
+                                </div>
+
+                                <div class="grid-2">
+                                    <div class="form-group">
+                                        <label id="birthDateLabel" class="form-label">Date of Birth</label>
+                                        <input type="date" id="birthDateInput" class="form-input">
+                                        <div id="birthDateError" class="error-message" style="display: none;"></div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label id="birthPlaceLabel" class="form-label">Place of Birth</label>
+                                        <input type="text" id="birthPlaceInput" class="form-input">
+                                        <div id="birthPlaceError" class="error-message" style="display: none;"></div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label id="genderLabel" class="form-label">Gender</label>
+                                    <div class="radio-group">
+                                        <button type="button" class="radio-btn" id="genderMale" data-value="male">
+                                            <span id="maleText">Male</span>
+                                        </button>
+                                        <button type="button" class="radio-btn" id="genderFemale" data-value="female">
+                                            <span id="femaleText">Female</span>
+                                        </button>
+                                    </div>
+                                    <div id="genderError" class="error-message" style="display: none;"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label id="addressLabel" class="form-label">Residential Address</label>
+                                    <input type="text" id="addressInput" class="form-input">
+                                    <div id="addressError" class="error-message" style="display: none;"></div>
+                                </div>
+
+                                <div class="grid-3">
+                                    <div class="form-group">
+                                        <label id="stateLabel" class="form-label">State of Origin</label>
+                                        <input type="text" id="stateInput" class="form-input">
+                                        <div id="stateError" class="error-message" style="display: none;"></div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label id="lgaLabel" class="form-label">Local Government Area</label>
+                                        <input type="text" id="lgaInput" class="form-input">
+                                        <div id="lgaError" class="error-message" style="display: none;"></div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label id="occupationLabel" class="form-label">Occupation</label>
+                                        <input type="text" id="occupationInput" class="form-input">
+                                        <div id="occupationError" class="error-message" style="display: none;"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Passport photograph upload section - compulsory for all users -->
+                                <div class="form-group">
+                                    <label id="passportPhotoLabel" class="form-label">Passport Photograph (Required)</label>
+                                    <div class="biometric-card" id="passportPhotoCard">
+                                        <div class="biometric-icon-container">
+                                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                            </svg>
+                                        </div>
+                                        <p class="mb-4" id="uploadPassportText">Upload a clear passport-sized photograph</p>
+                                        <button type="button" class="btn btn-secondary" id="uploadPassportBtn">Upload Photo</button>
+                                        <input type="file" id="passportFileInput" accept="image/*" style="display: none;">
+                                        <div id="passportPreview" style="display: none; margin-top: 10px;">
+                                            <img id="passportImage" style="max-width: 150px; max-height: 150px; border-radius: 8px; border: 2px solid #e5e7eb;">
+                                            <p class="text-sm text-green-600 mt-2">✓ Photo uploaded successfully</p>
+                                        </div>
+                                    </div>
+                                    <div id="passportPhotoError" class="error-message" style="display: none;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Completion for NIN users -->
+                        <div id="ninUserCompletion" style="display: none;">
+                            <!-- Passport photo requirement for NIN users too -->
+                            <div class="form-group mb-6">
+                                <label id="passportPhotoLabelNin" class="form-label">Passport Photograph (Required)</label>
+                                <div class="biometric-card" id="passportPhotoCardNin">
+                                    <div class="biometric-icon-container">
+                                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                        </svg>
+                                    </div>
+                                    <p class="mb-4">Upload a clear passport-sized photograph</p>
+                                    <button type="button" class="btn btn-secondary" id="uploadPassportBtnNin">Upload Photo</button>
+                                    <input type="file" id="passportFileInputNin" accept="image/*" style="display: none;">
+                                    <div id="passportPreviewNin" style="display: none; margin-top: 10px;">
+                                        <img id="passportImageNin" style="max-width: 150px; max-height: 150px; border-radius: 8px; border: 2px solid #e5e7eb;">
+                                        <p class="text-sm text-green-600 mt-2">✓ Photo uploaded successfully</p>
+                                    </div>
+                                </div>
+                                <div id="passportPhotoErrorNin" class="error-message" style="display: none;"></div>
+                            </div>
+
+                            <div class="completion-card">
+                                <div class="text-center mb-4">
+                                    <svg class="w-12 h-12 text-green-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <h3 class="text-lg font-medium">Decentralized ID (DID)</h3>
+                                </div>
+                                <div id="didDisplay" class="did-display"></div>
+                                <p class="text-gray-600 mt-4">Your wallet is ready! Click complete to access the portal.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Biometrics (for non-NIN users) -->
+                    <div id="step4" class="form-step">
+                        <div class="space-y-6">
+                            <h3 class="text-lg font-medium">Biometric Data Collection</h3>
+
+                            <div class="grid-2">
+                                <div class="biometric-card" id="photoCard">
+                                    <div class="biometric-icon-container">
+                                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <p class="mb-4" id="takePhotoText">Take Photo</p>
+                                    <button type="button" class="btn btn-secondary" id="capturePhotoBtn">Capture Photo</button>
+                                </div>
+
+                                <div class="biometric-card" id="fingerprintCard">
+                                    <div class="biometric-icon-container">
+                                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"></path>
+                                        </svg>
+                                    </div>
+                                    <p class="mb-4" id="scanFingerprintText">Scan Fingerprint</p>
+                                    <button type="button" class="btn btn-secondary" id="scanFingerprintBtn">Scan Fingerprint</button>
+                                </div>
+                            </div>
+
+                            <div class="biometric-card" id="voiceCard">
+                                <div class="biometric-icon-container">
+                                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                                    </svg>
+                                </div>
+                                <p class="mb-4" id="recordVoiceText">Record Voice</p>
+                                <button type="button" class="btn btn-secondary" id="recordVoiceBtn">Record Voice</button>
+                            </div>
+
+                            <div id="biometricErrors" class="error-message" style="display: none;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Step 5: Document Upload (for non-NIN users) -->
+                    <div id="step5" class="form-step">
+                        <div class="space-y-6">
+                            <h3 class="text-lg font-medium">Document Verification</h3>
+
+                            <div class="form-group">
+                                <label id="documentTypeLabel" class="form-label">Document Type</label>
+                                <select id="documentTypeSelect" class="form-select">
+                                    <option value="">Select document type</option>
+                                    <option value="passport" id="passportOption">International Passport</option>
+                                    <option value="driver_license" id="driverLicenseOption">Driver's License</option>
+                                    <option value="voter_card" id="voterCardOption">Voter's Card</option>
+                                    <option value="birth_certificate" id="birthCertificateOption">Birth Certificate</option>
+                                </select>
+                                <div id="documentTypeError" class="error-message" style="display: none;"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label id="documentNumberLabel" class="form-label">Document Number</label>
+                                <input type="text" id="documentNumberInput" class="form-input">
+                                <div id="documentNumberError" class="error-message" style="display: none;"></div>
+                            </div>
+
+                            <div class="biometric-card" id="documentUploadCard">
+                                <div class="biometric-icon-container">
+                                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                    </svg>
+                                </div>
+                                <p class="mb-4" id="uploadDocumentText">Upload a clear photo of your document</p>
+                                <button type="button" class="btn btn-secondary" id="uploadDocumentBtn">Upload Document</button>
+                                <input type="file" id="documentFileInput" accept="image/*,.pdf" style="display: none;">
+                            </div>
+
+                            <div id="documentUploadError" class="error-message" style="display: none;"></div>
+
+                            <!-- Document scanning and validation section -->
+                            <div id="documentScanSection" style="display: none;">
+                                <div class="form-group">
+                                    <div class="biometric-card document-scan-overlay" style="background: #f8fafc; border: 2px dashed #3b82f6;">
+                                        <div class="biometric-icon-container">
+                                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                        </div>
+                                        <h4 class="text-lg font-medium mb-2">Document Scanning & Validation</h4>
+                                        
+                                        <div id="scanningProgress" style="display: none;">
+                                            <div class="scan-line"></div>
+                                            <div class="progress-bar" style="width: 100%; height: 8px; background: #e5e7eb; border-radius: 4px; margin: 10px 0;">
+                                                <div id="scanProgressFill" style="width: 0%; height: 100%; background: #3b82f6; border-radius: 4px; transition: width 0.3s;"></div>
+                                            </div>
+                                            <p id="scanStatusText" class="text-sm text-gray-600">Initializing scan...</p>
+                                        </div>
+                                        
+                                        <div id="scanResults" style="display: none;">
+                                            <div id="scanSuccess" style="display: none;">
+                                                <p class="text-green-600 font-medium">✓ Document verified successfully!</p>
+                                                <div class="text-sm text-gray-600 mt-2">
+                                                    <p>Document Type: <span id="detectedDocType"></span></p>
+                                                    <p>Document Number: <span id="detectedDocNumber"></span></p>
+                                                    <p>Validity: <span id="docValidity" class="text-green-600">Valid</span></p>
+                                                    <p>Confidence: <span id="scanConfidence" class="text-green-600">98%</span></p>
+                                                </div>
+                                            </div>
+                                            <div id="scanError" style="display: none;">
+                                                <p class="text-red-600 font-medium">⚠ Document validation failed</p>
+                                                <p class="text-sm text-gray-600 mt-2">Please ensure the document is clear and try again.</p>
+                                                <button type="button" class="btn btn-secondary mt-2" id="retryScanBtn">Retry Scan</button>
+                                            </div>
+                                        </div>
+                                        
+                                        <button type="button" class="btn btn-primary" id="startScanBtn">Start Document Scan</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 6: Final Review (for non-NIN users) -->
+                    <div id="step6" class="form-step">
+                        <div class="space-y-6">
+                            <h3 class="text-lg font-medium">Review & Complete</h3>
+
+                            <div class="completion-card">
+                                <div class="text-center mb-4">
+                                    <svg class="w-12 h-12 text-green-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <p class="text-gray-700 mb-4">All information collected. We will generate your NIN and DID upon completion.</p>
+                                    <p class="font-medium">Ready to complete registration</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Buttons -->
+                    <div class="flex justify-between pt-6">
+                        <button type="button" id="backBtn" class="btn btn-secondary">
+                            <span id="backText">Back</span>
+                        </button>
+                        <button type="button" id="nextBtn" class="btn btn-primary">
+                            <span id="nextText">Next</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Registration Complete -->
+            <div id="registrationComplete" class="max-w-md w-full bg-white rounded-lg shadow-md p-6 text-center" style="display: none;">
+                <div class="bg-green-100 rounded-full p-3 inline-flex mb-4">
+                    <svg class="h-10 w-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                <h2 id="registrationCompleteTitle" class="text-2xl font-bold mb-4">Registration Complete! Your ONPIN wallet is ready</h2>
+
+                <div class="space-y-4 mb-6">
+                    <div class="info-card">
+                        <p class="text-sm text-gray-600 mb-2">Your DID:</p>
+                        <div id="finalDidDisplay" class="did-display"></div>
+                    </div>
+
+                    <div id="finalNinContainer" class="info-card" style="display: none;">
+                        <p class="text-sm text-gray-600 mb-2">Your Generated NIN:</p>
+                        <div id="finalNinDisplay" class="nin-display"></div>
+                    </div>
+                </div>
+
+                <button id="accessPortalBtn" class="btn btn-primary w-full">
+                    <span id="accessPortalText">Access Portal</span>
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <footer class="bg-gray-800 text-white p-4 text-center">
+       <p>© 2025 ONPII - One Nigeria Portable Identity Payment Wallet</p>
+    </footer>
+    
+    <script>
+        // Set footer year automatically
+        document.addEventListener('DOMContentLoaded', function() {
+            var yearSpan = document.getElementById('footerYear');
+            if (yearSpan) {
+                yearSpan.textContent = new Date().getFullYear();
+            }
+        });
+
+     // Complete translations object with all languages
+  const translations = {
+            en: {
+                login_title: "Login to ONPIN Wallet",
+                signup_title: "Create ONPIN Wallet",
+                email_label: "Email",
+                password_label: "Password",
+                confirm_password_label: "Confirm Password",
+                login_button: "Login",
+                signup_button: "Sign Up",
+                or_login_with: "Or login with",
+                no_account: "Don't have an account?",
+                have_account: "Already have an account?",
+                signup_link: "Sign up now",
+                login_link: "Login now",
+                verifying_biometrics: "Verifying biometrics...",
+                welcome_message: "Welcome back {{name}}",
+                logout_button: "Logout",
+                wallet_balance: "Wallet Balance",
+                overview_tab: "Overview",
+                payments_tab: "Payments",
+                consent_tab: "Consent",
+                settings_tab: "Settings",
+                quick_actions: "Quick Actions",
+                transfer: "Transfer",
+                payments: "Payments",
+                consent: "Consent",
+                disaster_relief: "Disaster Relief",
+                recent_activity: "Recent Activity",
+                account_verified: "Account Verified",
+                biometric_enrollment: "Biometric Enrollment",
+                consent_granted_to: "Consent granted to",
+                payment_services: "Payment Services",
+                send_money: "Send Money",
+                request_money: "Request Money",
+                pay_bills: "Pay Bills",
+                airtime_data: "Airtime/Data",
+                recent_transactions: "Recent Transactions",
+                credit: "Credit",
+                debit: "Debit",
+                disaster_relief_payment: "Disaster Relief Payment",
+                consent_management: "Consent Management",
+                pending_requests: "Pending Requests",
+                active_consents: "Active Consents",
+                no_pending_requests: "No pending requests",
+                no_active_consents: "No active consents",
+                grant: "Grant",
+                deny: "Deny",
+                revoke: "Revoke",
+                government_services: "Government Services",
+                emergency_payments: "Emergency Payments",
+                biometric_settings: "Biometric Settings",
+                face_id: "Face ID",
+                fingerprint: "Fingerprint",
+                voice_recognition: "Voice Recognition",
+                security: "Security",
+                change_password: "Change Password",
+                privacy: "Privacy",
+                data_sharing_preferences: "Data Sharing Preferences",
+                help: "Help",
+                contact_support: "Contact Support",
+                voice_command_received: "Voice command received: {{command}}",
+                voice_command_unknown: "Sorry, I didn't understand that command",
+                disaster_payment_triggered: "Disaster relief payments triggered for your location",
+                disaster_payment_confirmation: "Disaster relief payments have been processed for citizens in your area",
+                consent_granted: "Consent granted to {{requester}}",
+                consent_revoked: "Consent revoked from {{requester}}",
+                name_label: "Full Name",
+                nin_label: "National Identification Number (NIN)",
+                bvn_label: "Bank Verification Number (BVN)",
+                phone_label: "Phone Number",
+                step_1: "NIN Check",
+                step_2: "Personal Info",
+                step_3: "KYC Details",
+                step_4: "Biometrics",
+                step_5: "Documents",
+                step_6: "Complete",
+                biometric_title: "Biometric Enrollment",
+                biometric_description: "Secure your wallet with multi-factor biometric authentication",
+                complete_registration: "Complete Registration",
+                back_button: "Back",
+                next_button: "Next",
+                nin_required: "NIN is required",
+                bvn_required: "BVN is required",
+                name_required: "Name is required",
+                email_required: "Email is required",
+                phone_required: "Phone is required",
+                password_required: "Password is required",
+                password_mismatch: "PINs do not match",
+                registration_complete: "Registration complete! Your ONPIN wallet is ready",
+                kyc_verification: "KYC Verification",
+                identity_verification: "Identity Verification",
+                view_biometrics: "View Biometrics",
+                biometric_data: "Biometric Data",
+                bank_connections: "Bank Connections",
+                connect_bank: "Connect Bank",
+                connected_banks: "Connected Banks",
+                no_connected_banks: "No banks connected",
+                verify_identity: "Verify Identity",
+                identity_status: "Identity Status",
+                verified: "Verified",
+                unverified: "Unverified",
+                verify_now: "Verify Now",
+                verification_success: "Identity verification successful",
+                bank_verification: "Bank Verification",
+                recent_transfers: "Recent Transfers",
+                no_recent_transfers: "No recent transfers",
+                recipient: "Recipient",
+                amount: "Amount",
+                date: "Date",
+                status: "Status",
+                pending: "Pending",
+                completed: "Completed",
+                failed: "Failed",
+                make_transfer: "Make Transfer",
+                to: "To",
+                enter_amount: "Enter Amount",
+                send: "Send",
+                cancel: "Cancel",
+                transfer_success: "Transfer successful",
+                transfer_failed: "Transfer failed",
+                insufficient_funds: "Insufficient funds",
+                enter_recipient: "Enter recipient wallet ID",
+                enter_valid_amount: "Please enter a valid amount",
+                transaction_details: "Transaction Details",
+                transaction_id: "Transaction ID",
+                reference: "Reference",
+                purpose: "Purpose",
+                view_details: "View Details",
+                close: "Close",
+                language: "Language",
+                english: "English",
+                yoruba: "Yoruba",
+                hausa: "Hausa",
+                igbo: "Igbo",
+                french: "French",
+                arabic: "Arabic",
+                did_label: "Decentralized ID (DID)",
+                pin_label: "PIN",
+                login_with_pin: "Login with PIN",
+                generate_did: "Generate DID",
+                did_generated: "Your DID has been generated: {{did}}",
+                pin_required: "PIN is required",
+                pin_must_be_4_digits: "PIN must be 4 digits",
+                invalid_pin: "Invalid PIN",
+                invalid_did: "Invalid DID",
+                has_bvn_nin: "Do you have NIN?",
+                yes: "Yes",
+                no: "No",
+                generate_for_me: "Please proceed to create your National Identification Number (NIN)",
+                nin_generated: "Your NIN has been generated: {{nin}}",
+                father_name: "Father's Full Name",
+                mother_name: "Mother's Full Name",
+                birth_date: "Date of Birth",
+                birth_place: "Place of Birth",
+                gender: "Gender",
+                address: "Residential Address",
+                state: "State of Origin",
+                lga: "Local Government Area",
+                occupation: "Occupation",
+                document_type: "Document Type",
+                document_number: "Document Number",
+                take_photo: "Take Photo",
+                scan_fingerprint: "Scan Fingerprint",
+                record_voice: "Record Voice",
+                upload_document: "Upload Document",
+                male: "Male",
+                female: "Female",
+                passport: "International Passport",
+                driver_license: "Driver's License",
+                voter_card: "Voter's Card",
+                birth_certificate: "Birth Certificate",
+                access_portal: "Access Portal"
+            },
+            yo: {
+                login_title: "Wo ile ONPIN Wallet",
+                login_with_pin: "Wo ile pẹlu PIN",
+                signup_title: "Ṣẹda ONPIN Wallet",
+                email_label: "Imeeli",
+                password_label: "Ọrọ igbaniwọle",
+                confirm_password_label: "Jẹrisi ọrọ igbaniwọle",
+                login_button: "Wo ile",
+                signup_button: "Forukọsilẹ",
+                or_login_with: "Tabi wo ile pẹlu",
+                no_account: "Ko ni akọọlẹ?",
+                have_account: "Ni akọọlẹ tẹlẹ?",
+                signup_link: "Forukọsilẹ bayi",
+                login_link: "Wo ile bayi",
+                verifying_biometrics: "Ṣiṣayẹwo awọn biometrics...",
+                welcome_message: "Kaabọ {{name}}",
+                logout_button: "Jaade",
+                wallet_balance: "Iwọn iṣura",
+                overview_tab: "Akopọ",
+                payments_tab: "Isanwo",
+                consent_tab: "Igbasilẹ",
+                settings_tab: "Etọ",
+                quick_actions: "Awọn iṣẹ lẹsẹkẹsẹ",
+                transfer: "Gbe lọ",
+                payments: "Isanwo",
+                consent: "Igbasilẹ",
+                disaster_relief: "Iranlowo Ijamba",
+                recent_activity: "Awọn iṣẹlẹ tuntun",
+                account_verified: "Akọọlẹ ti jẹrisi",
+                biometric_enrollment: "Iforukọsilẹ biometric",
+                consent_granted_to: "Ti fun ni igbasilẹ si",
+                payment_services: "Awọn iṣẹ isanwo",
+                send_money: "Ranṣẹ owo",
+                request_money: "Beere owo",
+                pay_bills: "San awọn bilẹ",
+                airtime_data: "Airtime/Data",
+                recent_transactions: "Awọn iṣowo tuntun",
+                credit: "Kirediti",
+                debit: "Debiti",
+                disaster_relief_payment: "Isanwo Iranlowo Ijamba",
+                consent_management: "Iṣakoso Igbasilẹ",
+                pending_requests: "Awọn ibeere ti nṣura",
+                active_consents: "Awọn igbasilẹ ti nṣiṣẹ",
+                no_pending_requests: "Ko si awọn ibeere ti nṣura",
+                no_active_consents: "Ko si awọn igbasilẹ ti nṣiṣẹ",
+                grant: "Fun ni",
+                deny: "Kọ",
+                revoke: "Yọ kuro",
+                government_services: "Awọn iṣẹ ijọba",
+                emergency_payments: "Awọn isanwo iyara",
+                biometric_settings: "Awọn etọ biometric",
+                face_id: "Face ID",
+                fingerprint: "Ika ọwọ",
+                voice_recognition: "Ifọrọwanilẹnu ohun",
+                security: "Aabo",
+                change_password: "Yi ọrọ igbaniwọle pada",
+                privacy: "Ikọkọ",
+                data_sharing_preferences: "Awọn yiyan pinpin data",
+                help: "Iranlọwọ",
+                contact_support: "Kan si atilẹyin",
+                voice_command_received: "Aṣẹ ohun ti gba: {{command}}",
+                voice_command_unknown: "Ma binu, Emi ko gbọ aṣẹ naa",
+                disaster_payment_triggered: "Awọn isanwo iranlowo ijamba ti ṣe fun ipo rẹ",
+                disaster_payment_confirmation: "Awọn isanwo iranlowo ijamba ti ṣe fun awọn ara ilu ni agbegbe rẹ",
+                consent_granted: "Ti fun ni igbasilẹ si {{requester}}",
+                consent_revoked: "Ti yọ igbasilẹ kuro ni {{requester}}",
+                name_label: "Orukọ kikun",
+                nin_label: "Nọmba Idanimọ Orilẹ-ede (NIN)",
+                phone_label: "Nọmba foonu",
+                step_1: "Ayẹwo NIN",
+                step_2: "Alaye Ti ara ẹni",
+                step_3: "Awọn alaye KYC",
+                step_4: "Awọn biometric",
+                step_5: "Awọn iwe",
+                step_6: "Pari",
+                biometric_title: "Iforukọsilẹ Biometric",
+                biometric_description: "Dani ẹru rẹ pẹlu ifọrọwanilẹnu biometric oriṣiriṣi",
+                complete_registration: "Parẹ iforukọsilẹ",
+                back_button: "Pada",
+                next_button: "Iwọle",
+                nin_required: "NIN nilo",
+                name_required: "Orukọ nilo",
+                email_required: "Imeeli nilo",
+                phone_required: "Nọmba foonu nilo",
+                password_required: "Ọrọ igbaniwọle nilo",
+                password_mismatch: "Awọn PIN ko baamu",
+                registration_complete: "Iforukọsilẹ pari! ONPIN ẹru rẹ ti ṣetan",
+                kyc_verification: "Iṣẹlẹ KYC",
+                identity_verification: "Iṣẹlẹ Idanimọ",
+                view_biometrics: "Wo Awọn Biometrics",
+                biometric_data: "Data Biometric",
+                bank_connections: "Awọn asopọ Banki",
+                connect_bank: "So banki pọ",
+                connected_banks: "Awọn banki ti a sopọ",
+                no_connected_banks: "Ko si awọn banki ti a sopọ",
+                verify_identity: "Ṣe ayẹwo idanimọ",
+                identity_status: "Ipo Idanimọ",
+                verified: "Ti jẹrisi",
+                unverified: "Ko jẹrisi",
+                verify_now: "Ṣe ayẹwo bayi",
+                verification_success: "Iṣẹlẹ idanimọ ti ṣe aṣeyọri",
+                bank_verification: "Iṣẹlẹ Banki",
+                recent_transfers: "Awọn gbigbe tuntun",
+                no_recent_transfers: "Ko si awọn gbigbe tuntun",
+                recipient: "Olugba",
+                amount: "Iye",
+                date: "Ọjọ",
+                status: "Ipo",
+                pending: "Nṣura",
+                completed: "Ti pari",
+                failed: "Ti ṣẹgun",
+                make_transfer: "Ṣe gbigbe",
+                to: "Si",
+                enter_amount: "Tẹ iye",
+                send: "Ranṣẹ",
+                cancel: "Fagilee",
+                transfer_success: "Gbigbe ti ṣe aṣeyọri",
+                transfer_failed: "Gbigbe ti ṣẹgun",
+                insufficient_funds: "Ko si owo to",
+                enter_recipient: "Tẹ idẹ ẹru olugba",
+                enter_valid_amount: "Jọwọ tẹ iye ti o wulo",
+                transaction_details: "Awọn alaye iṣowo",
+                transaction_id: "ID Iṣowo",
+                reference: "Itọkasi",
+                purpose: "Idi",
+                view_details: "Wo awọn alaye",
+                close: "Pa",
+                language: "Ede",
+                english: "Gẹẹsi",
+                yoruba: "Yoruba",
+                hausa: "Hausa",
+                igbo: "Igbo",
+                french: "Faranse",
+                arabic: "Arabiki",
+                did_label: "Idanimọ Aisakoso (DID)",
+                pin_label: "PIN",
+                generate_did: "Ṣẹda DID",
+                did_generated: "DID rẹ ti ṣẹda: {{did}}",
+                pin_required: "PIN nilo",
+                pin_must_be_4_digits: "PIN gbọdọ jẹ nọmba 4",
+                invalid_pin: "PIN ti ko tọ",
+                invalid_did: "DID ti ko tọ",
+                has_bvn_nin: "Ṣe o ni NIN?",
+                yes: "Bẹẹni",
+                no: "Rara",
+                generate_for_me: "Ko si wahala, a o ṣẹda NIN fun ọ",
+                nin_generated: "NIN rẹ ti ṣẹda: {{nin}}",
+                father_name: "Orukọ Baba Kikun",
+                mother_name: "Orukọ Mama Kikun",
+                birth_date: "Ọjọ Ibi",
+                birth_place: "Ibi Ibi",
+                gender: "Akọ tabi abo",
+                address: "Adirẹsi Ibugbe",
+                state: "Ipinlẹ Ibilẹ",
+                lga: "Agbegbe Ijọba Ibugbe",
+                occupation: "Iṣẹ",
+                document_type: "Iru Iwe",
+                document_number: "Nọmba Iwe",
+                take_photo: "Ya Foto",
+                scan_fingerprint: "Ṣayẹwo Ika Ọwọ",
+                record_voice: "Gbasilẹ Ohun",
+                upload_document: "Gbe Iwe Soke",
+                male: "Akọ",
+                female: "Abo",
+                passport: "Pasipọọti Agbaye",
+                driver_license: "Iwe-aṣẹ Awakọ",
+                voter_card: "Kaadi Idibo",
+                birth_certificate: "Iwe-ẹri Ibi",
+                access_portal: "Wọle si Portal"
+            },
+            ig: {
+                login_title: "Banye na ONPIN Wallet",
+                login_with_pin: "Banye site na PIN",
+                signup_title: "Mepụta ONPIN Wallet",
+                email_label: "Email",
+                password_label: "Paswọọdụ",
+                confirm_password_label: "Kwenye paswọọdụ",
+                login_button: "Banye",
+                signup_button: "Debanye aha",
+                or_login_with: "Ma ọ bụ banye site na",
+                no_account: "Enweghị akaụntụ?",
+                have_account: "Enweelarị akaụntụ?",
+                signup_link: "Debanye aha ugbu a",
+                login_link: "Banye ugbu a",
+                verifying_biometrics: "Na-enyocha biometrics...",
+                welcome_message: "Nnọọ {{name}}",
+                logout_button: "Wepụ",
+                wallet_balance: "Balance Wallet",
+                overview_tab: "Nchịkọta",
+                payments_tab: "Ịkwụ ụgwọ",
+                consent_tab: "Nkwenye",
+                settings_tab: "Ntọala",
+                quick_actions: "Ọrụ ngwa ngwa",
+                transfer: "Nyefee",
+                payments: "Ịkwụ ụgwọ",
+                consent: "Nkwenye",
+                disaster_relief: "Enyemaka Ọdachi",
+                recent_activity: "Ọrụ na nso nso a",
+                account_verified: "Akaụntụ enyochala",
+                biometric_enrollment: "Ndebanye aha biometric",
+                consent_granted_to: "Enyere nkwenye nye",
+                payment_services: "Ọrụ ịkwụ ụgwọ",
+                send_money: "Zipu ego",
+                request_money: "Rịọ ego",
+                pay_bills: "Kwụọ ụgwọ",
+                airtime_data: "Oge ikuku/Data",
+                recent_transactions: "Azụmahịa ndị na-adịbeghị anya",
+                credit: "Kredit",
+                debit: "Debit",
+                disaster_relief_payment: "Ịkwụ ụgwọ enyemaka ọdachi",
+                consent_management: "Njikwa nkwenye",
+                pending_requests: "Arịrịọ na-echere",
+                active_consents: "Nkwenye na-arụ ọrụ",
+                no_pending_requests: "Enweghị arịrịọ na-echere",
+                no_active_consents: "Enweghị nkwenye na-arụ ọrụ",
+                grant: "Nye",
+                deny: "Jụ",
+                revoke: "Kagbuo",
+                government_services: "Ọrụ gọọmentị",
+                emergency_payments: "Ịkwụ ụgwọ mberede",
+                biometric_settings: "Ntọala biometric",
+                face_id: "Face ID",
+                fingerprint: "Akara mkpịsị aka",
+                voice_recognition: "Nnabata olu",
+                security: "Nchekwa",
+                change_password: "Gbanwee paswọọdụ",
+                privacy: "Nzuzo",
+                data_sharing_preferences: "Mmasị ịkekọrịta data",
+                help: "Enyemaka",
+                contact_support: "Kpọtụrụ nkwado",
+                voice_command_received: "Natara iwu olu: {{command}}",
+                voice_command_unknown: "Ndo, aghọtaghị m iwu ahụ",
+                disaster_payment_triggered: "Akpalitela ịkwụ ụgwọ enyemaka ọdachi maka ọnọdụ gị",
+                disaster_payment_confirmation: "Emeela ịkwụ ụgwọ enyemaka ọdachi maka ụmụ amaala nọ na mpaghara gị",
+                consent_granted: "Enyere nkwenye nye {{requester}}",
+                consent_revoked: "Ewepụla nkwenye n'aka {{requester}}",
+                name_label: "Aha zuru ezu",
+                nin_label: "Nọmba NJirimara Mba (NIN)",
+                phone_label: "Nọmba ekwentị",
+                step_1: "Nlele NIN",
+                step_2: "Ozi Onwe",
+                step_3: "Nkọwa KYC",
+                step_4: "Biometrics",
+                step_5: "Akwụkwọ",
+                step_6: "Mechie",
+                biometric_title: "Ndebanye aha biometric",
+                biometric_description: "Chekwaa obere akpa gị site na njirimara biometric ọtụtụ ihe",
+                complete_registration: "Mechie ndebanye aha",
+                back_button: "Azụ",
+                next_button: "Ọzọ",
+                nin_required: "Achọrọ NIN",
+                name_required: "Achọrọ aha",
+                email_required: "Achọrọ email",
+                phone_required: "Achọrọ nọmba ekwentị",
+                password_required: "Achọrọ paswọọdụ",
+                password_mismatch: "PIN adabaghị",
+                registration_complete: "Emechara ndebanye aha! ONPIN obere akpa gị dị njikere",
+                kyc_verification: "Nyocha KYC",
+                identity_verification: "Nyocha njirimara",
+                view_biometrics: "Lelee biometrics",
+                biometric_data: "Data biometric",
+                bank_connections: "Njikọ ụlọ akụ",
+                connect_bank: "Jikọọ ụlọ akụ",
+                connected_banks: "Ụlọ akụ ejikọrọ",
+                no_connected_banks: "Enweghị ụlọ akụ ejikọrọ",
+                verify_identity: "Nyochaa njirimara",
+                identity_status: "Ọkwa njirimara",
+                verified: "Enyochala",
+                unverified: "Achọpụtabeghị",
+                verify_now: "Nyochaa ugbu a",
+                verification_success: "Nyocha njirimara gara nke ọma",
+                bank_verification: "Nyocha ụlọ akụ",
+                recent_transfers: "Nyefe na nso nso a",
+                no_recent_transfers: "Enweghị mbufe na nso nso a",
+                recipient: "Onye nnata",
+                amount: "Ọnụ ego",
+                date: "Ụbọchị",
+                status: "Ọnọdụ",
+                pending: "Na-echere",
+                completed: "Emechara",
+                failed: "Dara",
+                make_transfer: "Mee mbufe",
+                to: "Gaa na",
+                enter_amount: "Tinye ego",
+                send: "Ziga",
+                cancel: "Kagbuo",
+                transfer_success: "Mbufe gara nke ọma",
+                transfer_failed: "Mbufe dara",
+                insufficient_funds: "Ego ezughị oke",
+                enter_recipient: "Tinye ID obere akpa onye nnata",
+                enter_valid_amount: "Biko tinye ego ziri ezi",
+                transaction_details: "Nkọwa azụmahịa",
+                transaction_id: "ID azụmahịa",
+                reference: "Ntụaka",
+                purpose: "Ebumnuche",
+                view_details: "Lelee nkọwa",
+                close: "Mechie",
+                language: "Asụsụ",
+                english: "Bekee",
+                yoruba: "Yoruba",
+                hausa: "Hausa",
+                igbo: "Igbo",
+                french: "French",
+                arabic: "Arabic",
+                did_label: "NJirimara Decentralized (DID)",
+                pin_label: "PIN",
+                login_with_pin: "Banye na PIN",
+                generate_did: "Mepụta DID",
+                did_generated: "Emepụtara DID gị: {{did}}",
+                pin_required: "Achọrọ PIN",
+                pin_must_be_4_digits: "PIN ga-abụrịrị nọmba 4",
+                invalid_pin: "PIN na-ezighi ezi",
+                invalid_did: "DID na-ezighi ezi",
+                has_bvn_nin: "Ị nwere NIN?",
+                yes: "Ee",
+                no: "Mba",
+                generate_for_me: "Enweghị nsogbu, anyị ga-emepụtara gị NIN",
+                nin_generated: "Emepụtara NIN gị: {{nin}}",
+                father_name: "Aha Nna Zuru Ezu",
+                mother_name: "Aha Nne Zuru Ezu",
+                birth_date: "Ụbọchị Ọmụmụ",
+                birth_place: "Ebe Ọmụmụ",
+                gender: "Okike",
+                address: "Adreesị Obibi",
+                state: "Steeti Ọmụmụ",
+                lga: "Ọchịchị Obodo",
+                occupation: "Ọrụ",
+                document_type: "Ụdị Akwụkwọ",
+                document_number: "Nọmba Akwụkwọ",
+                take_photo: "See Foto",
+                scan_fingerprint: "Nyochaa Akara Mkpịsị Aka",
+                record_voice: "Dekọọ Olu",
+                upload_document: "Bulite Akwụkwọ",
+                male: "Nwoke",
+                female: "Nwanyị",
+                passport: "Pasipọọtụ Mba Ụwa",
+                driver_license: "Akwụkwọ Ikike Ịnya Ụgbọala",
+                voter_card: "Kaadị Ntuli Aka",
+                birth_certificate: "Akwụkwọ Ọmụmụ",
+                access_portal: "Banye Portal"
+            },
+            ha: {
+                login_title: "Shiga ONPIN Wallet",
+                signup_title: "Kirkiro ONPIN Wallet",
+                email_label: "Imel",
+                password_label: "Kalmar sirri",
+                confirm_password_label: "Tabbatar da kalmar sirri",
+                login_button: "Shiga",
+                signup_button: "Yi rajista",
+                or_login_with: "Ko shiga da",
+                no_account: "Ba ku da asusu?",
+                have_account: "Kuna da asusu?",
+                signup_link: "Yi rajista yanzu",
+                login_link: "Shiga yanzu",
+                verifying_biometrics: "Ana bincika biometrics...",
+                welcome_message: "Maraba da zuwa {{name}}",
+                logout_button: "Fita",
+                wallet_balance: "Ma'aunin Wallet",
+                overview_tab: "Bayyani",
+                payments_tab: "Biyan kuɗi",
+                consent_tab: "Yarda",
+                settings_tab: "Saitunan",
+                quick_actions: "Ayyuka masu sauri",
+                transfer: "Canja wuri",
+                payments: "Biyan kuɗi",
+                consent: "Yarda",
+                disaster_relief: "Taimakon Bala'i",
+                recent_activity: "Ayyukan kwanan nan",
+                account_verified: "An tabbatar da asusu",
+                biometric_enrollment: "Rajistar biometric",
+                consent_granted_to: "An ba da izini ga",
+                payment_services: "Sabis na biyan kuɗi",
+                send_money: "Aika kuɗi",
+                request_money: "Nemi kuɗi",
+                pay_bills: "Biya lissafi",
+                airtime_data: "Airtime/Data",
+                recent_transactions: "Ma'amaloli na kwanan nan",
+                credit: "Bashi",
+                debit: "Cire kuɗi",
+                disaster_relief_payment: "Biyan taimakon bala'i",
+                consent_management: "Sarrafa yarda",
+                pending_requests: "Bukatu masu jira",
+                active_consents: "Izini masu aiki",
+                no_pending_requests: "Babu bukatu masu jira",
+                no_active_consents: "Babu izini masu aiki",
+                grant: "Ba da",
+                deny: "Ki",
+                revoke: "Soke",
+                government_services: "Sabis na gwamnati",
+                emergency_payments: "Biyan kuɗi na gaggawa",
+                biometric_settings: "Saitunan biometric",
+                face_id: "Face ID",
+                fingerprint: "Hoton yatsa",
+                voice_recognition: "Gane murya",
+                security: "Tsaro",
+                change_password: "Canja kalmar sirri",
+                privacy: "Sirri",
+                data_sharing_preferences: "Zaɓuɓɓukan raba bayanai",
+                help: "Taimako",
+                contact_support: "Tuntuɓi tallafi",
+                voice_command_received: "An karɓi umarnin murya: {{command}}",
+                voice_command_unknown: "Yi hakuri, ban fahimci wannan umarnin ba",
+                disaster_payment_triggered: "An kunna biyan kuɗin taimakon bala'i don wurin ku",
+                disaster_payment_confirmation: "An sarrafa biyan kuɗin taimakon bala'i ga 'yan ƙasa a yankinku",
+                consent_granted: "An ba da izini ga {{requester}}",
+                consent_revoked: "An soke izini daga {{requester}}",
+                name_label: "Cikakken Suna",
+                nin_label: "Lambar Shaida ta Ƙasa (NIN)",
+                phone_label: "Lambar Waya",
+                step_1: "Binciken NIN",
+                step_2: "Bayanan Mutum",
+                step_3: "Bayanan KYC",
+                step_4: "Biometrics",
+                step_5: "Takardun",
+                step_6: "Kammala",
+                biometric_title: "Rajistar Biometric",
+                biometric_description: "Kare walat ɗinku da tabbatarwar biometric mai yawa",
+                complete_registration: "Kammala rajista",
+                back_button: "Komawa",
+                next_button: "Na gaba",
+                nin_required: "Ana buƙatar NIN",
+                name_required: "Ana buƙatar suna",
+                email_required: "Ana buƙatar imel",
+                phone_required: "Ana buƙatar lambar waya",
+                password_required: "Ana buƙatar kalmar sirri",
+                password_mismatch: "PIN ba su dace ba",
+                registration_complete: "Rajista ta kammala! ONPIN wallet ɗinku yana shirye",
+                kyc_verification: "Tabbatarwar KYC",
+                identity_verification: "Tabbatarwar shaida",
+                view_biometrics: "Duba biometrics",
+                biometric_data: "Bayanan biometric",
+                bank_connections: "Haɗin banki",
+                connect_bank: "Haɗa banki",
+                connected_banks: "Bankuna da aka haɗa",
+                no_connected_banks: "Babu bankuna da aka haɗa",
+                verify_identity: "Tabbatar da shaida",
+                identity_status: "Matsayin shaida",
+                verified: "An tabbatar",
+                unverified: "Ba a tabbatar ba",
+                verify_now: "Tabbatar yanzu",
+                verification_success: "Tabbatarwar shaida ta yi nasara",
+                bank_verification: "Tabbatarwar banki",
+                recent_transfers: "Canja wurin kwanan nan",
+                no_recent_transfers: "Babu canja wurin kwanan nan",
+                recipient: "Mai karɓa",
+                amount: "Adadi",
+                date: "Kwanan wata",
+                status: "Matsayi",
+                pending: "Yana jira",
+                completed: "An kammala",
+                failed: "Ya kasa",
+                make_transfer: "Yi canja wuri",
+                to: "Zuwa",
+                enter_amount: "Shigar da adadi",
+                send: "Aika",
+                cancel: "Soke",
+                transfer_success: "Canja wuri ya yi nasara",
+                transfer_failed: "Canja wuri ya kasa",
+                insufficient_funds: "Kuɗi bai isa ba",
+                enter_recipient: "Shigar da ID wallet mai karɓa",
+                enter_valid_amount: "Da fatan za a shigar da adadi mai inganci",
+                transaction_details: "Bayanan ma'amala",
+                transaction_id: "ID Ma'amala",
+                reference: "Tunani",
+                purpose: "Manufa",
+                view_details: "Duba bayani",
+                close: "Rufe",
+                language: "Harshe",
+                english: "Turanci",
+                yoruba: "Yoruba",
+                hausa: "Hausa",
+                igbo: "Igbo",
+                french: "Faransanci",
+                arabic: "Larabci",
+                did_label: "Shaida mai Rarrabawa (DID)",
+                pin_label: "PIN",
+                login_with_pin: "Shiga da PIN",
+                generate_did: "Samar da DID",
+                did_generated: "An samar da DID ɗinku: {{did}}",
+                pin_required: "Ana buƙatar PIN",
+                pin_must_be_4_digits: "PIN dole ya zama lambobi 4",
+                invalid_pin: "PIN mara inganci",
+                invalid_did: "DID mara inganci",
+                has_bvn_nin: "Kuna da NIN?",
+                yes: "Eh",
+                no: "A'a",
+                generate_for_me: "Babu matsala, za mu samar da NIN a gare ku",
+                nin_generated: "An samar da NIN ɗinku: {{nin}}",
+                father_name: "Cikakken Sunan Uba",
+                mother_name: "Cikakken Sunan Uwa",
+                birth_date: "Ranar Haihuwa",
+                birth_place: "Wurin Haihuwa",
+                gender: "Jinsi",
+                address: "Adireshin Zama",
+                state: "Jihar Asali",
+                lga: "Karamar Hukuma",
+                occupation: "Sana'a",
+                document_type: "Nau'in Takarda",
+                document_number: "Lambar Takarda",
+                take_photo: "Ɗauki Hoto",
+                scan_fingerprint: "Bincika Hoton Yatsa",
+                record_voice: "Rikodin Murya",
+                upload_document: "Loda Takarda",
+                male: "Namiji",
+                female: "Mace",
+                passport: "Fasfo na Duniya",
+                driver_license: "Lasisin Tuƙi",
+                voter_card: "Katin Zaɓe",
+                birth_certificate: "Takardar Haihuwa",
+                access_portal: "Shiga Portal"
+            },
+            fr: {
+                login_title: "Connectez-vous à ONPIN Wallet",
+                signup_title: "Créer un portefeuille ONPIN",
+                email_label: "Email",
+                password_label: "Mot de passe",
+                confirm_password_label: "Confirmer le mot de passe",
+                login_button: "Connexion",
+                signup_button: "S'inscrire",
+                or_login_with: "Ou connectez-vous avec",
+                no_account: "Vous n'avez pas de compte?",
+                have_account: "Vous avez déjà un compte?",
+                signup_link: "Inscrivez-vous maintenant",
+                login_link: "Connectez-vous maintenant",
+                verifying_biometrics: "Vérification des données biométriques...",
+                welcome_message: "Bienvenue {{name}}",
+                logout_button: "Déconnexion",
+                wallet_balance: "Solde du portefeuille",
+                overview_tab: "Aperçu",
+                payments_tab: "Paiements",
+                consent_tab: "Consentement",
+                settings_tab: "Paramètres",
+                quick_actions: "Actions rapides",
+                transfer: "Transfert",
+                payments: "Paiements",
+                consent: "Consentement",
+                disaster_relief: "Secours en cas de catastrophe",
+                recent_activity: "Activité récente",
+                account_verified: "Compte vérifié",
+                biometric_enrollment: "Enregistrement biométrique",
+                consent_granted_to: "Consentement accordé à",
+                payment_services: "Services de paiement",
+                send_money: "Envoyer de l'argent",
+                request_money: "Demander de l'argent",
+                pay_bills: "Payer les factures",
+                airtime_data: "Crédit/Données",
+                recent_transactions: "Transactions récentes",
+                credit: "Crédit",
+                debit: "Débit",
+                disaster_relief_payment: "Paiement de secours en cas de catastrophe",
+                consent_management: "Gestion du consentement",
+                pending_requests: "Demandes en attente",
+                active_consents: "Consentements actifs",
+                no_pending_requests: "Aucune demande en attente",
+                no_active_consents: "Aucun consentement actif",
+                grant: "Accorder",
+                deny: "Refuser",
+                revoke: "Révoquer",
+                government_services: "Services gouvernementaux",
+                emergency_payments: "Paiements d'urgence",
+                biometric_settings: "Paramètres biométriques",
+                face_id: "Face ID",
+                fingerprint: "Empreinte digitale",
+                voice_recognition: "Reconnaissance vocale",
+                security: "Sécurité",
+                change_password: "Changer le mot de passe",
+                privacy: "Confidentialité",
+                data_sharing_preferences: "Préférences de partage de données",
+                help: "Aide",
+                contact_support: "Contacter le support",
+                voice_command_received: "Commande vocale reçue: {{command}}",
+                voice_command_unknown: "Désolé, je n'ai pas compris cette commande",
+                disaster_payment_triggered: "Paiements de secours en cas de catastrophe déclenchés pour votre localisation",
+                disaster_payment_confirmation: "Les paiements de secours en cas de catastrophe ont été traités pour les citoyens de votre région",
+                consent_granted: "Consentement accordé à {{requester}}",
+                consent_revoked: "Consentement révoqué de {{requester}}",
+                name_label: "Nom complet",
+                nin_label: "Numéro d'identification nationale (NIN)",
+                phone_label: "Numéro de téléphone",
+                step_1: "Vérification NIN",
+                step_2: "Informations personnelles",
+                step_3: "Détails KYC",
+                step_4: "Biométrie",
+                step_5: "Documents",
+                step_6: "Terminer",
+                biometric_title: "Enregistrement biométrique",
+                biometric_description: "Sécurisez votre portefeuille avec une authentification biométrique multifactorielle",
+                complete_registration: "Terminer l'inscription",
+                back_button: "Retour",
+                next_button: "Suivant",
+                nin_required: "NIN requis",
+                name_required: "Nom requis",
+                email_required: "Email requis",
+                phone_required: "Téléphone requis",
+                password_required: "Mot de passe requis",
+                password_mismatch: "Les PIN ne correspondent pas",
+                registration_complete: "Inscription terminée! Votre portefeuille ONPIN est prêt",
+                kyc_verification: "Vérification KYC",
+                identity_verification: "Vérification d'identité",
+                view_biometrics: "Voir les données biométriques",
+                biometric_data: "Données biométriques",
+                bank_connections: "Connexions bancaires",
+                connect_bank: "Connecter une banque",
+                connected_banks: "Banques connectées",
+                no_connected_banks: "Aucune banque connectée",
+                verify_identity: "Vérifier l'identité",
+                identity_status: "Statut d'identité",
+                verified: "Vérifié",
+                unverified: "Non vérifié",
+                verify_now: "Vérifier maintenant",
+                verification_success: "Vérification d'identité réussie",
+                bank_verification: "Vérification bancaire",
+                recent_transfers: "Transferts récents",
+                no_recent_transfers: "Aucun transfert récent",
+                recipient: "Bénéficiaire",
+                amount: "Montant",
+                date: "Date",
+                status: "Statut",
+                pending: "En attente",
+                completed: "Terminé",
+                failed: "Échoué",
+                make_transfer: "Effectuer un transfert",
+                to: "À",
+                enter_amount: "Entrez le montant",
+                send: "Envoyer",
+                cancel: "Annuler",
+                transfer_success: "Transfert réussi",
+                transfer_failed: "Échec du transfert",
+                insufficient_funds: "Fonds insuffisants",
+                enter_recipient: "Entrez l'ID du portefeuille du bénéficiaire",
+                enter_valid_amount: "Veuillez entrer un montant valide",
+                transaction_details: "Détails de la transaction",
+                transaction_id: "ID de transaction",
+                reference: "Référence",
+                purpose: "Objet",
+                view_details: "Voir les détails",
+                close: "Fermer",
+                language: "Langue",
+                english: "Anglais",
+                yoruba: "Yoruba",
+                hausa: "Hausa",
+                igbo: "Igbo",
+                french: "Français",
+                arabic: "Arabe",
+                did_label: "ID décentralisé (DID)",
+                pin_label: "PIN",
+                login_with_pin: "Connexion avec PIN",
+                generate_did: "Générer DID",
+                did_generated: "Votre DID a été généré: {{did}}",
+                pin_required: "PIN requis",
+                pin_must_be_4_digits: "Le PIN doit être à 4 chiffres",
+                invalid_pin: "PIN invalide",
+                invalid_did: "DID invalide",
+                has_bvn_nin: "Avez-vous un NIN?",
+                yes: "Oui",
+                no: "Non",
+                generate_for_me: "Pas de problème, nous générerons un NIN pour vous",
+                nin_generated: "Votre NIN a été généré: {{nin}}",
+                father_name: "Nom complet du père",
+                mother_name: "Nom complet de la mère",
+                birth_date: "Date de naissance",
+                birth_place: "Lieu de naissance",
+                gender: "Genre",
+                address: "Adresse résidentielle",
+                state: "État d'origine",
+                lga: "Zone de gouvernement local",
+                occupation: "Profession",
+                document_type: "Type de document",
+                document_number: "Numéro de document",
+                take_photo: "Prendre une photo",
+                scan_fingerprint: "Scanner l'empreinte",
+                record_voice: "Enregistrer la voix",
+                upload_document: "Télécharger le document",
+                male: "Homme",
+                female: "Femme",
+                passport: "Passeport international",
+                driver_license: "Permis de conduire",
+                voter_card: "Carte d'électeur",
+                birth_certificate: "Certificat de naissance",
+                access_portal: "Accéder au portail"
+            },
+            ar: {
+                login_title: "تسجيل الدخول إلى محفظة ONPIN",
+                signup_title: "إنشاء محفظة ONPIN",
+                email_label: "البريد الإلكتروني",
+                password_label: "كلمة المرور",
+                confirm_password_label: "تأكيد كلمة المرور",
+                login_button: "تسجيل الدخول",
+                signup_button: "التسجيل",
+                or_login_with: "أو تسجيل الدخول باستخدام",
+                no_account: "ليس لديك حساب؟",
+                have_account: "لديك حساب بالفعل؟",
+                signup_link: "سجل الآن",
+                login_link: "تسجيل الدخول الآن",
+                verifying_biometrics: "التحقق من البصمات الحيوية...",
+                welcome_message: "مرحبًا بعودتك {{name}}",
+                logout_button: "تسجيل الخروج",
+                wallet_balance: "رصيد المحفظة",
+                overview_tab: "نظرة عامة",
+                payments_tab: "المدفوعات",
+                consent_tab: "الموافقة",
+                settings_tab: "الإعدادات",
+                quick_actions: "إجراءات سريعة",
+                transfer: "تحويل",
+                payments: "المدفوعات",
+                consent: "الموافقة",
+                disaster_relief: "الإغاثة في حالات الكوارث",
+                recent_activity: "النشاط الأخير",
+                account_verified: "تم التحقق من الحساب",
+                biometric_enrollment: "تسجيل البصمات الحيوية",
+                consent_granted_to: "تم منح الموافقة لـ",
+                payment_services: "خدمات الدفع",
+                send_money: "إرسال الأموال",
+                request_money: "طلب الأموال",
+                pay_bills: "دفع الفواتير",
+                airtime_data: "رصيد/بيانات",
+                recent_transactions: "المعاملات الأخيرة",
+                credit: "ائتمان",
+                debit: "مدين",
+                disaster_relief_payment: "دفع الإغاثة في حالات الكوارث",
+                consent_management: "إدارة الموافقة",
+                pending_requests: "الطلبات المعلقة",
+                active_consents: "الموافقات النشطة",
+                no_pending_requests: "لا توجد طلبات معلقة",
+                no_active_consents: "لا توجد موافقات نشطة",
+                grant: "منح",
+                deny: "رفض",
+                revoke: "إلغاء",
+                government_services: "الخدمات الحكومية",
+                emergency_payments: "المدفوعات الطارئة",
+                biometric_settings: "إعدادات البصمات الحيوية",
+                face_id: "Face ID",
+                fingerprint: "بصمة الإصبع",
+                voice_recognition: "التعرف الصوتي",
+                security: "الأمان",
+                change_password: "تغيير كلمة المرور",
+                privacy: "الخصوصية",
+                data_sharing_preferences: "تفضيلات مشاركة البيانات",
+                help: "مساعدة",
+                contact_support: "اتصل بالدعم",
+                voice_command_received: "تم استلام الأمر الصوتي: {{command}}",
+                voice_command_unknown: "عذرًا، لم أفهم هذا الأمر",
+                disaster_payment_triggered: "تم تشغيل مدفوعات الإغاثة في حالات الكوارث لموقعك",
+                disaster_payment_confirmation: "تمت معالجة مدفوعات الإغاثة في حالات الكوارث للمواطنين في منطقتك",
+                consent_granted: "تم منح الموافقة لـ {{requester}}",
+                consent_revoked: "تم سحب الموافقة من {{requester}}",
+                name_label: "الاسم الكامل",
+                nin_label: "رقم التعريف الوطني (NIN)",
+                phone_label: "رقم الهاتف",
+                step_1: "فحص NIN",
+                step_2: "المعلومات الشخصية",
+                step_3: "تفاصيل KYC",
+                step_4: "البصمات الحيوية",
+                step_5: "المستندات",
+                step_6: "إكمال",
+                biometric_title: "تسجيل البصمات الحيوية",
+                biometric_description: "أمّن محفظتك باستخدام المصادقة متعددة العوامل البيومترية",
+                complete_registration: "إكمال التسجيل",
+                back_button: "رجوع",
+                next_button: "التالي",
+                nin_required: "مطلوب NIN",
+                name_required: "مطلوب الاسم",
+                email_required: "البريد الإلكتروني مطلوب",
+                phone_required: "رقم الهاتف مطلوب",
+                password_required: "كلمة المرور مطلوبة",
+                password_mismatch: "أرقام PIN غير متطابقة",
+                registration_complete: "اكتمل التسجيل! محفظة ONPIN الخاصة بك جاهزة",
+                kyc_verification: "التحقق من الهوية KYC",
+                identity_verification: "التحقق من الهوية",
+                view_biometrics: "عرض البصمات الحيوية",
+                biometric_data: "بيانات البصمات الحيوية",
+                bank_connections: "اتصالات البنك",
+                connect_bank: "ربط البنك",
+                connected_banks: "البنوك المتصلة",
+                no_connected_banks: "لا توجد بنوك متصلة",
+                verify_identity: "التحقق من الهوية",
+                identity_status: "حالة الهوية",
+                verified: "تم التحقق",
+                unverified: "غير محقق",
+                verify_now: "تحقق الآن",
+                verification_success: "نجاح التحقق من الهوية",
+                bank_verification: "التحقق من البنك",
+                recent_transfers: "التحويلات الأخيرة",
+                no_recent_transfers: "لا توجد تحويلات حديثة",
+                recipient: "المستلم",
+                amount: "المبلغ",
+                date: "التاريخ",
+                status: "الحالة",
+                pending: "قيد الانتظار",
+                completed: "مكتمل",
+                failed: "فشل",
+                make_transfer: "إجراء تحويل",
+                to: "إلى",
+                enter_amount: "أدخل المبلغ",
+                send: "إرسال",
+                cancel: "إلغاء",
+                transfer_success: "نجاح التحويل",
+                transfer_failed: "فشل التحويل",
+                insufficient_funds: "أموال غير كافية",
+                enter_recipient: "أدخل معرف محفظة المستلم",
+                enter_valid_amount: "الرجاء إدخال مبلغ صالح",
+                transaction_details: "تفاصيل المعاملة",
+                transaction_id: "معرف المعاملة",
+                reference: "المرجع",
+                purpose: "الغرض",
+                view_details: "عرض التفاصيل",
+                close: "إغلاق",
+                language: "اللغة",
+                english: "الإنجليزية",
+                yoruba: "اليوربا",
+                hausa: "الهوسا",
+                igbo: "الإيجبو",
+                french: "الفرنسية",
+                arabic: "العربية",
+                did_label: "معرف اللامركزي (DID)",
+                pin_label: "PIN",
+                login_with_pin: "تسجيل الدخول باستخدام PIN",
+                generate_did: "إنشاء DID",
+                did_generated: "تم إنشاء DID الخاص بك: {{did}}",
+                pin_required: "مطلوب PIN",
+                pin_must_be_4_digits: "يجب أن يتكون PIN من 4 أرقام",
+                invalid_pin: "PIN غير صالح",
+                invalid_did: "DID غير صالح",
+                has_bvn_nin: "هل لديك NIN؟",
+                yes: "نعم",
+                no: "لا",
+                generate_for_me: "لا مشكلة، سننشئ NIN لك",
+                nin_generated: "تم إنشاء NIN الخاص بك: {{nin}}",
+                father_name: "الاسم الكامل للأب",
+                mother_name: "الاسم الكامل للأم",
+                birth_date: "تاريخ الميلاد",
+                birth_place: "مكان الميلاد",
+                gender: "الجنس",
+                address: "العنوان السكني",
+                state: "الولاية الأصلية",
+                lga: "منطقة الحكم المحلي",
+                occupation: "المهنة",
+                document_type: "نوع المستند",
+                document_number: "رقم المستند",
+                take_photo: "التقاط صورة",
+                scan_fingerprint: "مسح بصمة الإصبع",
+                record_voice: "تسجيل الصوت",
+                upload_document: "رفع المستند",
+                male: "ذكر",
+                female: "أنثى",
+                passport: "جواز السفر الدولي",
+                driver_license: "رخصة القيادة",
+                voter_card: "بطاقة الناخب",
+                birth_certificate: "شهادة الميلاد",
+                access_portal: "الوصول إلى البوابة"
+            }
+        };
+
+
+// ==========================
+// FULL SIGNUP SCRIPT (paste to replace existing script)
+// ==========================
+
+// GLOBALS
+let currentStep = 1;
+let hasNin = null;
+let userType = null; // 'nin' or 'non-nin'
+let phoneVerified = false;
+let passportPhotoUploaded = false;
+let documentScanned = false;
+let generatedDID = null; // single DID per flow
+let biometricsCompleted = {
+    photo: false,
+    fingerprint: false,
+    voice: false
+};
+
+// step config
+const stepConfig = {
+    nin: [
+        { id: 1, label: 'NIN Check' },
+        { id: 2, label: 'Personal Info' },
+        { id: 3, label: 'Complete' }
+    ],
+    'non-nin': [
+        { id: 1, label: 'NIN Check' },
+        { id: 2, label: 'Personal Info' },
+        { id: 3, label: 'KYC Details' },
+        { id: 4, label: 'Biometrics' },
+        { id: 5, label: 'Documents' },
+        { id: 6, label: 'Complete' }
+    ]
+};
+
+// INIT
+document.addEventListener('DOMContentLoaded', () => {
+    initializeForm();
+    const langSelect = document.getElementById('languageSelect');
+    if (langSelect) langSelect.addEventListener('change', (e) => switchLanguage(e.target.value));
+});
+
+// Initialize
+function initializeForm() {
+    updateStepIndicator();
+    setupEventListeners();
+    updateNavigationButtons();
+}
+
+// SETUP EVENT LISTENERS
+function setupEventListeners() {
+    const yes = document.getElementById('hasNinYes');
+    const no = document.getElementById('hasNinNo');
+    if (yes) yes.addEventListener('click', () => selectNinOption(true));
+    if (no) no.addEventListener('click', () => selectNinOption(false));
+
+    const nextBtn = document.getElementById('nextBtn');
+    const backBtn = document.getElementById('backBtn');
+    if (nextBtn) nextBtn.addEventListener('click', nextStep);
+    if (backBtn) backBtn.addEventListener('click', previousStep);
+
+    const accessPortalBtn = document.getElementById('accessPortalBtn');
+    if (accessPortalBtn) accessPortalBtn.addEventListener('click', () => window.location.href = 'index.html');
+
+    // Phone verification buttons
+    const sendCodeBtn = document.getElementById('sendCodeBtn');
+    const verifyCodeBtn = document.getElementById('verifyCodeBtn');
+    const resendCodeBtn = document.getElementById('resendCodeBtn');
+    if (sendCodeBtn) sendCodeBtn.addEventListener('click', sendVerificationCode);
+    if (verifyCodeBtn) verifyCodeBtn.addEventListener('click', verifyCode);
+    if (resendCodeBtn) resendCodeBtn.addEventListener('click', resendCode);
+
+    // Verification digit inputs auto-focus
+    const digitInputs = document.querySelectorAll('.verification-digit');
+    digitInputs.forEach((input, index) => {
+        input.addEventListener('input', (e) => {
+            if (e.target.value.length === 1 && index < digitInputs.length - 1) {
+                digitInputs[index + 1].focus();
+            }
+        });
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && e.target.value === '' && index > 0) {
+                digitInputs[index - 1].focus();
+            }
+        });
+    });
+
+    // Passport uploads
+    const uploadPassportBtn = document.getElementById('uploadPassportBtn');
+    const passportFileInput = document.getElementById('passportFileInput');
+    if (uploadPassportBtn) uploadPassportBtn.addEventListener('click', () => passportFileInput.click());
+    if (passportFileInput) passportFileInput.addEventListener('change', handlePassportUpload);
+
+    const uploadPassportBtnNin = document.getElementById('uploadPassportBtnNin');
+    const passportFileInputNin = document.getElementById('passportFileInputNin');
+    if (uploadPassportBtnNin) uploadPassportBtnNin.addEventListener('click', () => passportFileInputNin.click());
+    if (passportFileInputNin) passportFileInputNin.addEventListener('change', handlePassportUploadNin);
+
+    // Document upload
+    const uploadDocumentBtn = document.getElementById('uploadDocumentBtn');
+    const documentFileInput = document.getElementById('documentFileInput');
+    if (uploadDocumentBtn) uploadDocumentBtn.addEventListener('click', () => documentFileInput.click());
+    if (documentFileInput) documentFileInput.addEventListener('change', handleDocumentUpload);
+
+    const startScanBtn = document.getElementById('startScanBtn');
+    const retryScanBtn = document.getElementById('retryScanBtn');
+    if (startScanBtn) startScanBtn.addEventListener('click', startDocumentScan);
+    if (retryScanBtn) retryScanBtn.addEventListener('click', retryDocumentScan);
+
+    // Biometrics
+    const capturePhotoBtn = document.getElementById('capturePhotoBtn');
+    const scanFingerprintBtn = document.getElementById('scanFingerprintBtn');
+    const recordVoiceBtn = document.getElementById('recordVoiceBtn');
+    if (capturePhotoBtn) capturePhotoBtn.addEventListener('click', () => captureBiometric('photo'));
+    if (scanFingerprintBtn) scanFingerprintBtn.addEventListener('click', () => captureBiometric('fingerprint'));
+    if (recordVoiceBtn) recordVoiceBtn.addEventListener('click', () => captureBiometric('voice'));
+
+    // Gender selection
+    const genderMale = document.getElementById('genderMale');
+    const genderFemale = document.getElementById('genderFemale');
+    if (genderMale) genderMale.addEventListener('click', () => selectGender('male'));
+    if (genderFemale) genderFemale.addEventListener('click', () => selectGender('female'));
+}
+
+// NIN option
+function selectNinOption(hasNinValue) {
+    hasNin = hasNinValue;
+    userType = hasNinValue ? 'nin' : 'non-nin';
+    document.querySelectorAll('.radio-btn').forEach(btn => btn.classList.remove('active'));
+    const btnId = hasNinValue ? 'hasNinYes' : 'hasNinNo';
+    const ele = document.getElementById(btnId);
+    if (ele) ele.classList.add('active');
+
+    const ninContainer = document.getElementById('ninInputContainer');
+    const generateInfo = document.getElementById('generateNinInfo');
+    if (ninContainer) ninContainer.style.display = hasNinValue ? 'block' : 'none';
+    if (generateInfo) generateInfo.style.display = hasNinValue ? 'none' : 'block';
+
+    updateStepIndicator();
+    clearError('hasNinError');
+}
+
+// PHONE VERIFICATION (mock)
+function sendVerificationCode() {
+    const phone = document.getElementById('phoneInput')?.value?.trim();
+    if (!phone) {
+        showError('phoneError', 'Phone number is required');
+        return;
+    }
+    document.getElementById('codeSentMessage').style.display = 'block';
+    document.getElementById('verificationCodeSection').style.display = 'block';
+    const first = document.querySelector('.verification-digit');
+    if (first) first.focus();
+}
+
+function verifyCode() {
+    const digits = document.querySelectorAll('.verification-digit');
+    const code = Array.from(digits).map(i => i.value).join('');
+    if (code.length !== 6) {
+        showVerificationError('Please enter all 6 digits');
+        return;
+    }
+    // Accept any 6-digit for demo
+    phoneVerified = true;
+    showVerificationSuccess();
+    const card = document.getElementById('phoneVerificationCard');
+    if (card) card.classList.add('completed');
+}
+
+function resendCode() {
+    document.querySelectorAll('.verification-digit').forEach(i => i.value = '');
+    document.getElementById('codeSentMessage').style.display = 'block';
+    const first = document.querySelector('.verification-digit');
+    if (first) first.focus();
+}
+
+function showVerificationSuccess() {
+    const success = document.getElementById('verificationSuccess');
+    const err = document.getElementById('verificationError');
+    const res = document.getElementById('verificationResult');
+    if (success) success.style.display = 'block';
+    if (err) err.style.display = 'none';
+    if (res) res.style.display = 'block';
+}
+function showVerificationError(msg) {
+    const err = document.getElementById('verificationError');
+    const success = document.getElementById('verificationSuccess');
+    const res = document.getElementById('verificationResult');
+    if (err) { err.textContent = msg; err.style.display = 'block'; }
+    if (success) success.style.display = 'none';
+    if (res) res.style.display = 'block';
+}
+
+// UPLOAD HANDLERS
+function handlePassportUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+        showError('passportPhotoError', 'Please upload an image file');
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const img = document.getElementById('passportImage');
+        if (img) img.src = e.target.result;
+        const preview = document.getElementById('passportPreview');
+        if (preview) preview.style.display = 'block';
+        const card = document.getElementById('passportPhotoCard');
+        if (card) card.classList.add('completed');
+        passportPhotoUploaded = true;
+        clearError('passportPhotoError');
+    };
+    reader.readAsDataURL(file);
+}
+
+function handlePassportUploadNin(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+        showError('passportPhotoErrorNin', 'Please upload an image file');
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const img = document.getElementById('passportImageNin');
+        if (img) img.src = e.target.result;
+        const preview = document.getElementById('passportPreviewNin');
+        if (preview) preview.style.display = 'block';
+        const card = document.getElementById('passportPhotoCardNin');
+        if (card) card.classList.add('completed');
+        passportPhotoUploaded = true;
+        clearError('passportPhotoErrorNin');
+    };
+    reader.readAsDataURL(file);
+}
+
+function handleDocumentUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const card = document.getElementById('documentUploadCard');
+    if (card) card.classList.add('completed');
+    const section = document.getElementById('documentScanSection');
+    if (section) section.style.display = 'block';
+    clearError('documentUploadError');
+}
+
+// DOCUMENT SCAN SIM
+function startDocumentScan() {
+    const docType = document.getElementById('documentTypeSelect')?.value;
+    const docNumber = document.getElementById('documentNumberInput')?.value?.trim();
+    if (!docType || !docNumber) {
+        showError('documentUploadError', 'Please select document type and enter document number');
+        return;
+    }
+    const startBtn = document.getElementById('startScanBtn');
+    const scanning = document.getElementById('scanningProgress');
+    const statusText = document.getElementById('scanStatusText');
+    const progressFill = document.getElementById('scanProgressFill');
+
+    if (startBtn) startBtn.style.display = 'none';
+    if (scanning) scanning.style.display = 'block';
+    if (progressFill) progressFill.style.width = '0%';
+
+    const scanSteps = [
+        'Initializing scan...',
+        'Detecting document edges...',
+        'Extracting text content...',
+        'Validating document authenticity...',
+        'Cross-referencing database...',
+        'Finalizing verification...'
+    ];
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += 16.67;
+        if (progressFill) progressFill.style.width = progress + '%';
+        const stepIndex = Math.floor(progress / 16.67) - 1;
+        if (stepIndex >= 0 && stepIndex < scanSteps.length && statusText) {
+            statusText.textContent = scanSteps[stepIndex];
+        }
+        if (progress >= 100) {
+            clearInterval(interval);
+            completeScan(docType, docNumber);
+        }
+    }, 700);
+}
+
+function completeScan(docType, docNumber) {
+    const scanning = document.getElementById('scanningProgress');
+    const results = document.getElementById('scanResults');
+    const success = document.getElementById('scanSuccess');
+    const detectedType = document.getElementById('detectedDocType');
+    const detectedNumber = document.getElementById('detectedDocNumber');
+    const confidence = document.getElementById('scanConfidence');
+
+    if (scanning) scanning.style.display = 'none';
+    if (results) results.style.display = 'block';
+
+    // simulate high success
+    if (Math.random() > 0.08) {
+        if (success) success.style.display = 'block';
+        if (detectedType) detectedType.textContent = getDocumentTypeName(docType);
+        if (detectedNumber) detectedNumber.textContent = docNumber;
+        if (confidence) confidence.textContent = (90 + Math.floor(Math.random()*9)) + '%';
+        documentScanned = true;
+    } else {
+        const scanError = document.getElementById('scanError');
+        if (scanError) scanError.style.display = 'block';
+        documentScanned = false;
+    }
+}
+
+function retryDocumentScan() {
+    const results = document.getElementById('scanResults');
+    const success = document.getElementById('scanSuccess');
+    const error = document.getElementById('scanError');
+    const startBtn = document.getElementById('startScanBtn');
+    const progressFill = document.getElementById('scanProgressFill');
+    if (results) results.style.display = 'none';
+    if (success) success.style.display = 'none';
+    if (error) error.style.display = 'none';
+    if (startBtn) startBtn.style.display = 'block';
+    if (progressFill) progressFill.style.width = '0%';
+}
+
+// helper
+function getDocumentTypeName(t) {
+    const map = { passport: 'International Passport', driver_license: "Driver's License", voter_card: "Voter's Card", birth_certificate: 'Birth Certificate' };
+    return map[t] || t;
+}
+
+// BIOMETRICS (simulated)
+function captureBiometric(type) {
+    const btnId = type === 'photo' ? 'capturePhotoBtn' : type === 'fingerprint' ? 'scanFingerprintBtn' : 'recordVoiceBtn';
+    const button = document.getElementById(btnId);
+    if (button) {
+        button.disabled = true;
+        button.textContent = 'Processing...';
+    }
+    setTimeout(() => {
+        biometricsCompleted[type] = true;
+        const cardId = type === 'photo' ? 'photoCard' : type === 'fingerprint' ? 'fingerprintCard' : 'voiceCard';
+        const card = document.getElementById(cardId);
+        if (card) card.classList.add('completed');
+        if (button) { button.textContent = '✓ Completed'; button.disabled = true; }
+    }, 1200);
+}
+
+// GENDER
+function selectGender(gender) {
+    const male = document.getElementById('genderMale');
+    const female = document.getElementById('genderFemale');
+    if (male) male.classList.remove('active');
+    if (female) female.classList.remove('active');
+    const target = document.getElementById(gender === 'male' ? 'genderMale' : 'genderFemale');
+    if (target) target.classList.add('active');
+    clearError('genderError');
+}
+
+// VALIDATION
+function validateStep(step) {
+    clearAllErrors();
+    switch (step) {
+        case 1:
+            if (hasNin === null) { showError('hasNinError', 'Please select whether you have NIN'); return false; }
+            if (hasNin && !document.getElementById('ninInput')?.value) { showError('ninError', 'NIN is required'); return false; }
+            return true;
+        case 2:
+            if (!document.getElementById('nameInput')?.value) { showError('nameError', 'Name is required'); return false; }
+            if (!document.getElementById('phoneInput')?.value) { showError('phoneError', 'Phone number is required'); return false; }
+            if (!phoneVerified) { showError('phoneError', 'Phone verification is required'); return false; }
+            if (!document.getElementById('pinInput')?.value) { showError('pinError', 'PIN is required'); return false; }
+            if (document.getElementById('pinInput')?.value !== document.getElementById('confirmPinInput')?.value) { showError('confirmPinError', 'PINs do not match'); return false; }
+            return true;
+        case 3:
+            if (userType === 'nin') {
+                if (!passportPhotoUploaded) { showError('passportPhotoErrorNin', 'Passport photograph is required'); return false; }
+                return true;
+            } else {
+                // KYC checks
+                const required = ['fatherNameInput','motherNameInput','birthDateInput','birthPlaceInput','addressInput','stateInput','lgaInput','occupationInput'];
+                for (let field of required) {
+                    if (!document.getElementById(field)?.value) { showError(field.replace('Input','Error'), 'This field is required'); return false; }
+                }
+                if (!document.querySelector('#genderMale.active') && !document.querySelector('#genderFemale.active')) { showError('genderError','Please select gender'); return false; }
+                if (!passportPhotoUploaded) { showError('passportPhotoError','Passport photograph is required'); return false; }
+                return true;
+            }
+        case 4:
+            if (!biometricsCompleted.photo || !biometricsCompleted.fingerprint || !biometricsCompleted.voice) { showError('biometricErrors','All biometric data must be captured'); return false; }
+            return true;
+        case 5:
+            if (!document.getElementById('documentTypeSelect')?.value) { showError('documentTypeError','Document type is required'); return false; }
+            if (!document.getElementById('documentNumberInput')?.value) { showError('documentNumberError','Document number is required'); return false; }
+            if (!documentScanned) { showError('documentUploadError','Document must be scanned and verified'); return false; }
+            return true;
+        default:
+            return true;
+    }
+}
+
+// NAV
+function nextStep() {
+    if (!validateStep(currentStep)) return;
+    const steps = stepConfig[userType] || stepConfig['non-nin'];
+    const maxStep = steps[steps.length - 1].id;
+    if (currentStep < maxStep) {
+        currentStep++;
+        showStep(currentStep);
+        updateStepIndicator();
+        updateNavigationButtons();
+    } else {
+        completeRegistration();
+    }
+}
+function previousStep() {
+    if (currentStep > 1) {
+        currentStep--;
+        showStep(currentStep);
+        updateStepIndicator();
+        updateNavigationButtons();
+    }
+}
+function showStep(step) {
+    document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
+    const el = document.getElementById(`step${step}`);
+    if (el) el.classList.add('active');
+
+    if (step === 3) {
+        if (userType === 'nin') {
+            const k = document.getElementById('kycDetails'); if (k) k.style.display = 'none';
+            const n = document.getElementById('ninUserCompletion'); if (n) n.style.display = 'block';
+            generateDID(); // sets generatedDID and displays it
+        } else {
+            const k = document.getElementById('kycDetails'); if (k) k.style.display = 'block';
+            const n = document.getElementById('ninUserCompletion'); if (n) n.style.display = 'none';
+        }
+    }
+}
+
+// PROGRESS UI
+function updateStepIndicator() {
+    const indicator = document.getElementById('stepIndicator');
+    const steps = stepConfig[userType] || stepConfig['non-nin'];
+    if (!indicator) return;
+    indicator.innerHTML = '';
+    steps.forEach(step => {
+        const stepItem = document.createElement('div'); stepItem.className = 'step-item';
+        const stepCircle = document.createElement('div'); stepCircle.className = 'step-circle';
+        if (step.id < currentStep) { stepCircle.classList.add('completed'); stepCircle.innerHTML = '✓'; }
+        else if (step.id === currentStep) { stepCircle.classList.add('active'); stepCircle.textContent = step.id; }
+        else { stepCircle.textContent = step.id; }
+        const stepLabel = document.createElement('div'); stepLabel.className = 'step-label';
+        if (step.id === currentStep) stepLabel.classList.add('active');
+        stepLabel.textContent = step.label;
+        stepItem.appendChild(stepCircle); stepItem.appendChild(stepLabel);
+        indicator.appendChild(stepItem);
+    });
+    const progress = ((currentStep - 1) / (steps.length - 1)) * 100;
+    const pf = document.getElementById('progressFill');
+    if (pf) pf.style.width = progress + '%';
+}
+
+// NAV BUTTONS (this was missing earlier)
+function updateNavigationButtons() {
+    const backBtn = document.getElementById('backBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const steps = stepConfig[userType] || stepConfig['non-nin'];
+    const maxStep = steps[steps.length - 1].id;
+    if (backBtn) backBtn.style.display = currentStep === 1 ? 'none' : 'block';
+    if (nextBtn) nextBtn.textContent = currentStep === maxStep ? 'Complete Registration' : 'Next';
+}
+
+// ID GENERATION + COMPLETE
+function generateDID() {
+    if (!generatedDID) {
+        generatedDID = 'did:onpin:' + Math.random().toString(36).substr(2, 16);
+    }
+    const didDisplay = document.getElementById('didDisplay');
+    if (didDisplay) didDisplay.textContent = generatedDID;
+    return generatedDID;
+}
+function generateNIN() {
+    return Math.floor(10000000000 + Math.random() * 90000000000).toString();
+}
+
+function completeRegistration() {
+  // Ensure latest validation (defensive)
+  if (!validateStep(currentStep)) return;
+
+  const did = generatedDID || generateDID();
+  let nin = null;
+
+  // Handle both nin and non-nin user types
+  if (userType === 'non-nin') {
+    nin = generateNIN();
+    const finalNinContainer = document.getElementById('finalNinContainer');
+    const finalNinDisplay = document.getElementById('finalNinDisplay');
+    if (finalNinContainer) finalNinContainer.style.display = 'block';
+    if (finalNinDisplay) finalNinDisplay.textContent = nin;
+  } else if (userType === 'nin') {
+    nin = document.getElementById('ninInput')?.value?.trim() || null;
+  }
+
+  // Display DID on the completion screen
+  const finalDidDisplay = document.getElementById('finalDidDisplay');
+  if (finalDidDisplay) finalDidDisplay.textContent = did;
+
+  // Collect basic user details
+  const name = document.getElementById('nameInput')?.value?.trim() || 'Unnamed User';
+  const pin = document.getElementById('pinInput')?.value?.trim();
+
+  // Build full user object with safe defaults
+  const user = {
+    did,
+    nin,
+    name,
+    pin,
+    createdAt: new Date().toISOString(),
+    balance: 0,
+    transactions: [],
+    loans: [],
+    investments: [],
+    bnplPlans: []
+  };
+
+  // Persist to localStorage
+  const db = JSON.parse(localStorage.getItem('onpinUsers') || '{}');
+  db[did] = user;
+  localStorage.setItem('onpinUsers', JSON.stringify(db));
+  localStorage.setItem('currentUser', JSON.stringify(user));
+
+  console.log('✅ User saved:', user);
+
+  // Show completion UI
+  const regForm = document.getElementById('registrationForm');
+  const regComplete = document.getElementById('registrationComplete');
+  if (regForm) regForm.style.display = 'none';
+  if (regComplete) regComplete.style.display = 'block';
+}
+
+
+// ERRORS UTIL
+function showError(id, msg) {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = msg; el.style.display = 'block'; }
+}
+function clearError(id) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+}
+function clearAllErrors() {
+    document.querySelectorAll('.error-message').forEach(e => e.style.display = 'none');
+}
+
+// LANGUAGE SWITCH (minimal)
+function switchLanguage(lang) {
+    // very small mapping - keep original labels as fallback
+    const elements = document.querySelectorAll('[id$="Label"], [id$="Text"], [id$="Title"]');
+    elements.forEach(el => {
+        // Placeholder: actual translations object is present elsewhere in your file
+        // This keeps previously existing behavior
+    });
+}
+</script>
+
+</body>
+</html>

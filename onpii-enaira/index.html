@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ONPIN Identity Wallet - Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .biometric-icon {
+      transition: all 0.3s ease;
+    }
+    .biometric-icon:hover {
+      transform: scale(1.1);
+    }
+    .progress-bar {
+      transition: width 0.5s ease;
+    }
+    .language-selector {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23334d5c'%3E%3Cpath d='M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 010 16z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.5rem center;
+      background-size: 1.5em;
+    }
+  </style>
+</head>
+<body class="bg-gray-100">
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script type="text/babel">
+    // Translations
+    const translations = {
+      en: {
+        login_title: "Login to ONPIN Wallet",
+        signup_title: "Create ONPIN Wallet",
+        email_label: "Email",
+        password_label: "Password",
+        confirm_password_label: "Confirm Password",
+        login_button: "Login",
+        signup_button: "Sign Up",
+        or_login_with: "Or login with",
+        no_account: "Don't have an account?",
+        have_account: "Already have an account?",
+        signup_link: "Sign up now",
+        login_link: "Login now",
+        verifying_biometrics: "Verifying biometrics...",
+        welcome_message: "Welcome back {{name}}",
+        logout_button: "Logout",
+        wallet_balance: "Wallet Balance",
+        overview_tab: "Overview",
+        payments_tab: "Payments",
+        consent_tab: "Consent",
+        settings_tab: "Settings",
+        quick_actions: "Quick Actions",
+        transfer: "Transfer",
+        payments: "Payments",
+        consent: "Consent",
+        disaster_relief: "Disaster Relief",
+        recent_activity: "Recent Activity",
+        account_verified: "Account Verified",
+        biometric_enrollment: "Biometric Enrollment",
+        consent_granted_to: "Consent granted to",
+        payment_services: "Payment Services",
+        send_money: "Send Money",
+        request_money: "Request Money",
+        pay_bills: "Pay Bills",
+        airtime_data: "Airtime/Data",
+        recent_transactions: "Recent Transactions",
+        credit: "Credit",
+        debit: "Debit",
+        disaster_relief_payment: "Disaster Relief Payment",
+        consent_management: "Consent Management",
+        pending_requests: "Pending Requests",
+        active_consents: "Active Consents",
+        no_pending_requests: "No pending requests",
+        no_active_consents: "No active consents",
+        grant: "Grant",
+        deny: "Deny",
+        revoke: "Revoke",
+        government_services: "Government Services",
+        emergency_payments: "Emergency Payments",
+        biometric_settings: "Biometric Settings",
+        face_id: "Face ID",
+        fingerprint: "Fingerprint",
+        voice_recognition: "Voice Recognition",
+        security: "Security",
+        change_password: "Change Password",
+        privacy: "Privacy",
+        data_sharing_preferences: "Data Sharing Preferences",
+        help: "Help",
+        contact_support: "Contact Support",
+        voice_command_received: "Voice command received: {{command}}",
+        voice_command_unknown: "Sorry, I didn't understand that command",
+        disaster_payment_triggered: "Disaster relief payments triggered for your location",
+        disaster_payment_confirmation: "Disaster relief payments have been processed for citizens in your area",
+        consent_granted: "Consent granted to {{requester}}",
+        consent_revoked: "Consent revoked from {{requester}}",
+        name_label: "Full Name",
+        nin_label: "National Identification Number (NIN)",
+        bvn_label: "Bank Verification Number (BVN)",
+        phone_label: "Phone Number",
+        step_1: "NIN/BVN",
+        step_2: "Details",
+        step_3: "Password",
+        step_4: "Biometrics",
+        biometric_title: "Biometric Enrollment",
+        biometric_description: "Secure your wallet with multi-factor biometric authentication",
+        complete_registration: "Complete Registration",
+        back_button: "Back",
+        next_button: "Next",
+        nin_required: "NIN is required",
+        bvn_required: "BVN is required",
+        name_required: "Name is required",
+        email_required: "Email is required",
+        phone_required: "Phone is required",
+        password_required: "Password is required",
+        password_mismatch: "Passwords do not match",
+        registration_complete: "Registration complete! Your ONPIN wallet is ready",
+        kyc_verification: "KYC Verification",
+        identity_verification: "Identity Verification",
+        view_biometrics: "View Biometrics",
+        biometric_data: "Biometric Data",
+        bank_connections: "Bank Connections",
+        connect_bank: "Connect Bank",
+        connected_banks: "Connected Banks",
+        no_connected_banks: "No banks connected",
+        verify_identity: "Verify Identity",
+        identity_status: "Identity Status",
+        verified: "Verified",
+        unverified: "Unverified",
+        verify_now: "Verify Now",
+        verification_success: "Identity verification successful",
+        bank_verification: "Bank Verification",
+        recent_transfers: "Recent Transfers",
+        no_recent_transfers: "No recent transfers",
+        recipient: "Recipient",
+        amount: "Amount",
+        date: "Date",
+        status: "Status",
+        pending: "Pending",
+        completed: "Completed",
+        failed: "Failed",
+        make_transfer: "Make Transfer",
+        to: "To",
+        enter_amount: "Enter Amount",
+        send: "Send",
+        cancel: "Cancel",
+        transfer_success: "Transfer successful",
+        transfer_failed: "Transfer failed",
+        insufficient_funds: "Insufficient funds",
+        enter_recipient: "Enter recipient wallet ID",
+        enter_valid_amount: "Please enter a valid amount",
+        transaction_details: "Transaction Details",
+        transaction_id: "Transaction ID",
+        reference: "Reference",
+        purpose: "Purpose",
+        view_details: "View Details",
+        close: "Close",
+        language: "Language",
+        english: "English",
+        yoruba: "Yoruba",
+        hausa: "Hausa",
+        igbo: "Igbo",
+        french: "French",
+        arabic: "Arabic",
+        did_label: "Decentralized ID (DID)",
+        pin_label: "PIN",
+        login_with_pin: "Login with PIN",
+        generate_did: "Generate DID",
+        did_generated: "Your DID has been generated: {{did}}",
+        pin_required: "PIN is required",
+        pin_must_be_4_digits: "PIN must be 4 digits",
+        invalid_pin: "Invalid PIN",
+        invalid_did: "Invalid DID"
+      },
+      yo: {
+        login_title: "Wo ile ONPIN Wallet",
+        login_with_pin: "Wo ile pẹlu PIN",
+        signup_title: "Ṣẹda ONPIN Wallet",
+        email_label: "Imeeli",
+        password_label: "Ọrọ igbaniwọle",
+        confirm_password_label: "Jẹrisi ọrọ igbaniwọle",
+        login_button: "Wo ile",
+        signup_button: "Forukọsilẹ",
+        or_login_with: "Tabi wo ile pẹlu",
+        no_account: "Ko ni akọọlẹ?",
+        have_account: "Ni akọọlẹ tẹlẹ?",
+        signup_link: "Forukọsilẹ bayi",
+        login_link: "Wo ile bayi",
+        verifying_biometrics: "Ṣiṣayẹwo awọn biometrics...",
+        welcome_message: "Kaabọ {{name}}",
+        logout_button: "Jaade",
+        wallet_balance: "Iwọn iṣura",
+        overview_tab: "Akopọ",
+        payments_tab: "Isanwo",
+        consent_tab: "Igbasilẹ",
+        settings_tab: "Etọ",
+        quick_actions: "Awọn iṣẹ lẹsẹkẹsẹ",
+        transfer: "Gbe lọ",
+        payments: "Isanwo",
+        consent: "Igbasilẹ",
+        disaster_relief: "Iranlowo Ijamba",
+        recent_activity: "Awọn iṣẹlẹ tuntun",
+        account_verified: "Akọọlẹ ti jẹrisi",
+        biometric_enrollment: "Iforukọsilẹ biometric",
+        consent_granted_to: "Ti fun ni igbasilẹ si",
+        payment_services: "Awọn iṣẹ isanwo",
+        send_money: "Ranṣẹ owo",
+        request_money: "Beere owo",
+        pay_bills: "San awọn bilẹ",
+        airtime_data: "Airtime/Data",
+        recent_transactions: "Awọn iṣowo tuntun",
+        credit: "Kirediti",
+        debit: "Debiti",
+        disaster_relief_payment: "Isanwo Iranlowo Ijamba",
+        consent_management: "Iṣakoso Igbasilẹ",
+        pending_requests: "Awọn ibeere ti nṣura",
+        active_consents: "Awọn igbasilẹ ti nṣiṣẹ",
+        no_pending_requests: "Ko si awọn ibeere ti nṣura",
+        no_active_consents: "Ko si awọn igbasilẹ ti nṣiṣẹ",
+        grant: "Fun ni",
+        deny: "Kọ",
+        revoke: "Yọ kuro",
+        government_services: "Awọn iṣẹ ijọba",
+        emergency_payments: "Awọn isanwo iyara",
+        biometric_settings: "Awọn etọ biometric",
+        face_id: "Face ID",
+        fingerprint: "Ika ọwọ",
+        voice_recognition: "Ifọrọwanilẹnu ohun",
+        security: "Aabo",
+        change_password: "Yi ọrọ igbaniwọle pada",
+        privacy: "Ikọkọ",
+        data_sharing_preferences: "Awọn yiyan pinpin data",
+        help: "Iranlọwọ",
+        contact_support: "Kan si atilẹyin",
+        voice_command_received: "Aṣẹ ohun ti gba: {{command}}",
+        voice_command_unknown: "Ma binu, Emi ko gbọ aṣẹ naa",
+        disaster_payment_triggered: "Awọn isanwo iranlowo ijamba ti ṣe fun ipo rẹ",
+        disaster_payment_confirmation: "Awọn isanwo iranlowo ijamba ti ṣe fun awọn ara ilu ni agbegbe rẹ",
+        consent_granted: "Ti fun ni igbasilẹ si {{requester}}",
+        consent_revoked: "Ti yọ igbasilẹ kuro ni {{requester}}",
+        name_label: "Orukọ kikun",
+        nin_label: "Nọmba Idanimọ Orilẹ-ede (NIN)",
+        bvn_label: "Nọmba Idanimọ Banki (BVN)",
+        phone_label: "Nọmba foonu",
+        step_1: "NIN/BVN",
+        step_2: "Awọn alaye",
+        step_3: "Ọrọ igbaniwọle",
+        step_4: "Awọn biometric",
+        biometric_title: "Iforukọsilẹ Biometric",
+        biometric_description: "Dani ẹru rẹ pẹlu ifọrọwanilẹnu biometric oriṣiriṣi",
+        complete_registration: "Parẹ iforukọsilẹ",
+        back_button: "Pada",
+        next_button: "Iwọle",
+        nin_required: "NIN nilo",
+        bvn_required: "BVN nilo",
+        name_required: "Orukọ nilo",
+        email_required: "Imeeli nilo",
+        phone_required: "Nọmba foonu nilo",
+        password_required: "Ọrọ igbaniwọle nilo",
+        password_mismatch: "Awọn ọrọ igbaniwọle ko baamu",
+        registration_complete: "Iforukọsilẹ pari! ONPIN ẹru rẹ ti ṣetan",
+        kyc_verification: "Iṣẹlẹ KYC",
+        identity_verification: "Iṣẹlẹ Idanimọ",
+        view_biometrics: "Wo Awọn Biometrics",
+        biometric_data: "Data Biometric",
+        bank_connections: "Awọn asopọ Banki",
+        connect_bank: "So banki pọ",
+        connected_banks: "Awọn banki ti a sopọ",
+        no_connected_banks: "Ko si awọn banki ti a sopọ",
+        verify_identity: "Ṣe ayẹwo idanimọ",
+        identity_status: "Ipo Idanimọ",
+        verified: "Ti jẹrisi",
+        unverified: "Ko jẹrisi",
+        verify_now: "Ṣe ayẹwo bayi",
+        verification_success: "Iṣẹlẹ idanimọ ti ṣe aṣeyọri",
+        bank_verification: "Iṣẹlẹ Banki",
+        recent_transfers: "Awọn gbigbe tuntun",
+        no_recent_transfers: "Ko si awọn gbigbe tuntun",
+        recipient: "Olugba",
+        amount: "Iye",
+        date: "Ọjọ",
+        status: "Ipo",
+        pending: "Nṣura",
+        completed: "Ti pari",
+        failed: "Ti ṣẹgun",
+        make_transfer: "Ṣe gbigbe",
+        to: "Si",
+        enter_amount: "Tẹ iye",
+        send: "Ranṣẹ",
+        cancel: "Fagilee",
+        transfer_success: "Gbigbe ti ṣe aṣeyọri",
+        transfer_failed: "Gbigbe ti ṣẹgun",
+        insufficient_funds: "Ko si owo to",
+        enter_recipient: "Tẹ idẹ ẹru olugba",
+        enter_valid_amount: "Jọwọ tẹ iye ti o wulo",
+        transaction_details: "Awọn alaye iṣowo",
+        transaction_id: "ID Iṣowo",
+        reference: "Itọkasi",
+        purpose: "Idi",
+        view_details: "Wo awọn alaye",
+        close: "Pa",
+        language: "Ede",
+        english: "Gẹẹsi",
+        yoruba: "Yoruba",
+        hausa: "Hausa",
+        igbo: "Igbo",
+        french: "Faranse",
+        arabic: "Arabiki",
+        did_label: "Idanimọ Aisakoso (DID)",
+        pin_label: "PIN",
+        generate_did: "Ṣẹda DID",
+        did_generated: "DID rẹ ti ṣẹda: {{did}}",
+        pin_required: "PIN nilo",
+        pin_must_be_4_digits: "PIN gbọdọ jẹ nọmba 4",
+        invalid_pin: "PIN ti ko tọ",
+        invalid_did: "DID ti ko tọ"
+      },
+      ig: {
+  login_title: "Banye na ONPIN Wallet",
+  signup_title: "Mepụta ONPIN Wallet",
+  email_label: "Email",
+  password_label: "Paswọọdụ",
+  confirm_password_label: "Kwenye paswọọdụ",
+  login_button: "Banye",
+  signup_button: "Debanye aha",
+  or_login_with: "Ma ọ bụ banye site na",
+  no_account: "Enweghị akaụntụ?",
+  have_account: "Enweelarị akaụntụ?",
+  signup_link: "Debanye aha ugbu a",
+  login_link: "Banye ugbu a",
+  verifying_biometrics: "Na-enyocha biometrics...",
+  welcome_message: "Nnọọ {{name}}",
+  logout_button: "Wepụ",
+  wallet_balance: "Balance Wallet",
+  overview_tab: "Nchịkọta",
+  payments_tab: "Ịkwụ ụgwọ",
+  consent_tab: "Nkwenye",
+  settings_tab: "Ntọala",
+  quick_actions: "Ọrụ ngwa ngwa",
+  transfer: "Nyefee",
+  payments: "Ịkwụ ụgwọ",
+  consent: "Nkwenye",
+  disaster_relief: "Enyemaka Ọdachi",
+  recent_activity: "Ọrụ na nso nso a",
+  account_verified: "Akaụntụ enyochala",
+  biometric_enrollment: "Ndebanye aha biometric",
+  consent_granted_to: "Enyere nkwenye nye",
+  payment_services: "Ọrụ ịkwụ ụgwọ",
+  send_money: "Zipu ego",
+  request_money: "Rịọ ego",
+  pay_bills: "Kwụọ ụgwọ",
+  airtime_data: "Oge ikuku/Data",
+  recent_transactions: "Azụmahịa ndị na-adịbeghị anya",
+  credit: "Kredit",
+  debit: "Debit",
+  disaster_relief_payment: "Ịkwụ ụgwọ enyemaka ọdachi",
+  consent_management: "Njikwa nkwenye",
+  pending_requests: "Arịrịọ na-echere",
+  active_consents: "Nkwenye na-arụ ọrụ",
+  no_pending_requests: "Enweghị arịrịọ na-echere",
+  no_active_consents: "Enweghị nkwenye na-arụ ọrụ",
+  grant: "Nye",
+  deny: "Jụ",
+  revoke: "Kagbuo",
+  government_services: "Ọrụ gọọmentị",
+  emergency_payments: "Ịkwụ ụgwọ mberede",
+  biometric_settings: "Ntọala biometric",
+  face_id: "Face ID",
+  fingerprint: "Akara mkpịsị aka",
+  voice_recognition: "Nnabata olu",
+  security: "Nchekwa",
+  change_password: "Gbanwee paswọọdụ",
+  privacy: "Nzuzo",
+  data_sharing_preferences: "Mmasị ịkekọrịta data",
+  help: "Enyemaka",
+  contact_support: "Kpọtụrụ nkwado",
+  voice_command_received: "Natara iwu olu: {{command}}",
+  voice_command_unknown: "Ndo, aghọtaghị m iwu ahụ",
+  disaster_payment_triggered: "Akpalitela ịkwụ ụgwọ enyemaka ọdachi maka ọnọdụ gị",
+  disaster_payment_confirmation: "Emeela ịkwụ ụgwọ enyemaka ọdachi maka ụmụ amaala nọ na mpaghara gị",
+  consent_granted: "Enyere nkwenye nye {{requester}}",
+  consent_revoked: "Ewepụla nkwenye n'aka {{requester}}",
+  name_label: "Aha zuru ezu",
+  nin_label: "Nọmba NJirimara Mba (NIN)",
+  bvn_label: "Nọmba Nkwenye Bank (BVN)",
+  phone_label: "Nọmba ekwentị",
+  step_1: "NIN/BVN",
+  step_2: "Nkọwa",
+  step_3: "Paswọọdụ",
+  step_4: "Biometrics",
+  biometric_title: "Ndebanye aha biometric",
+  biometric_description: "Chekwaa obere akpa gị site na njirimara biometric ọtụtụ ihe",
+  complete_registration: "Mechie ndebanye aha",
+  back_button: "Azụ",
+  next_button: "Ọzọ",
+  nin_required: "Achọrọ NIN",
+  bvn_required: "Achọrọ BVN",
+  name_required: "Achọrọ aha",
+  email_required: "Achọrọ email",
+  phone_required: "Achọrọ nọmba ekwentị",
+  password_required: "Achọrọ paswọọdụ",
+  password_mismatch: "Okwuntughe adabaghị",
+  registration_complete: "Emechara ndebanye aha! ONPIN obere akpa gị dị njikere",
+  kyc_verification: "Nyocha KYC",
+  identity_verification: "Nyocha njirimara",
+  view_biometrics: "Lelee biometrics",
+  biometric_data: "Data biometric",
+  bank_connections: "Njikọ ụlọ akụ",
+  connect_bank: "Jikọọ ụlọ akụ",
+  connected_banks: "Ụlọ akụ ejikọrọ",
+  no_connected_banks: "Enweghị ụlọ akụ ejikọrọ",
+  verify_identity: "Nyochaa njirimara",
+  identity_status: "Ọkwa njirimara",
+  verified: "Enyochala",
+  unverified: "Achọpụtabeghị",
+  verify_now: "Nyochaa ugbu a",
+  verification_success: "Nyocha njirimara gara nke ọma",
+  bank_verification: "Nyocha ụlọ akụ",
+  recent_transfers: "Nyefe na nso nso a",
+  no_recent_transfers: "Enweghị mbufe na nso nso a",
+  recipient: "Onye nnata",
+  amount: "Ọnụ ego",
+  date: "Ụbọchị",
+  status: "Ọnọdụ",
+  pending: "Na-echere",
+  completed: "Emechara",
+  failed: "Dara",
+  make_transfer: "Mee mbufe",
+  to: "Gaa na",
+  enter_amount: "Tinye ego",
+  send: "Ziga",
+  cancel: "Kagbuo",
+  transfer_success: "Mbufe gara nke ọma",
+  transfer_failed: "Mbufe dara",
+  insufficient_funds: "Ego ezughị oke",
+  enter_recipient: "Tinye ID obere akpa onye nnata",
+  enter_valid_amount: "Biko tinye ego ziri ezi",
+  transaction_details: "Nkọwa azụmahịa",
+  transaction_id: "ID azụmahịa",
+  reference: "Ntụaka",
+  purpose: "Ebumnuche",
+  view_details: "Lelee nkọwa",
+  close: "Mechie",
+  language: "Asụsụ",
+  english: "Bekee",
+  yoruba: "Yoruba",
+  hausa: "Hausa",
+  igbo: "Igbo",
+  french: "French",
+  arabic: "Arabic",
+  did_label: "NJirimara Decentralized (DID)",
+  pin_label: "PIN",
+  login_with_pin: "Banye na PIN",
+  generate_did: "Mepụta DID",
+  did_generated: "Emepụtara DID gị: {{did}}",
+  pin_required: "Achọrọ PIN",
+  pin_must_be_4_digits: "PIN ga-abụrịrị nọmba 4",
+  invalid_pin: "PIN na-ezighi ezi",
+  invalid_did: "DID na-ezighi ezi"
+},
+
+
+fr: {
+  login_title: "Connectez-vous à ONPIN Wallet",
+  signup_title: "Créer un portefeuille ONPIN",
+  email_label: "Email",
+  password_label: "Mot de passe",
+  confirm_password_label: "Confirmer le mot de passe",
+  login_button: "Connexion",
+  signup_button: "S'inscrire",
+  or_login_with: "Ou connectez-vous avec",
+  no_account: "Vous n'avez pas de compte?",
+  have_account: "Vous avez déjà un compte?",
+  signup_link: "Inscrivez-vous maintenant",
+  login_link: "Connectez-vous maintenant",
+  verifying_biometrics: "Vérification des données biométriques...",
+  welcome_message: "Bienvenue {{name}}",
+  logout_button: "Déconnexion",
+  wallet_balance: "Solde du portefeuille",
+  overview_tab: "Aperçu",
+  payments_tab: "Paiements",
+  consent_tab: "Consentement",
+  settings_tab: "Paramètres",
+  quick_actions: "Actions rapides",
+  transfer: "Transfert",
+  payments: "Paiements",
+  consent: "Consentement",
+  disaster_relief: "Secours en cas de catastrophe",
+  recent_activity: "Activité récente",
+  account_verified: "Compte vérifié",
+  biometric_enrollment: "Enregistrement biométrique",
+  consent_granted_to: "Consentement accordé à",
+  payment_services: "Services de paiement",
+  send_money: "Envoyer de l'argent",
+  request_money: "Demander de l'argent",
+  pay_bills: "Payer les factures",
+  airtime_data: "Crédit/Données",
+  recent_transactions: "Transactions récentes",
+  credit: "Crédit",
+  debit: "Débit",
+  disaster_relief_payment: "Paiement de secours en cas de catastrophe",
+  consent_management: "Gestion du consentement",
+  pending_requests: "Demandes en attente",
+  active_consents: "Consentements actifs",
+  no_pending_requests: "Aucune demande en attente",
+  no_active_consents: "Aucun consentement actif",
+  grant: "Accorder",
+  deny: "Refuser",
+  revoke: "Révoquer",
+  government_services: "Services gouvernementaux",
+  emergency_payments: "Paiements d'urgence",
+  biometric_settings: "Paramètres biométriques",
+  face_id: "Face ID",
+  fingerprint: "Empreinte digitale",
+  voice_recognition: "Reconnaissance vocale",
+  security: "Sécurité",
+  change_password: "Changer le mot de passe",
+  privacy: "Confidentialité",
+  data_sharing_preferences: "Préférences de partage de données",
+  help: "Aide",
+  contact_support: "Contacter le support",
+  voice_command_received: "Commande vocale reçue: {{command}}",
+  voice_command_unknown: "Désolé, je n'ai pas compris cette commande",
+  disaster_payment_triggered: "Paiements de secours en cas de catastrophe déclenchés pour votre localisation",
+  disaster_payment_confirmation: "Les paiements de secours en cas de catastrophe ont été traités pour les citoyens de votre région",
+  consent_granted: "Consentement accordé à {{requester}}",
+  consent_revoked: "Consentement révoqué de {{requester}}",
+  name_label: "Nom complet",
+  nin_label: "Numéro d'identification nationale (NIN)",
+  bvn_label: "Numéro de vérification bancaire (BVN)",
+  phone_label: "Numéro de téléphone",
+  step_1: "NIN/BVN",
+  step_2: "Détails",
+  step_3: "Mot de passe",
+  step_4: "Biométrie",
+  biometric_title: "Enregistrement biométrique",
+  biometric_description: "Sécurisez votre portefeuille avec une authentification biométrique multifactorielle",
+  complete_registration: "Terminer l'inscription",
+  back_button: "Retour",
+  next_button: "Suivant",
+  nin_required: "NIN requis",
+  bvn_required: "BVN requis",
+  name_required: "Nom requis",
+  email_required: "Email requis",
+  phone_required: "Téléphone requis",
+  password_required: "Mot de passe requis",
+  password_mismatch: "Les mots de passe ne correspondent pas",
+  registration_complete: "Inscription terminée! Votre portefeuille ONPIN est prêt",
+  kyc_verification: "Vérification KYC",
+  identity_verification: "Vérification d'identité",
+  view_biometrics: "Voir les données biométriques",
+  biometric_data: "Données biométriques",
+  bank_connections: "Connexions bancaires",
+  connect_bank: "Connecter une banque",
+  connected_banks: "Banques connectées",
+  no_connected_banks: "Aucune banque connectée",
+  verify_identity: "Vérifier l'identité",
+  identity_status: "Statut d'identité",
+  verified: "Vérifié",
+  unverified: "Non vérifié",
+  verify_now: "Vérifier maintenant",
+  verification_success: "Vérification d'identité réussie",
+  bank_verification: "Vérification bancaire",
+  recent_transfers: "Transferts récents",
+  no_recent_transfers: "Aucun transfert récent",
+  recipient: "Bénéficiaire",
+  amount: "Montant",
+  date: "Date",
+  status: "Statut",
+  pending: "En attente",
+  completed: "Terminé",
+  failed: "Échoué",
+  make_transfer: "Effectuer un transfert",
+  to: "À",
+  enter_amount: "Entrez le montant",
+  send: "Envoyer",
+  cancel: "Annuler",
+  transfer_success: "Transfert réussi",
+  transfer_failed: "Échec du transfert",
+  insufficient_funds: "Fonds insuffisants",
+  enter_recipient: "Entrez l'ID du portefeuille du bénéficiaire",
+  enter_valid_amount: "Veuillez entrer un montant valide",
+  transaction_details: "Détails de la transaction",
+  transaction_id: "ID de transaction",
+  reference: "Référence",
+  purpose: "Objet",
+  view_details: "Voir les détails",
+  close: "Fermer",
+  language: "Langue",
+  english: "Anglais",
+  yoruba: "Yoruba",
+  hausa: "Hausa",
+  igbo: "Igbo",
+  french: "Français",
+  arabic: "Arabe",
+  did_label: "ID décentralisé (DID)",
+  pin_label: "PIN",
+  login_with_pin: "Connexion avec PIN",
+  generate_did: "Générer DID",
+  did_generated: "Votre DID a été généré: {{did}}",
+  pin_required: "PIN requis",
+  pin_must_be_4_digits: "Le PIN doit être à 4 chiffres",
+  invalid_pin: "PIN invalide",
+  invalid_did: "DID invalide"
+},
+
+ar: {
+  login_title: "تسجيل الدخول إلى محفظة ONPIN",
+  signup_title: "إنشاء محفظة ONPIN",
+  email_label: "البريد الإلكتروني",
+  password_label: "كلمة المرور",
+  confirm_password_label: "تأكيد كلمة المرور",
+  login_button: "تسجيل الدخول",
+  signup_button: "التسجيل",
+  or_login_with: "أو تسجيل الدخول باستخدام",
+  no_account: "ليس لديك حساب؟",
+  have_account: "لديك حساب بالفعل؟",
+  signup_link: "سجل الآن",
+  login_link: "تسجيل الدخول الآن",
+  verifying_biometrics: "التحقق من البصمات الحيوية...",
+  welcome_message: "مرحبًا بعودتك {{name}}",
+  logout_button: "تسجيل الخروج",
+  wallet_balance: "رصيد المحفظة",
+  overview_tab: "نظرة عامة",
+  payments_tab: "المدفوعات",
+  consent_tab: "الموافقة",
+  settings_tab: "الإعدادات",
+  quick_actions: "إجراءات سريعة",
+  transfer: "تحويل",
+  payments: "المدفوعات",
+  consent: "الموافقة",
+  disaster_relief: "الإغاثة في حالات الكوارث",
+  recent_activity: "النشاط الأخير",
+  account_verified: "تم التحقق من الحساب",
+  biometric_enrollment: "تسجيل البصمات الحيوية",
+  consent_granted_to: "تم منح الموافقة لـ",
+  payment_services: "خدمات الدفع",
+  send_money: "إرسال الأموال",
+  request_money: "طلب الأموال",
+  pay_bills: "دفع الفواتير",
+  airtime_data: "رصيد/بيانات",
+  recent_transactions: "المعاملات الأخيرة",
+  credit: "ائتمان",
+  debit: "مدين",
+  disaster_relief_payment: "دفع الإغاثة في حالات الكوارث",
+  consent_management: "إدارة الموافقة",
+  pending_requests: "الطلبات المعلقة",
+  active_consents: "الموافقات النشطة",
+  no_pending_requests: "لا توجد طلبات معلقة",
+  no_active_consents: "لا توجد موافقات نشطة",
+  grant: "منح",
+  deny: "رفض",
+  revoke: "إلغاء",
+  government_services: "الخدمات الحكومية",
+  emergency_payments: "المدفوعات الطارئة",
+  biometric_settings: "إعدادات البصمات الحيوية",
+  face_id: "Face ID",
+  fingerprint: "بصمة الإصبع",
+  voice_recognition: "التعرف الصوتي",
+  security: "الأمان",
+  change_password: "تغيير كلمة المرور",
+  privacy: "الخصوصية",
+  data_sharing_preferences: "تفضيلات مشاركة البيانات",
+  help: "مساعدة",
+  contact_support: "اتصل بالدعم",
+  voice_command_received: "تم استلام الأمر الصوتي: {{command}}",
+  voice_command_unknown: "عذرًا، لم أفهم هذا الأمر",
+  disaster_payment_triggered: "تم تشغيل مدفوعات الإغاثة في حالات الكوارث لموقعك",
+  disaster_payment_confirmation: "تمت معالجة مدفوعات الإغاثة في حالات الكوارث للمواطنين في منطقتك",
+  consent_granted: "تم منح الموافقة لـ {{requester}}",
+  consent_revoked: "تم سحب الموافقة من {{requester}}",
+  name_label: "الاسم الكامل",
+  nin_label: "رقم التعريف الوطني (NIN)",
+  bvn_label: "رقم التحقق المصرفي (BVN)",
+  phone_label: "رقم الهاتف",
+  step_1: "NIN/BVN",
+  step_2: "التفاصيل",
+  step_3: "كلمة المرور",
+  step_4: "البصمات الحيوية",
+  biometric_title: "تسجيل البصمات الحيوية",
+  biometric_description: "أمّن محفظتك باستخدام المصادقة متعددة العوامل البيومترية",
+  complete_registration: "إكمال التسجيل",
+  back_button: "رجوع",
+  next_button: "التالي",
+  nin_required: "مطلوب NIN",
+  bvn_required: "مطلوب BVN",
+  name_required: "مطلوب الاسم",
+  email_required: "البريد الإلكتروني مطلوب",
+  phone_required: "رقم الهاتف مطلوب",
+  password_required: "كلمة المرور مطلوبة",
+  password_mismatch: "كلمات المرور غير متطابقة",
+  registration_complete: "اكتمل التسجيل! محفظة ONPIN الخاصة بك جاهزة",
+  kyc_verification: "التحقق من الهوية KYC",
+  identity_verification: "التحقق من الهوية",
+  view_biometrics: "عرض البصمات الحيوية",
+  biometric_data: "بيانات البصمات الحيوية",
+  bank_connections: "اتصالات البنك",
+  connect_bank: "ربط البنك",
+  connected_banks: "البنوك المتصلة",
+  no_connected_banks: "لا توجد بنوك متصلة",
+  verify_identity: "التحقق من الهوية",
+  identity_status: "حالة الهوية",
+  verified: "تم التحقق",
+  unverified: "غير محقق",
+  verify_now: "تحقق الآن",
+  verification_success: "نجاح التحقق من الهوية",
+  bank_verification: "التحقق من البنك",
+  recent_transfers: "التحويلات الأخيرة",
+  no_recent_transfers: "لا توجد تحويلات حديثة",
+  recipient: "المستلم",
+  amount: "المبلغ",
+  date: "التاريخ",
+  status: "الحالة",
+  pending: "قيد الانتظار",
+  completed: "مكتمل",
+  failed: "فشل",
+  make_transfer: "إجراء تحويل",
+  to: "إلى",
+  enter_amount: "أدخل المبلغ",
+  send: "إرسال",
+  cancel: "إلغاء",
+  transfer_success: "نجاح التحويل",
+  transfer_failed: "فشل التحويل",
+  insufficient_funds: "أموال غير كافية",
+  enter_recipient: "أدخل معرف محفظة المستلم",
+  enter_valid_amount: "الرجاء إدخال مبلغ صالح",
+  transaction_details: "تفاصيل المعاملة",
+  transaction_id: "معرف المعاملة",
+  reference: "المرجع",
+  purpose: "الغرض",
+  view_details: "عرض التفاصيل",
+  close: "إغلاق",
+  language: "اللغة",
+  english: "الإنجليزية",
+  yoruba: "اليوربا",
+  hausa: "الهوسا",
+  igbo: "الإيجبو",
+  french: "الفرنسية",
+  arabic: "العربية",
+  did_label: "معرف اللامركزي (DID)",
+  pin_label: "PIN",
+  login_with_pin: "تسجيل الدخول باستخدام PIN",
+  generate_did: "إنشاء DID",
+  did_generated: "تم إنشاء DID الخاص بك: {{did}}",
+  pin_required: "مطلوب PIN",
+  pin_must_be_4_digits: "يجب أن يتكون PIN من 4 أرقام",
+  invalid_pin: "PIN غير صالح",
+  invalid_did: "DID غير صالح"
+}
+    };
+
+    // Mock database for users
+    const userDatabase = JSON.parse(localStorage.getItem('onpinUsers')) || {};
+
+    // Function to generate a random DID
+    const generateDID = () => {
+      const chars = '0123456789abcdef';
+      let did = 'did:onpin:';
+      for (let i = 0; i < 16; i++) {
+        did += chars[Math.floor(Math.random() * chars.length)];
+      }
+      return did;
+    };
+
+    // Function to save user to database
+    const saveUser = (user) => {
+      userDatabase[user.did] = user;
+      localStorage.setItem('onpinUsers', JSON.stringify(userDatabase));
+    };
+
+    // Function to find user by DID
+    const findUserByDID = (did) => {
+      return userDatabase[did];
+    };
+
+    // Main App Component for Login Page
+    function LoginApp() {
+      const [loginType, setLoginType] = React.useState('did'); // 'did' or 'email'
+      const [did, setDID] = React.useState('');
+      const [pin, setPIN] = React.useState('');
+      const [error, setError] = React.useState('');
+      const [language, setLanguage] = React.useState('en');
+      
+      const t = (key, params) => {
+        let text = translations[language][key] || translations.en[key] || key;
+        if (params) {
+          Object.keys(params).forEach(param => {
+            text = text.replace(`{{${param}}}`, params[param]);
+          });
+        }
+        return text;
+      };
+      
+      const handleLogin = (e) => {
+        e.preventDefault();
+        
+        if (!did) {
+          setError(t('invalid_did'));
+          return;
+        }
+        
+        if (!pin || pin.length !== 4 || !/^\d+$/.test(pin)) {
+          setError(t('pin_must_be_4_digits'));
+          return;
+        }
+        
+        const user = findUserByDID(did);
+        if (!user || user.pin !== pin) {
+          setError(t('invalid_credentials'));
+          return;
+        }
+        
+        // Redirect to dashboard with user DID as parameter
+        window.location.href = `dashboard.html?did=${did}`;
+      };
+      
+      const handleSignup = () => {
+        window.location.href = 'signup.html';
+      };
+      
+      return (
+        <div className="min-h-screen flex flex-col">
+          {/* Header */}
+          <header className="bg-green-800 text-white p-4 shadow-md">
+            <div className="container mx-auto flex justify-between items-center">
+              <h1 className="text-2xl font-bold">
+                 <div class="w-40 h-auto">
+                    <img src="logo.png" class="w-full h-auto" alt="PFTISS Logo" />
+                </div>
+                </h1>
+              <div className="flex items-center space-x-4">
+                <select
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
+                  className="bg-white text-gray-800 rounded px-3 py-1 pr-8 language-selector appearance-none"
+                >
+                  <option value="en">{t('english')}</option>
+                  <option value="yo">{t('yoruba')}</option>
+                   <option value="ig">{t('igbo')}</option>
+                  <option value="fr">{t('french')}</option>
+                  <option value="ar">{t('arabic')}</option>
+                </select>
+              </div>
+            </div>
+          </header>
+          
+          {/* Main Content */}
+          <main className="flex-grow container mx-auto p-4 flex items-center justify-center">
+            <div className="max-w-md w-full bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-2xl font-bold mb-6 text-center">{t('login_with_pin')}</h2>
+              
+              {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                  {error}
+                </div>
+              )}
+              
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div>
+                  <label className="block text-gray-700 mb-2">{t('did_label')}</label>
+                  <input
+                    type="text"
+                    value={did}
+                    onChange={(e) => setDID(e.target.value)}
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="did:onpin:123..."
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-gray-700 mb-2">{t('pin_label')}</label>
+                  <input
+                    type="password"
+                    value={pin}
+                    onChange={(e) => setPIN(e.target.value)}
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="4-digit PIN"
+                    maxLength="4"
+                    pattern="\d{4}"
+                    required
+                  />
+                </div>
+                
+                <button
+                  type="submit"
+                  className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition duration-300"
+                >
+                  {t('login_button')}
+                </button>
+              </form>
+              
+              <div className="mt-6 text-center">
+                <p className="text-gray-600">
+                  {t('no_account')}{' '}
+                  <button 
+                    onClick={handleSignup}
+                    className="text-green-600 hover:underline"
+                  >
+                    {t('signup_link')}
+                  </button>
+                </p>
+              </div>
+            </div>
+          </main>
+          
+          {/* Footer */}
+          <footer className="bg-gray-800 text-white p-4 text-center">
+            <p>© 2023 ONPIN - National Identity Wallet</p>
+          </footer>
+        </div>
+      );
+    }
+
+    // Render the app
+    ReactDOM.render(<LoginApp />, document.getElementById('root'));
+  </script>
+</body>
+</html>

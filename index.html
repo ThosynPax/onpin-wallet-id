@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ONPII Identity Wallet - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .language-selector {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23334d5c'%3E%3Cpath d='M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 010 16z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+            background-size: 1.5em;
+        }
+        .form-input {
+            transition: border-color 0.3s ease;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #812138;
+        }
+        .form-input.error {
+            border-color: #dc2626;
+        }
+        .error-message {
+            color: #dc2626;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+        .btn {
+            transition: all 0.3s ease;
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-[812138]-50 to-blue-50 min-h-screen">
+    <!-- Mic Icon for Accessibility -->
+    <button id="accessMicBtn" aria-label="Activate screen reader"
+  class="fixed bottom-4 right-4 bg-[#812138] text-white rounded-full p-3 shadow-lg focus:outline-none hover:bg-[#EAAB21] transition-colors"
+  tabindex="0">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18v2m0-2a6 6 0 006-6V9a6 6 0 10-12 0v3a6 6 0 006 6zm0 0v2m-6-6h12" />
+        </svg>
+    </button>
+    <header class="bg-[#812138] text-white p-4 shadow-md">
+    <div class="container mx-auto flex justify-between items-center">
+        <h1 class="text-xl font-bold flex items-center space-x-3">
+        <img src="logo.png" class="w-20 h-auto" alt="Logo" />
+        <span class="text-[#EAAB21] tracking-wide">Bestaf Payments</span>
+        </h1>
+
+
+        <div class="flex items-center space-x-4">
+        <select
+            id="languageSelect"
+            class="bg-[#282828] text-[#EAAB21] border border-[#838484] rounded px-3 py-1 pr-8 appearance-none focus:outline-none focus:ring-2 focus:ring-[#EAAB21]"
+        >
+            <option value="en">English</option>
+            <option value="yo">Yoruba</option>
+            <option value="ig">Igbo</option>
+            <option value="ha">Hausa</option>
+            <option value="fr">Français</option>
+            <option value="ar">العربية</option>
+        </select>
+        </div>
+    </div>
+    </header>
+
+
+    <!-- Main Content -->
+    <main class="container mx-auto p-4 flex items-center justify-center min-h-[calc(100vh-140px)]">
+        <div class="w-full max-w-md bg-white rounded-lg shadow-md p-6">
+            <h2 id="loginTitle" class="text-2xl font-bold mb-6 text-center">Login to ONPII Wallet</h2>
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label id="didLabel" class="block text-gray-700 font-medium mb-2">Decentralized ID (DID)</label>
+                    <input 
+                        type="text" 
+                        id="didInput" 
+                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg form-input" 
+                        placeholder="did:ONPII:..."
+                        required
+                    >
+                    <div id="didError" class="error-message" style="display: none;"></div>
+                </div>
+                <div>
+                    <label id="pinLabel" class="block text-gray-700 font-medium mb-2">PIN</label>
+                    <div class="relative">
+                        <input 
+                            type="password" 
+                            id="pinInput" 
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg form-input pr-12" 
+                            placeholder="4-digit PIN"
+                            maxlength="4"
+                            required
+                        >
+                        <button type="button" id="togglePinVisibility" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 focus:outline-none" tabindex="-1">
+                            <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div id="pinError" class="error-message" style="display: none;"></div>
+                </div>
+                <div id="generalError" class="error-message text-center" style="display: none;"></div>
+                <button 
+                    type="submit" 
+                    id="loginBtn" 
+                    class="w-full bg-[#812138] text-white py-3 px-4 rounded-lg hover:bg-[812138]-700 btn font-medium"
+                >
+                    <span id="loginBtnText">Login</span>
+                </button>
+                <div class="flex items-center justify-center my-4">
+                    <span class="text-gray-500 mx-2">or</span>
+                    <button type="button" id="voiceLoginBtn" class="flex items-center text-gray-800" aria-label="Login with voice" style="background: none; border: none; box-shadow: none;">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18v2m0-2a6 6 0 006-6V9a6 6 0 10-12 0v3a6 6 0 006 6zm0 0v2m-6-6h12" />
+                        </svg>
+                        Voice Login
+                    </button>
+                </div>
+                <div id="voiceLoginPopup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                    <div class="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full text-center relative">
+                        <button id="closeVoicePopup" class="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl">&times;</button>
+                        <div class="flex flex-col items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-[812138]-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18v2m0-2a6 6 0 006-6V9a6 6 0 10-12 0v3a6 6 0 006 6zm0 0v2m-6-6h12" />
+                            </svg>
+                            <h3 class="text-xl font-bold mb-2">Voice Login</h3>
+                            <p class="mb-4">Say your 4-digit PIN to login.<br><span class="text-sm text-gray-500">(Proof of concept: PIN is matched with your registered PIN)</span></p>
+                            <button id="startVoiceLogin" class="bg-[#812138]-600 text-black px-4 py-2 rounded-lg mb-2">Start Voice Login</button>
+                            <div id="voiceLoginStatus" class="text-gray-700 mb-2"></div>
+                            <div id="voiceLoginError" class="error-message text-center" style="display: none;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div id="generalError" class="error-message text-center" style="display: none;"></div>
+                <div class="text-center">
+                    <p class="text-sm text-gray-600">
+                        <span id="noAccountText">Don't have an account?</span>
+                        <a href="signup.html" class="text-[#EAAB21] hover:underline ml-1" id="signupLink">Sign up now</a>
+                    </p>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white p-4 text-center">
+        <p>© 2025 ONPII - One Nigeria Portable Identity Payment Wallet</p>
+    </footer>
+
+   <script>
+/* -----------------------------
+   ONPII LOGIN SCRIPT - FINAL
+   Works with new signup storage
+------------------------------ */
+
+// GLOBAL TRANSLATIONS
+const translations = {
+  en: {
+    login_title: "Login to ONPII Wallet",
+    did_label: "Decentralized ID (DID)",
+    pin_label: "PIN",
+    login_button: "Login",
+    no_account: "Don't have an account?",
+    signup_link: "Sign up now",
+    did_required: "DID is required",
+    pin_required: "PIN is required",
+    invalid_credentials: "Invalid DID or PIN",
+    logging_in: "Logging in...",
+    english: "English",
+    yoruba: "Yoruba",
+    hausa: "Hausa",
+    igbo: "Igbo",
+    french: "French",
+    arabic: "Arabic"
+  },
+  yo: {
+    login_title: "Wo ile ONPII Wallet",
+    did_label: "Idanimọ Aisakoso (DID)",
+    pin_label: "PIN",
+    login_button: "Wo ile",
+    no_account: "Ko ni akọọlẹ?",
+    signup_link: "Forukọsilẹ bayi",
+    did_required: "DID nilo",
+    pin_required: "PIN nilo",
+    invalid_credentials: "DID tabi PIN ti ko tọ",
+    logging_in: "N wo ile..."
+  },
+  ig: {
+    login_title: "Banye na ONPII Wallet",
+    did_label: "NJirimara Decentralized (DID)",
+    pin_label: "PIN",
+    login_button: "Banye",
+    no_account: "Enweghị akaụntụ?",
+    signup_link: "Debanye aha ugbu a",
+    did_required: "Achọrọ DID",
+    pin_required: "Achọrọ PIN",
+    invalid_credentials: "DID ma ọ bụ PIN na-ezighi ezi",
+    logging_in: "Na-abanye..."
+  },
+  ha: {
+    login_title: "Shiga ONPII Wallet",
+    did_label: "Shaida mai Rarrabawa (DID)",
+    pin_label: "PIN",
+    login_button: "Shiga",
+    no_account: "Ba ku da asusu?",
+    signup_link: "Yi rajista yanzu",
+    did_required: "Ana buƙatar DID",
+    pin_required: "Ana buƙatar PIN",
+    invalid_credentials: "DID ko PIN mara inganci",
+    logging_in: "Ana shigawa..."
+  },
+  fr: {
+    login_title: "Connectez-vous à ONPII Wallet",
+    did_label: "ID décentralisé (DID)",
+    pin_label: "PIN",
+    login_button: "Connexion",
+    no_account: "Vous n'avez pas de compte?",
+    signup_link: "Inscrivez-vous maintenant",
+    did_required: "DID requis",
+    pin_required: "PIN requis",
+    invalid_credentials: "DID ou PIN invalide",
+    logging_in: "Connexion en cours..."
+  },
+  ar: {
+    login_title: "تسجيل الدخول إلى محفظة ONPII",
+    did_label: "معرف اللامركزي (DID)",
+    pin_label: "PIN",
+    login_button: "تسجيل الدخول",
+    no_account: "ليس لديك حساب؟",
+    signup_link: "سجل الآن",
+    did_required: "مطلوب DID",
+    pin_required: "مطلوب PIN",
+    invalid_credentials: "DID أو PIN غير صالح",
+    logging_in: "جاري تسجيل الدخول..."
+  }
+};
+
+let currentLanguage = 'en';
+const t = (key) => translations[currentLanguage][key] || translations.en[key] || key;
+
+// UPDATE UI TEXT
+const updateUIText = () => {
+  document.getElementById('loginTitle').textContent = t('login_title');
+  document.getElementById('didLabel').textContent = t('did_label');
+  document.getElementById('pinLabel').textContent = t('pin_label');
+  document.getElementById('loginBtnText').textContent = t('login_button');
+  document.getElementById('noAccountText').textContent = t('no_account');
+  document.getElementById('signupLink').textContent = t('signup_link');
+};
+
+/* -----------------------------
+   ERROR HANDLERS
+------------------------------ */
+const clearErrors = () => {
+  document.querySelectorAll('.error-message').forEach(e => { e.style.display = 'none'; e.textContent = ''; });
+  document.querySelectorAll('.form-input').forEach(e => e.classList.remove('error'));
+};
+const showError = (field, msg) => {
+  const err = document.getElementById(`${field}Error`);
+  const input = document.getElementById(`${field}Input`);
+  if (err) { err.textContent = msg; err.style.display = 'block'; }
+  if (input) input.classList.add('error');
+};
+
+/* -----------------------------
+   LOGIN LOGIC
+------------------------------ */
+const handleLogin = (e) => {
+  e.preventDefault();
+  clearErrors();
+
+  const did = document.getElementById('didInput').value.trim();
+  const pin = document.getElementById('pinInput').value.trim();
+  const loginBtn = document.getElementById('loginBtn');
+  const loginBtnText = document.getElementById('loginBtnText');
+
+  if (!did) { showError('did', t('did_required')); return; }
+  if (!pin) { showError('pin', t('pin_required')); return; }
+
+  loginBtn.disabled = true;
+  loginBtnText.textContent = t('logging_in');
+
+  try {
+    const users = JSON.parse(localStorage.getItem('ONPIIUsers') || '{}');
+    const user = Object.values(users).find(
+      u => u.did?.toLowerCase() === did.toLowerCase()
+    );
+
+    if (!user || user.pin !== pin) {
+      showError('general', t('invalid_credentials'));
+      return;
+    }
+
+    localStorage.setItem('currentUser', JSON.stringify(user));
+    window.location.href = `dashboard.html?did=${encodeURIComponent(user.did)}`;
+  } catch (err) {
+    console.error(err);
+    showError('general', 'Login failed. Please try again.');
+  } finally {
+    loginBtn.disabled = false;
+    loginBtnText.textContent = t('login_button');
+  }
+};
+
+/* -----------------------------
+   VOICE LOGIN (PIN MATCH)
+------------------------------ */
+document.addEventListener('DOMContentLoaded', () => {
+  const voiceLoginBtn = document.getElementById('voiceLoginBtn');
+  const popup = document.getElementById('voiceLoginPopup');
+  const closeBtn = document.getElementById('closeVoicePopup');
+  const startBtn = document.getElementById('startVoiceLogin');
+  const statusEl = document.getElementById('voiceLoginStatus');
+  const errorEl = document.getElementById('voiceLoginError');
+
+  if (voiceLoginBtn) {
+    voiceLoginBtn.addEventListener('click', () => {
+      popup.classList.remove('hidden');
+      statusEl.textContent = '';
+      errorEl.style.display = 'none';
+    });
+  }
+  if (closeBtn) closeBtn.addEventListener('click', () => popup.classList.add('hidden'));
+  if (startBtn) {
+    startBtn.addEventListener('click', () => {
+      statusEl.textContent = 'Listening for your PIN...';
+      if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+        errorEl.textContent = 'Voice recognition not supported in this browser.';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const rec = new SpeechRecognition();
+      rec.lang = 'en-US';
+      rec.interimResults = false;
+      rec.maxAlternatives = 1;
+      rec.start();
+
+      rec.onresult = (event) => {
+        const spoken = event.results[0][0].transcript.replace(/\D/g, '');
+        statusEl.textContent = `You said: ${spoken}`;
+        if (!spoken.match(/^\d{4}$/)) {
+          errorEl.textContent = 'Please say your 4-digit PIN clearly.';
+          errorEl.style.display = 'block';
+          return;
+        }
+
+        const users = JSON.parse(localStorage.getItem('ONPIIUsers') || '{}');
+        const match = Object.values(users).find(u => u.pin === spoken);
+        if (!match) {
+          errorEl.textContent = 'Invalid PIN.';
+          errorEl.style.display = 'block';
+          return;
+        }
+
+        localStorage.setItem('currentUser', JSON.stringify(match));
+        window.location.href = `dashboard.html?did=${encodeURIComponent(match.did)}`;
+      };
+      rec.onerror = () => {
+        errorEl.textContent = 'Voice recognition error. Please try again.';
+        errorEl.style.display = 'block';
+      };
+    });
+  }
+});
+
+/* -----------------------------
+   PIN TOGGLE + LANG + INIT
+------------------------------ */
+const initPinToggle = () => {
+  const pinInput = document.getElementById('pinInput');
+  const toggleBtn = document.getElementById('togglePinVisibility');
+  const eyeIcon = document.getElementById('eyeIcon');
+  let visible = false;
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => {
+      visible = !visible;
+      pinInput.type = visible ? 'text' : 'password';
+      eyeIcon.innerHTML = visible
+        ? `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.956 9.956 0 012.042-3.362m3.087-2.968A9.956 9.956 0 0112 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7z" />`
+        : `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />`;
+    });
+  }
+};
+
+const initialize = () => {
+  updateUIText();
+  initPinToggle();
+  document.getElementById('loginForm').addEventListener('submit', handleLogin);
+  document.getElementById('languageSelect').addEventListener('change', (e) => {
+    currentLanguage = e.target.value;
+    updateUIText();
+  });
+};
+
+document.addEventListener('DOMContentLoaded', initialize);
+</script>
+
+
+</body>
+</html>
