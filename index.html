@@ -156,14 +156,14 @@
 
    <script>
 /* -----------------------------
-   ONPII LOGIN SCRIPT - FINAL
+   ONPIN LOGIN SCRIPT - FINAL
    Works with new signup storage
 ------------------------------ */
 
 // GLOBAL TRANSLATIONS
 const translations = {
   en: {
-    login_title: "Login to ONPII Wallet",
+    login_title: "Login to ONPIN Wallet",
     did_label: "Decentralized ID (DID)",
     pin_label: "PIN",
     login_button: "Login",
@@ -181,7 +181,7 @@ const translations = {
     arabic: "Arabic"
   },
   yo: {
-    login_title: "Wo ile ONPII Wallet",
+    login_title: "Wo ile ONPIN Wallet",
     did_label: "Idanimọ Aisakoso (DID)",
     pin_label: "PIN",
     login_button: "Wo ile",
@@ -193,7 +193,7 @@ const translations = {
     logging_in: "N wo ile..."
   },
   ig: {
-    login_title: "Banye na ONPII Wallet",
+    login_title: "Banye na ONPIN Wallet",
     did_label: "NJirimara Decentralized (DID)",
     pin_label: "PIN",
     login_button: "Banye",
@@ -205,7 +205,7 @@ const translations = {
     logging_in: "Na-abanye..."
   },
   ha: {
-    login_title: "Shiga ONPII Wallet",
+    login_title: "Shiga ONPIN Wallet",
     did_label: "Shaida mai Rarrabawa (DID)",
     pin_label: "PIN",
     login_button: "Shiga",
@@ -217,7 +217,7 @@ const translations = {
     logging_in: "Ana shigawa..."
   },
   fr: {
-    login_title: "Connectez-vous à ONPII Wallet",
+    login_title: "Connectez-vous à ONPIN Wallet",
     did_label: "ID décentralisé (DID)",
     pin_label: "PIN",
     login_button: "Connexion",
@@ -229,7 +229,7 @@ const translations = {
     logging_in: "Connexion en cours..."
   },
   ar: {
-    login_title: "تسجيل الدخول إلى محفظة ONPII",
+    login_title: "تسجيل الدخول إلى محفظة ONPIN",
     did_label: "معرف اللامركزي (DID)",
     pin_label: "PIN",
     login_button: "تسجيل الدخول",
@@ -288,7 +288,7 @@ const handleLogin = (e) => {
   loginBtnText.textContent = t('logging_in');
 
   try {
-    const users = JSON.parse(localStorage.getItem('ONPIIUsers') || '{}');
+    const users = JSON.parse(localStorage.getItem('onpinUsers') || '{}');
     const user = Object.values(users).find(
       u => u.did?.toLowerCase() === did.toLowerCase()
     );
@@ -353,7 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
-        const users = JSON.parse(localStorage.getItem('ONPIIUsers') || '{}');
+        const users = JSON.parse(localStorage.getItem('onpinUsers') || '{}');
         const match = Object.values(users).find(u => u.pin === spoken);
         if (!match) {
           errorEl.textContent = 'Invalid PIN.';
